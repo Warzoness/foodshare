@@ -1,0 +1,10 @@
+:root {
+  --brand: #2f9e44; /* xanh FoodShare */
+  --brand-contrast: #ffffff;
+  --muted: #f6f8fa;
+}
+
+html, body { height: 100%; }
+body { background: #fff; color: #111; }
+
+a { text-decoration: none; }
