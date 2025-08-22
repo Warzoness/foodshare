@@ -1,60 +1,164 @@
-.wrap{
-  background:#fff;
-  min-height:100vh;
-  padding-bottom:84px; /* chừa chỗ sticky bar */
+.wrap {
+  background: #fff;
+  min-height: 100vh;
+  padding-bottom: 84px;
+  /* chừa chỗ sticky bar */
 }
 
 /* Hero image */
-.hero{ position:relative; width:100%; height:220px; overflow:hidden; }
-.heroImg{ object-fit:cover; }
-.badgeDiscount{
-  position:absolute; right:10px; top:10px;
-  background:#ff4d4f; color:#fff;
-  font-weight:800; font-size:12px;
-  padding:4px 8px; border-radius:999px;
-  box-shadow:0 2px 6px rgba(255,77,79,.35);
+.hero {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+}
+
+.heroImg {
+  object-fit: cover;
+}
+
+.badgeDiscount {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background: #ff4d4f;
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, .35);
 }
 
 /* Thumbs */
-.thumbRow{ display:flex; gap:10px; overflow-x:auto; padding:10px 2px 0; }
-.thumbBtn{ border:none; background:transparent; padding:0; border-radius:10px; }
-.thumb{ width:78px; height:64px; border-radius:10px; background-size:cover; background-position:center; border:2px solid transparent; }
-.active .thumb{ border-color:#2e7d32; }
+.thumbRow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 2px 0;
+}
+
+.thumbBtn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 10px;
+}
+
+.thumb {
+  width: 78px;
+  height: 64px;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid transparent;
+}
+
+.active .thumb {
+  border-color: #2e7d32;
+}
 
 /* Price row */
-.priceRow{ display:flex; align-items:center; gap:8px; margin-top:10px; }
-.priceNow{ font-size:20px; font-weight:800; color:#111; }
-.discount{ color:#e53935; font-weight:800; }
-.priceOld{ color:#2e7d32; text-decoration:line-through; font-weight:700; }
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.priceNow {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111;
+}
+
+.discount {
+  color: #e53935;
+  font-weight: 800;
+}
+
+.priceOld {
+  color: #2e7d32;
+  text-decoration: line-through;
+  font-weight: 700;
+}
 
 /* Map card */
-.mapCard{
-  display:flex; align-items:center; justify-content:space-between;
-  border:1px solid #e6ebef; border-radius:12px;
-  padding:10px; background:#f6fbf7;
+.mapCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e6ebef;
+  border-radius: 12px;
+  padding: 10px;
+  background: #f6fbf7;
 }
-.mapMini{
-  display:flex; align-items:center; gap:6px;
-  background:#fff; border:1px solid #e6ebef; border-radius:8px;
-  padding:8px 10px;
+
+.mapMini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #e6ebef;
+  border-radius: 8px;
+  padding: 8px 10px;
 }
-.mapBtn{
-  border:none; background:#2e7d32; color:#fff; font-weight:700;
-  padding:8px 12px; border-radius:8px;
+
+.mapBtn {
+  border: none;
+  background: #2e7d32;
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
 }
-.linkStore{
-  border:none; background:transparent; color:#2e7d32; font-weight:700;
-  padding:8px 0 0; text-decoration:underline; cursor:pointer;
+
+.linkStore {
+  border: none;
+  background: transparent;
+  color: #2e7d32;
+  font-weight: 700;
+  padding: 8px 0 0;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* Sticky bar */
-.stickyBar{
-  position:fixed; left:0; right:0; bottom:0;
-  background:#ffffff; border-top:1px solid #e6ebef;
-  padding:10px 12px; display:flex; justify-content:center;
+.stickyBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ffffff;
+  border-top: 1px solid #e6ebef;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: center;
 }
-.reserveBtn{
-  width:100%; max-width:540px;
-  border:none; background:#68b67f; color:#fff;
-  padding:12px 14px; border-radius:8px; font-weight:800; font-size:16px;
+
+.reserveBtn {
+  width: 100%;
+  max-width: 540px;
+  border: none;
+  background: #68b67f;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.backBtn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

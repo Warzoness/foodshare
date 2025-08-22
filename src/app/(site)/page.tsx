@@ -55,23 +55,26 @@ function Section({
 
       <div className={styles.rowScroll}>
         {items.map((it) => (
-          <article key={it.id} className={styles.cardItem}>
-            <div className={styles.thumbWrap}>
-              <div
-                className={styles.thumb}
-                style={{ backgroundImage: `url(${it.img})` }}
-                aria-label={it.name}
-              />
-              {!!it.discount && <span className={styles.badgeDiscount}>{it.discount}</span>}
-            </div>
-            <div className={styles.cardMeta}>
-              <div className={styles.itemName} title={it.name}>
-                {it.name}
+          <Link key={it.id} href={`/items/${it.id}`}>
+            <article className={styles.cardItem}>
+              <div className={styles.thumbWrap}>
+                <div
+                  className={styles.thumb}
+                  style={{ backgroundImage: `url(${it.img})` }}
+                  aria-label={it.name}
+                />
+                {!!it.discount && <span className={styles.badgeDiscount}>{it.discount}</span>}
               </div>
-              <div className={styles.price}>{it.price}</div>
-            </div>
-          </article>
+              <div className={styles.cardMeta}>
+                <div className={styles.itemName} title={it.name}>
+                  {it.name}
+                </div>
+                <div className={styles.price}>{it.price}</div>
+              </div>
+            </article>
+          </Link>
         ))}
+
       </div>
     </section>
   );

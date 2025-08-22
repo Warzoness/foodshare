@@ -1,25 +1,44 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
+  // Nạp JS Bootstrap (có Popper) để toggle/collapse, dropdown, modal... hoạt động
+  useEffect(() => {
+    // dynamic import chỉ chạy phía client, tránh SSR issues
+    import("bootstrap");
+
+  }, []);
+
   return (
     <>
-      <nav className="navbar navbar-expand-lg" style={{ background: "var(--brand)" }}>
+      <nav className="navbar navbar-expand-lg navbar-dark" style={{ background: "var(--brand)" }}>
         <div className="container">
           <Link className="navbar-brand text-white fw-bold" href="/">
             FoodShare
           </Link>
 
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav">
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#siteNav"
+            aria-controls="siteNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
             <span className="navbar-toggler-icon" />
           </button>
 
           <div className="collapse navbar-collapse" id="siteNav">
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-              <li className="nav-item"><Link className="nav-link text-white" href="/items">Kho thực phẩm</Link></li>
-              <li className="nav-item"><Link className="nav-link text-white" href="/about">Về chúng tôi</Link></li>
+              <li className="nav-item">
+                <Link className="nav-link text-white" href="/items">Kho thực phẩm</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link text-white" href="/about">Về chúng tôi</Link>
+              </li>
             </ul>
             <div className="d-flex ms-lg-3 gap-2">
               <Link href="/auth/login" className="btn btn-light btn-sm">Đăng nhập</Link>

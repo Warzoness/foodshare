@@ -52,8 +52,16 @@ export default function ItemDetailPage() {
           className={styles.heroImg}
           priority
         />
+        {/* Back button */}
+        <button className={styles.backBtn} onClick={() => window.history.back()}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path fillRule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H3.707l3.147 3.146a.5.5 0 0 1-.708.708l-4-4a.498.498 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L3.707 7.5H14.5A.5.5 0 0 1 15 8z" />
+          </svg>
+        </button>
+
         {data.discount && <span className={styles.badgeDiscount}>{data.discount}</span>}
       </div>
+
 
       {/* THUMB LIST */}
       <div className="container">
@@ -92,7 +100,7 @@ export default function ItemDetailPage() {
             <div className={styles.mapMini}>
               {/* ảnh tĩnh / placeholder — bấm nút để mở Google Map */}
               <svg viewBox="0 0 24 24" width="22" height="22">
-                <path fill="#2e7d32" d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z"/>
+                <path fill="#2e7d32" d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z" />
               </svg>
               <span className="small ms-1">Vonstrane</span>
             </div>
