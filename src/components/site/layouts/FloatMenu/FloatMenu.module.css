@@ -1,0 +1,45 @@
+/* Bottom Navigation (mobile) */
+.bottomNav {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 58px;
+  background: #fff;
+  border-top: 1px solid #e6ebef;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 1000;
+}
+
+.navItem {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: #7c8a97;
+  font-size: 11px;
+  padding-top: 4px;
+  transition: all 0.2s ease;
+}
+
+.navItem i {
+  font-size: 20px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+/* Label dưới icon */
+.navLabel {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+/* Hover → sáng viền icon */
+.navItem:hover i {
+  color: #2e7d32; /* màu nhấn */
+  text-shadow: 0 0 6px rgba(46, 125, 50, 0.6); /* viền sáng */
+}
+
+/* Active (đang ở route đó) → icon đậm */
+.navItem i[class*="fi-sr-"] {
+  color: #2e7d32; /* icon đậm có màu nhấn */
+  font-weight: 700;
+}

@@ -1,0 +1,9 @@
+/* components/SearchBar/SearchBar.module.css */
+.searchBar{
+  display:flex;align-items:center;gap:10px;
+  background:#f7f9fb;border:1px solid #e6ebef;border-radius:12px;
+  padding:10px 12px;cursor:text;transition:border-color .18s, box-shadow .18s;
+}
+.searchBar:hover,.searchBar:focus-within{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.searchIcon{opacity:.7}
+.searchInput{border:none;outline:none;flex:1;background:transparent;font:inherit}

@@ -1,0 +1,102 @@
+.wrap {
+  position: sticky;
+  top: 56px;
+  background: #fff;
+  z-index: 5;
+  padding: 6px 0 4px;
+  border-bottom: 1px solid #eef2f5;
+}
+
+.horizontalBar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  align-items: end;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 0 2px 6px;
+  scrollbar-width: thin;
+}
+
+.filterItem {
+  display: grid;
+  gap: 6px;
+  min-width: 140px;
+}
+
+.actionItem {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+}
+
+.label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.select, .input {
+  border: 1px solid #e6ebef;
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+  font: inherit;
+  background: #fff;
+}
+
+.btnPrimary {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnGhost {
+  background: transparent;
+  border: 1px solid #e6ebef;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+}
+
+.chipX {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+}
+
+/* Desktop căn đều, không cuộn */
+@media (min-width: 1024px) {
+  .horizontalBar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    overflow: visible;
+    padding-bottom: 8px;
+  }
+  .filterItem { min-width: 0; }
+}

@@ -1,143 +1,186 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./Home.module.css";
 import Link from "next/link";
-import FilterModal, { FilterValues } from "@/components/site/FilterModal/FilterModal";
+import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
+import { ProductService, Product } from "@/services/site/product.service";
+import { MOCK_PRODUCTS } from "@/types/product";
+import SaleTag from "@/components/share/SaleTag/SaleTag";
 
-type CardItem = {
-  id: number;
-  name: string;
-  price: string;
-  discount?: string;       // ví dụ "-40%"
-  img: string;
-};
+const USE_API = false; // Đổi thành true khi có API
 
-const commonImg = "/images/chicken-fried.jpg"; // đổi sang ảnh thật trong public/images
-const hot: CardItem[] = [
-  { id: 1, name: "Gà rán giòn", price: "39K", discount: "-40%", img: commonImg },
-  { id: 2, name: "Cánh gà sốt", price: "42K", discount: "-35%", img: commonImg },
-  { id: 3, name: "Đùi gà BBQ", price: "49K", discount: "-30%", img: commonImg },
-  { id: 4, name: "Gà rán cay", price: "45K", discount: "-15%", img: commonImg },
-];
+type CardItem = { id: number; name: string; price: string; img: string; discountPct?: number };
 
-const shock: CardItem[] = [
-  { id: 5, name: "Combo 2 miếng", price: "59K", discount: "-45%", img: commonImg },
-  { id: 6, name: "Burger gà", price: "29K", discount: "-25%", img: commonImg },
-  { id: 7, name: "Cánh gà mật ong", price: "39K", discount: "-20%", img: commonImg },
-  { id: 8, name: "Gà popcorn", price: "25K", discount: "-30%", img: commonImg },
-];
 
-const near: CardItem[] = [
-  { id: 9, name: "Gà rán góc phố", price: "35K", discount: "-10%", img: commonImg },
-  { id: 10, name: "Gà không bột", price: "44K", discount: "-18%", img: commonImg },
-  { id: 11, name: "Đùi gà tỏi", price: "47K", discount: "-22%", img: commonImg },
-  { id: 12, name: "Cánh gà phô mai", price: "52K", discount: "-17%", img: commonImg },
-];
 
+function priceToLabel(v?: number) {
+  if (typeof v !== "number") return "—";
+  if (v >= 1000 && v % 1000 === 0) return `${Math.round(v / 1000)}.000`;
+  return v.toLocaleString("vi-VN") + " đ";
+}
+const toCard = (p: Product): CardItem => ({
+  id: p.id,
+  name: p.name,
+  price: priceToLabel(p.price),
+  img: p.imageUrl || "/images/chicken-fried.jpg",
+  discountPct: p.discountPercent ?? undefined,
+});
 function Section({
-  title,
-  items,
-  seeMoreHref = "/items",
+  title, items, seeMoreHref = "/items", loading = false,
 }: {
   title: string;
   items: CardItem[];
   seeMoreHref?: string;
+  loading?: boolean;
 }) {
   return (
     <section className="mt-3">
       <div className="d-flex justify-content-between align-items-center px-2">
         <h6 className="mb-2 fw-bold">{title}</h6>
-        <Link href={seeMoreHref} className={styles.seeMore}>
-          see more
-        </Link>
+        <Link href={seeMoreHref} className={styles.seeMore}>Xem thêm &gt;</Link>
       </div>
 
-      <div className={styles.rowScroll}>
-        {items.map((it) => (
-          <Link key={it.id} href={`/items/${it.id}`}>
-            <article className={styles.cardItem}>
-              <div className={styles.thumbWrap}>
-                <div
-                  className={styles.thumb}
-                  style={{ backgroundImage: `url(${it.img})` }}
-                  aria-label={it.name}
-                />
-                {!!it.discount && <span className={styles.badgeDiscount}>{it.discount}</span>}
+      {loading ? (
+        <div className={styles.rowScroll}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className={styles.cardItem}>
+              <div className={`${styles.thumbWrap} placeholder-glow`}>
+                <div className={`${styles.thumb} placeholder`} />
               </div>
-              <div className={styles.cardMeta}>
-                <div className={styles.itemName} title={it.name}>
-                  {it.name}
+              <div className="p-2">
+                <div className="placeholder col-8 mb-2" />
+                <div className="placeholder col-4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className={styles.rowScroll}>
+          {items.map((it) => (
+            <Link key={it.id} href={`/items/${it.id}`}>
+              <article className={styles.cardItem}>
+                <div className={styles.thumbWrap}>
+                  <div className={styles.thumb} style={{ backgroundImage: `url(${it.img})` }} aria-label={it.name} />
+                  {typeof it.discountPct === "number" && (
+                    <SaleTag percent={it.discountPct ?? 0} corner size="sm" width={70} />
+                  )}
                 </div>
-                <div className={styles.price}>{it.price}</div>
-              </div>
-            </article>
-          </Link>
-        ))}
-
-      </div>
+                <div className={styles.cardMeta}>
+                  <div className={styles.itemName} title={it.name}>{it.name}</div>
+                  <div className={styles.price}>{it.price}</div>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
 
 export default function HomePage() {
-  const [openFilter, setOpenFilter] = useState(false);
-  const [filters, setFilters] = useState<FilterValues>({
-    distanceKm: 5,
-    flashDealPercent: 20,
-    priceFrom: "",
-    priceTo: ""
-  });
+  const [err, setErr] = useState<string | null>(null);
+  const [loadingHot, setLoadingHot] = useState(USE_API);
+  const [loadingShock, setLoadingShock] = useState(USE_API);
+  const [loadingNear, setLoadingNear] = useState(USE_API);
 
-  function handleApply(vals: FilterValues) {
-    setFilters(vals);
-    setOpenFilter(false);
-    // TODO: gọi API hoặc filter client theo `vals`
-  }
+  const [hotRaw, setHotRaw] = useState<Product[]>([]);
+  const [shockRaw, setShockRaw] = useState<Product[]>([]);
+  const [nearRaw, setNearRaw] = useState<Product[]>([]);
+
+  // Nếu dùng API thật
+  const fetchHot = useCallback(async () => {
+    setLoadingHot(true);
+    try {
+      const r = await ProductService.list({ page: 0, size: 12 });
+      setHotRaw(r.content || []);
+    } catch (e: any) {
+      setErr(e.message || "Failed to fetch");
+      setHotRaw(MOCK_PRODUCTS.slice(0, 12) as unknown as Product[]);
+    } finally {
+      setLoadingHot(false);
+    }
+  }, []);
+
+  const fetchShock = useCallback(async () => {
+    setLoadingShock(true);
+    try {
+      const r = await ProductService.list({ page: 0, size: 12, priceSort: "asc" });
+      setShockRaw(r.content || []);
+    } catch (e: any) {
+      setErr(e.message || "Failed to fetch");
+      const m = [...MOCK_PRODUCTS].sort((a, b) => a.price - b.price).slice(0, 12);
+      setShockRaw(m as unknown as Product[]);
+    } finally {
+      setLoadingShock(false);
+    }
+  }, []);
+
+  const fetchNear = useCallback(async (lat?: number, lon?: number) => {
+    setLoadingNear(true);
+    try {
+      const r = await ProductService.list({
+        page: 0, size: 12,
+        ...(lat !== undefined && lon !== undefined ? { lat, lon, maxDistanceKm: 5 } : {}),
+      });
+      setNearRaw(r.content || []);
+    } catch (e: any) {
+      setErr(e.message || "Failed to fetch");
+      const hasDistance = MOCK_PRODUCTS.some(x => typeof x.distanceKm === "number");
+      const m = hasDistance
+        ? [...MOCK_PRODUCTS].sort((a, b) => (a.distanceKm ?? 999) - (b.distanceKm ?? 999))
+        : [...MOCK_PRODUCTS];
+      setNearRaw(m.slice(0, 12) as unknown as Product[]);
+    } finally {
+      setLoadingNear(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (USE_API) {
+      fetchHot();
+      fetchShock();
+      if (typeof window !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          pos => fetchNear(pos.coords.latitude, pos.coords.longitude),
+          () => fetchNear(),
+          { enableHighAccuracy: false, timeout: 8000 }
+        );
+      } else {
+        fetchNear();
+      }
+    } else {
+      // Dữ liệu cứng
+      setHotRaw(MOCK_PRODUCTS.slice(0, 12) as unknown as Product[]);
+      setShockRaw([...MOCK_PRODUCTS].sort((a, b) => a.price - b.price).slice(0, 12) as unknown as Product[]);
+      const hasDistance = MOCK_PRODUCTS.some(x => typeof x.distanceKm === "number");
+      const m = hasDistance
+        ? [...MOCK_PRODUCTS].sort((a, b) => (a.distanceKm ?? 999) - (b.distanceKm ?? 999))
+        : [...MOCK_PRODUCTS];
+      setNearRaw(m.slice(0, 12) as unknown as Product[]);
+      setLoadingHot(false);
+      setLoadingShock(false);
+      setLoadingNear(false);
+    }
+  }, [fetchHot, fetchShock, fetchNear]);
+
+  const hot = useMemo(() => hotRaw.map(toCard), [hotRaw]);
+  const shock = useMemo(() => shockRaw.map(toCard), [shockRaw]);
+  const near = useMemo(() => nearRaw.map(toCard), [nearRaw]);
 
   return (
     <div className={styles.wrap}>
       <div className="container pt-3 pb-2">
-        {/* Search */}
-        <div className={styles.searchBar} onClick={() => setOpenFilter(true)} role="button">
-          <span className={styles.searchIcon}>🔎</span>
-          <input className={styles.searchInput} placeholder="Tìm kiếm" readOnly />
-        </div>
+        {err && <div className="alert alert-danger">{err}</div>}
 
-
-        {/* Sections */}
-        <Section title="Mua nhiều" items={hot} />
-        <Section title="Giảm sốc" items={shock} />
-        <Section title="Gần bạn" items={near} />
+        <Section title="Mua nhiều" items={hot} loading={loadingHot} />
+        <Section title="Giảm sốc" items={shock} loading={loadingShock} />
+        <Section title="Gần bạn" items={near} loading={loadingNear} />
       </div>
 
-      {/* Bottom Navigation */}
-      <nav className={styles.bottomNav}>
-        <Link href="/" className={`${styles.navItem} ${styles.active}`}>
-          <span className={styles.navIcon}>🏠</span>
-          <span className={styles.navLabel}>Trang chủ</span>
-        </Link>
-        <Link href="/search" className={styles.navItem}>
-          <span className={styles.navIcon}>🛍️</span>
-          <span className={styles.navLabel}>Danh mục</span>
-        </Link>
-        <Link href="/favorites" className={styles.navItem}>
-          <span className={styles.navIcon}>💚</span>
-          <span className={styles.navLabel}>Yêu thích</span>
-        </Link>
-        <Link href="/account" className={styles.navItem}>
-          <span className={styles.navIcon}>👤</span>
-          <span className={styles.navLabel}>Tài khoản</span>
-        </Link>
-      </nav>
-
-      <FilterModal
-        open={openFilter}
-        onClose={() => setOpenFilter(false)}
-        onApply={handleApply}
-        initial={filters}
-      />
-
+      <FloatMenu />
     </div>
   );
+
 }

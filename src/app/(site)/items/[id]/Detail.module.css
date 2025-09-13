@@ -15,6 +15,7 @@
 
 .heroImg {
   object-fit: cover;
+  cursor: pointer;
 }
 
 .badgeDiscount {
@@ -28,6 +29,36 @@
   padding: 4px 8px;
   border-radius: 999px;
   box-shadow: 0 2px 6px rgba(255, 77, 79, .35);
+}
+
+@media (min-width: 768px) {
+  .hero {
+    height: clamp(320px, 45vh, 560px);
+    background: #fff;
+    /* nền sau ảnh khi letterbox */
+  }
+
+  .heroImg {
+    object-fit: contain;
+  }
+}
+
+/* Back button */
+.backBtn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, .5);
+  border: none;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+
 }
 
 /* Thumbs */
@@ -56,6 +87,30 @@
 
 .active .thumb {
   border-color: #2e7d32;
+  /* xanh như mock */
+}
+
+/* Dots dưới thumbnail */
+.dotsRow {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 0 4px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #cfd8dc;
+  /* xám nhạt */
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .04);
+  cursor: pointer;
+}
+
+.dotActive {
+  background: #2e7d32;
+  /* xanh active */
 }
 
 /* Price row */
@@ -68,30 +123,45 @@
 
 .priceNow {
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 500;
   color: #111;
 }
 
 .discount {
-  color: #e53935;
-  font-weight: 800;
+  color: #ff2521;
+  font-weight: 600;
 }
 
 .priceOld {
   color: #2e7d32;
   text-decoration: line-through;
-  font-weight: 700;
+  font-weight: 500;
 }
 
-/* Map card */
+/* Map card + mini map */
 .mapCard {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 10px;
   border: 1px solid #e6ebef;
   border-radius: 12px;
   padding: 10px;
   background: #f6fbf7;
+}
+
+.mapPreview {
+  width: 100%;
+  border: 1px solid #e6ebef;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mapIframe {
+  width: 100%;
+  height: 140px;
+  border: 0;
+  display: block;
 }
 
 .mapMini {
@@ -108,19 +178,9 @@
   border: none;
   background: #2e7d32;
   color: #fff;
-  font-weight: 700;
+  font-weight: 500;
   padding: 8px 12px;
   border-radius: 8px;
-}
-
-.linkStore {
-  border: none;
-  background: transparent;
-  color: #2e7d32;
-  font-weight: 700;
-  padding: 8px 0 0;
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 /* Sticky bar */
@@ -129,7 +189,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: #ffffff;
+  background: #fff;
   border-top: 1px solid #e6ebef;
   padding: 10px 12px;
   display: flex;
@@ -148,17 +208,86 @@
   font-size: 16px;
 }
 
-.backBtn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
-  color: #fff;
-  padding: 6px 8px;
-  border-radius: 50%;
-  cursor: pointer;
+/* Lightbox (giữ như ban đầu – không có dot trong lightbox) */
+.lightboxBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .7);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1050;
+}
+
+.lightbox {
+  position: relative;
+  max-width: 960px;
+  width: 92%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.lightboxImgWrap {
+  position: relative;
+  width: 100%;
+  padding-top: 66.66%;
+}
+
+.lightboxImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.lightboxControls {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+}
+
+.lbBtn {
+  border: none;
+  background: rgba(255, 255, 255, .15);
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.lbClose {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.lbThumbs {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  background: #111;
+  overflow-x: auto;
+}
+
+.lbThumb {
+  width: 76px;
+  height: 60px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid transparent;
+  flex: 0 0 auto;
+}
+
+.lbActive {
+  border-color: #2e7d32;
 }

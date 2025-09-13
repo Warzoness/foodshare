@@ -1,56 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import Header from "@/components/site/layouts/Header/Header";
+
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
-  // Nạp JS Bootstrap (có Popper) để toggle/collapse, dropdown, modal... hoạt động
   useEffect(() => {
-    // dynamic import chỉ chạy phía client, tránh SSR issues
     import("bootstrap");
 
   }, []);
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-dark" style={{ background: "var(--brand)" }}>
-        <div className="container">
-          <Link className="navbar-brand text-white fw-bold" href="/">
-            FoodShare
-          </Link>
-
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#siteNav"
-            aria-controls="siteNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon" />
-          </button>
-
-          <div className="collapse navbar-collapse" id="siteNav">
-            <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <Link className="nav-link text-white" href="/items">Kho thực phẩm</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link text-white" href="/about">Về chúng tôi</Link>
-              </li>
-            </ul>
-            <div className="d-flex ms-lg-3 gap-2">
-              <Link href="/auth/login" className="btn btn-light btn-sm">Đăng nhập</Link>
-              <Link href="/admin" className="btn btn-outline-light btn-sm">Trang quản trị</Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <main>{children}</main>
 
-      <footer className="border-top mt-5 py-4">
+      {/* <footer className="border-top mt-5 py-4">
         <div className="container small text-muted d-flex justify-content-between">
           <span>© {new Date().getFullYear()} FoodShare</span>
           <div className="d-flex gap-3">
@@ -59,7 +23,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <Link href="/privacy" className="link-secondary">Bảo mật</Link>
           </div>
         </div>
-      </footer>
+      </footer> */}
     </>
   );
 }

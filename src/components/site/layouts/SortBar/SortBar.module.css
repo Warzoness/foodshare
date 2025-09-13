@@ -1,0 +1,22 @@
+.sortWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px 10px;
+  border-bottom: 1px solid #f2f4f7;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.select {
+  border: 1px solid #e6ebef;
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+  background: #fff;
+  font: inherit;
+}
