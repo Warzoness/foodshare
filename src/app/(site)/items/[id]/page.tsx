@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import MapModal from "@/components/site/modals/MapModal/MapModal";
 import SaleTag from "@/components/share/SaleTag/SaleTag";
+import Link from "next/link";
 
 type ItemDetail = {
   id: string;
@@ -103,8 +104,11 @@ export default function ItemDetailPage() {
 
         )}
 
-        <button className={styles.backBtn} onClick={() => window.history.back()}>
-          {/* ... */}
+        <button className={styles.backBtn} onClick={() => window.history.back()} aria-label="Quay lại">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: "middle" }}>
+            <path d="M15 19l-7-7 7-7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="visually-hidden">Quay lại</span>
         </button>
       </div>
 
@@ -186,9 +190,13 @@ export default function ItemDetailPage() {
       </div>
 
       {/* STICKY ACTION */}
-      <div className={styles.stickyBar}>
+      {/* <div className={styles.stickyBar}>
         <button className={styles.reserveBtn}>Giữ chỗ</button>
-      </div>
+      </div> */}
+
+      <Link className={styles.stickyBar} href={`/items/${data.id}/hold?name=${encodeURIComponent(data.title)}&price=${data.priceNow}`}>
+        <button className={styles.reserveBtn}>Đặt chỗ</button>
+      </Link>
 
       {/* MAP MODAL */}
       <MapModal

@@ -34,10 +34,10 @@ export default function FloatMenu() {
       </Link>
 
       {/* Favorites */}
-      <Link href="/favorites" className={styles.navItem}>
+      <Link href="/orders" className={styles.navItem}>
         <i
           className={
-            pathname === "/favorites"
+            pathname === "/orders"
               ? "fi fi-sr-to-do-alt" // icon đậm
               : "fi fi-ts-to-do-alt" // icon thường
           }

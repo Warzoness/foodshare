@@ -1,0 +1,46 @@
+
+
+.thumb {
+  flex-shrink: 0;
+}
+
+.thumb :global(img) {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  /* bo nhẹ */
+}
+
+
+
+/* nút tab phẳng, không viền, không nền */
+.tab {
+  background: transparent;
+  border: 0;
+  padding: .5rem .25rem .6rem;
+  color: var(--bs-secondary-color);
+  font-weight: 600;
+  position: relative;
+  outline: none;
+}
+
+/* gạch chân khi active */
+.tab.active {
+  color: var(--bs-success);
+}
+.tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px; /* đè lên border-bottom của thanh tab */
+  height: 3px;
+  background: var(--bs-success);
+  border-radius: 3px;
+}
+
+/* focus/hover */
+.tab:hover { color: var(--bs-body-color); }
+.tab:focus-visible { outline: 2px solid var(--bs-success); outline-offset: 2px; }
