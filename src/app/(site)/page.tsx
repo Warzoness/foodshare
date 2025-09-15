@@ -7,6 +7,7 @@ import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
 import { ProductService, Product } from "@/services/site/product.service";
 import { MOCK_PRODUCTS } from "@/types/product";
 import SaleTag from "@/components/share/SaleTag/SaleTag";
+import SearchBar from "@/components/site/layouts/SearchBar/SearchBar";
 
 const USE_API = false; // Đổi thành true khi có API
 
@@ -172,15 +173,17 @@ export default function HomePage() {
   return (
     <div className={styles.wrap}>
       <div className="container pt-3 pb-2">
+        {/* Thanh search */}
+        <div style={{marginBottom: 12}}>
+          <SearchBar />
+        </div>
         {err && <div className="alert alert-danger">{err}</div>}
 
         <Section title="Mua nhiều" items={hot} loading={loadingHot} />
         <Section title="Giảm sốc" items={shock} loading={loadingShock} />
         <Section title="Gần bạn" items={near} loading={loadingNear} />
       </div>
-
       <FloatMenu />
     </div>
   );
-
 }

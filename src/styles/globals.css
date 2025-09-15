@@ -1,14 +1,30 @@
-
 @import '@flaticon/flaticon-uicons/css/all/all.css';
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/FZPoppins-Regular.ttf");
+}
 
 
 :root {
-  --brand: #2f9e44; /* xanh FoodShare */
+  --brand: #2f9e44;
+  /* xanh FoodShare */
   --brand-contrast: #ffffff;
   --muted: #f6f8fa;
 }
 
-html, body { height: 100%; }
-body { background: #fff; color: #111; }
+html,
+body {
+  height: 100%;
+  font-family: "Poppins";
+  font-size: 1rem;
+}
 
-a { text-decoration: none; }
+body {
+  background: #fff;
+  color: #111;
+}
+
+a {
+  text-decoration: none;
+}

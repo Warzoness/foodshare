@@ -79,38 +79,38 @@ export default function HoldPage() {
           <h5 className="mt-1 fw-bold">Giữ chỗ thành công</h5>
 
           <div className="bg-white border rounded-4 p-3 mt-3 w-100" style={{ maxWidth: 520 }}>
-  <div className="d-flex justify-content-between mb-1">
-    <span className="fw-medium">Món ăn:</span>
-    <span className="fw-semibold">{itemName}</span>
-  </div>
-  <div className="d-flex justify-content-between mb-1">
-    <span className="fw-medium">Số lượng:</span>
-    <span className="fw-semibold">{qty}</span>
-  </div>
-  <div className="d-flex justify-content-between mb-1">
-    <span className="fw-medium">Ngày đặt:</span>
-    <span className="fw-semibold">{formatDateVN(dateISO)}</span>
-  </div>
-  <div className="d-flex justify-content-between mb-1">
-    <span className="fw-medium">Giờ đặt:</span>
-    <span className="fw-semibold">{formatTimeVN24(timeHM)}</span>
-  </div>
-  <div className="d-flex justify-content-between mb-1">
-    <span className="fw-medium">Mã đặt chỗ:</span>
-    <span className="fw-semibold">{success.code}</span>
-  </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span className="fw-medium">Món ăn:</span>
+              <span className="fw-semibold">{itemName}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span className="fw-medium">Số lượng:</span>
+              <span className="fw-semibold">{qty}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span className="fw-medium">Ngày đặt:</span>
+              <span className="fw-semibold">{formatDateVN(dateISO)}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span className="fw-medium">Giờ đặt:</span>
+              <span className="fw-semibold">{formatTimeVN24(timeHM)}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span className="fw-medium">Mã đặt chỗ:</span>
+              <span className="fw-semibold">{success.code}</span>
+            </div>
 
-  <hr className="my-2" />
+            <hr className="my-2" />
 
-  <div className="d-flex justify-content-between mb-1">
-    <span>Đơn giá</span>
-    <span>{vnd(unitPrice)}</span>
-  </div>
-  <div className="d-flex justify-content-between">
-    <span>Tổng tiền</span>
-    <span className="fw-bold">{vnd(total)}</span>
-  </div>
-</div>
+            <div className="d-flex justify-content-between mb-1">
+              <span>Đơn giá</span>
+              <span>{vnd(unitPrice)}</span>
+            </div>
+            <div className="d-flex justify-content-between">
+              <span>Tổng tiền</span>
+              <span className="fw-bold">{vnd(total)}</span>
+            </div>
+          </div>
 
 
           <p className="text-body-secondary mt-3 mb-3">Chỗ của bạn sẽ được giữ trong 30 phút</p>

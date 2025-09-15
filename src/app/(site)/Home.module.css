@@ -7,6 +7,8 @@
 
 
 
+
+
 /* See more */
 .seeMore {
   font-size: 12px;
@@ -41,12 +43,11 @@
 @media (max-width: 576px){
   .rowScroll{
     --gap: 12px;   /* khoảng cách giữa card */
-    --peek: 28px;  /* phần ló muốn thấy của item #4 */
+    --peek: 32px;  /* phần ló muốn thấy của item #4 */
 
     padding-right: calc(12px + var(--peek));
-    /* Ẩn scrollbar chỉ trên mobile */
-    scrollbar-width: none;       /* Firefox */
-    -ms-overflow-style: none;    /* IE/Edge cũ */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
   .rowScroll::-webkit-scrollbar{ display:none; }
 
@@ -54,22 +55,30 @@
   .rowScroll > a{
     flex: 0 0 calc((100% - (var(--gap) * 2) - var(--peek)) / 3);
     scroll-snap-align: start;
+    max-width: none;
   }
 
-  /* Card fill đúng bề rộng flex item */
   .cardItem{
     width:100%;
     min-width:0;
     max-width:none;
+    height: 100%; /* fill chiều cao */
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Tuỳ chọn: làm ảnh vuông để tỉ lệ đồng đều */
   .thumb{
     aspect-ratio: 1 / 1;
-    height: auto;         /* ghi đè nếu trước đó đặt height cố định */
+    height: auto;
+    min-height: 0;
+    flex-shrink: 0;
   }
 }
 
+/* Đảm bảo rowScroll không bị co lại */
+.rowScroll {
+  min-height: 0;
+}
 
 /* Card nhỏ như mock (3 thẻ vừa khung mobile) */
 .cardItem {
