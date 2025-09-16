@@ -9,25 +9,24 @@
 
 .horizontalBar {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: max-content;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: end;
-  gap: 12px;
-  overflow-x: auto;
+  gap: 10px;
+  overflow: visible;
   padding: 0 2px 6px;
-  scrollbar-width: thin;
 }
 
 .filterItem {
   display: grid;
   gap: 6px;
-  min-width: 140px;
+  min-width: 0;
 }
 
 .actionItem {
   display: flex;
   gap: 8px;
   align-items: end;
+  grid-column: 1 / -1; /* đẩy nút xuống hàng dưới, full width */
 }
 
 .label {
@@ -99,4 +98,10 @@
     padding-bottom: 8px;
   }
   .filterItem { min-width: 0; }
+}
+
+@media (min-width: 480px) and (max-width: 1023px) {
+  .horizontalBar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

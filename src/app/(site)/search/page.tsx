@@ -5,15 +5,17 @@ import styles from "./SearchPage.module.css";
 import FilterBar, { FilterValues } from "@/components/site/layouts/FilterBar/FilterBar";
 import ResultsList from "@/components/site/layouts/SearchResult/ResultList";
 import { FoodResult } from "@/components/site/layouts/SearchResult/ResultItem";
+import { ProductService, type SearchProduct } from "@/services/site/product.service";
+import { getCurrentCoordinates } from "@/lib/location";
 import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
 import SortBar, { SortKey } from "@/components/site/layouts/SortBar/SortBar";
 
 const DATA: FoodResult[] = [
-  { id: 1, name: "Bánh Mì Gà", price: 2225000, distanceKm: 1.2, flashDealPercent: 30, imgUrl: "/food/banhmi.jpg", vendor: "Cô Ba", category: "Đồ ăn" },
-  { id: 2, name: "Phở Bò", price: 45000, distanceKm: 4.8, imgUrl: "/food/pho.jpg", vendor: "Gia Truyền", category: "Đồ ăn" },
-  { id: 3, name: "Cơm Sườn", price: 35000, distanceKm: 6.5, flashDealPercent: 10, imgUrl: "/food/comsuon.jpg", vendor: "Quán 79", category: "Đồ ăn" },
-  { id: 4, name: "Bún Chả", price: 55000, distanceKm: 2.0, flashDealPercent: 25, imgUrl: "/food/buncha.jpg", vendor: "Hương Liễu", category: "Đồ ăn" },
-  { id: 5, name: "Trà Sữa", price: 30000, distanceKm: 1.5, flashDealPercent: 15, imgUrl: "/food/trasua.jpg", vendor: "Sweetie", category: "Đồ uống" },
+  { id: 1, name: "Bánh Mì Gà", price: 2225000, distanceKm: 1.2, flashDealPercent: 30, imgUrl: "/images/chicken-fried.jpg", vendor: "Cô Ba", category: "Đồ ăn" },
+  { id: 2, name: "Phở Bò", price: 45000, distanceKm: 4.8, imgUrl: "/images/chicken-fried.jpg", vendor: "Gia Truyền", category: "Đồ ăn" },
+  { id: 3, name: "Cơm Sườn", price: 35000, distanceKm: 6.5, flashDealPercent: 10, imgUrl: "/images/chicken-fried.jpg", vendor: "Quán 79", category: "Đồ ăn" },
+  { id: 4, name: "Bún Chả", price: 55000, distanceKm: 2.0, flashDealPercent: 25, imgUrl: "/images/chicken-fried.jpg", vendor: "Hương Liễu", category: "Đồ ăn" },
+  { id: 5, name: "Trà Sữa", price: 30000, distanceKm: 1.5, flashDealPercent: 15, imgUrl: "/images/chicken-fried.jpg", vendor: "Sweetie", category: "Đồ uống" },
 ];
 
 const TRENDING = ["bánh mì", "phở bò", "cơm sườn", "trà sữa", "bún chả"];
@@ -35,6 +37,12 @@ export default function SearchPage() {
   // SORT
   const [sortBy, setSortBy] = useState<SortKey>("relevance");
 
+  // server results
+  const [loading, setLoading] = useState(false);
+  const [items, setItems] = useState<FoodResult[]>([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
   useEffect(() => {
     inputRef.current?.focus();
     try { setRecent(JSON.parse(localStorage.getItem(LS_KEY) || "[]")); } catch { }
@@ -48,12 +56,37 @@ export default function SearchPage() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch { }
   };
 
-  const doSearch = (term = q) => {
+  const doSearch = async (term = q) => {
     const t = term.trim();
     if (!t) return;
     setQ(t);
     saveRecent(t);
     setSubmitted(true);
+    setLoading(true);
+    try {
+      let lat: number | undefined;
+      let lon: number | undefined;
+      try {
+        const coords = await getCurrentCoordinates({ timeout: 8000 });
+        lat = coords.latitude;
+        lon = coords.longitude;
+      } catch {}
+
+      const res = await ProductService.search({ name: t, page: 0, size: 20, latitude: lat, longitude: lon });
+      const data = res.data; // { data: PageEnvelope<SearchProduct> }
+      const pg = data;
+      setPage(pg.number);
+      setTotalPages(pg.totalPages);
+      const transformed: FoodResult[] = (pg.content || []).map(mapToFoodResult);
+      setItems(transformed);
+    } catch (e) {
+      console.error("Search failed", e);
+      setItems([]);
+      setPage(0);
+      setTotalPages(0);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const clearQ = () => { setQ(""); setSubmitted(false); };
@@ -66,20 +99,16 @@ export default function SearchPage() {
     return names.filter(n => n.toLowerCase().includes(key)).slice(0, 8);
   }, [q]);
 
-  // lọc + sort
+  // client-side sort/filter applied on server results
   const results = useMemo(() => {
-    if (!submitted) return [];
-    const key = q.trim().toLowerCase();
+    if (!submitted) return [] as FoodResult[];
     const maxPrice = filters.priceTo ? Number(filters.priceTo) : Infinity;
-
-    const filtered = DATA.filter(i => {
-      const okText = i.name.toLowerCase().includes(key) || (i.vendor ?? "").toLowerCase().includes(key);
+    const filtered = items.filter(i => {
       const okDist = filters.distanceKm != null ? i.distanceKm <= filters.distanceKm : true;
       const okPrice = i.price <= maxPrice;
       const okFlash = filters.flashDealPercent != null ? (i.flashDealPercent ?? 0) >= filters.flashDealPercent : true;
-      return okText && okDist && okPrice && okFlash;
+      return okDist && okPrice && okFlash;
     });
-
     const arr = [...filtered];
     switch (sortBy) {
       case "distanceAsc":
@@ -94,19 +123,34 @@ export default function SearchPage() {
       case "flashDesc":
         arr.sort((a, b) => (b.flashDealPercent ?? 0) - (a.flashDealPercent ?? 0));
         break;
-      case "relevance":
       default:
-        // giữ nguyên
         break;
     }
     return arr;
-  }, [submitted, q, filters, sortBy]);
+  }, [submitted, items, filters, sortBy]);
+
+  function mapToFoodResult(p: SearchProduct): FoodResult {
+    return {
+      id: p.productId,
+      name: p.name,
+      price: p.price,
+      imgUrl: p.imageUrl,
+      distanceKm: p.distanceKm,
+      vendor: p.shopName,
+      category: "", // not provided by API
+      flashDealPercent: undefined,
+    };
+  }
 
   return (
     <div className={styles.page}>
       {/* header */}
       <div className={styles.header}>
-        <button aria-label="Quay lại" onClick={() => history.length > 1 ? history.back() : (location.href = "/")} className={styles.iconBtn}>←</button>
+        <button aria-label="Quay lại" onClick={() => history.length > 1 ? history.back() : (location.href = "/")} className="btn-back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
         <div className={styles.searchWrap}>
           <i className="fi fi-rr-search"></i>
           <input
@@ -191,7 +235,9 @@ export default function SearchPage() {
             {/* Sort dropdown nằm dưới Filter */}
             <SortBar value={sortBy} onChange={setSortBy} />
 
-            {results.length === 0 ? (
+            {loading ? (
+              <div className={styles.notice}>Đang tìm kiếm…</div>
+            ) : results.length === 0 ? (
               <div className={styles.notice}>Không có món nào phù hợp.</div>
             ) : (
               <ResultsList items={results} />

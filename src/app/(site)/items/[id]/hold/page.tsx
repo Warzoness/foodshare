@@ -9,11 +9,22 @@ import styles from "./hold.module.css";
 const VN_TZ = "Asia/Ho_Chi_Minh";
 
 function todayISO() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${dd}`; // dùng cho <input type="date">
+  // Lấy ngày hiện tại theo múi giờ VN ở định dạng YYYY-MM-DD
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: VN_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+function nowHM() {
+  // Lấy giờ:phút hiện tại theo múi giờ VN ở định dạng HH:mm (24h)
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: VN_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date());
 }
 function formatDateVN(dateISO: string) {
   const [y, m, d] = dateISO.split("-").map(Number);
@@ -52,7 +63,7 @@ export default function HoldPage() {
   const imgSrc = sp.get("img") ?? "/images/chicken-fried.jpg";
 
   const [dateISO, setDateISO] = useState<string>(todayISO());
-  const [timeHM, setTimeHM] = useState<string>("18:00"); // 24h
+  const [timeHM, setTimeHM] = useState<string>(nowHM()); // mặc định giờ hiện tại (24h)
   const [qty, setQty] = useState<number>(1);
   const total = useMemo(() => qty * unitPrice, [qty, unitPrice]);
 
@@ -68,7 +79,11 @@ export default function HoldPage() {
   if (success) {
     return (
       <main className="container py-3" style={{ maxWidth: 560 }}>
-        <button className="btn btn-link p-0 mb-2" onClick={() => router.back()} aria-label="Quay lại">←</button>
+        <button className="btn-back" onClick={() => router.back()} aria-label="Quay lại">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
 
         <div className="d-flex flex-column align-items-center text-center">
           <div className={styles.hero}>
@@ -127,7 +142,11 @@ export default function HoldPage() {
   /* ----- Form screen ----- */
   return (
     <main className="container py-3" style={{ maxWidth: 560 }}>
-      <button className="btn btn-link p-0 mb-2" onClick={() => router.back()} aria-label="Quay lại">←</button>
+      <button className="btn-back" onClick={() => router.back()} aria-label="Quay lại">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
 
       <form onSubmit={onSubmit} className="d-flex flex-column align-items-center text-center">
         <div className={styles.hero}>
@@ -138,32 +157,43 @@ export default function HoldPage() {
         <div className="text-body-secondary mb-3">Bạn đang giữ chỗ {itemName.toLowerCase()}</div>
 
         <div className="w-100" style={{ maxWidth: 520 }}>
-          {/* Ngày đặt */}
+          {/* Ngày đặt (mặc định thời gian hiện tại) */}
           <label className="form-label text-start w-100">Ngày đặt</label>
           <div className="input-group mb-3">
             <span className="input-group-text">📅</span>
+            {/* ĐÃ ẨN PHẦN CHỌN NGÀY: giữ cố định theo thời gian hiện tại */}
+            {/*
             <input
               type="date"
               className="form-control border-success"
               value={dateISO}
               onChange={(e) => setDateISO(e.target.value)}
+              lang="vi"
+              pattern="\\d{4}-\\d{2}-\\d{2}"
               required
             />
+            */}
+            <div className="form-control border-success bg-light">{formatDateVN(dateISO)}</div>
           </div>
 
-          {/* Giờ đặt (24h) */}
+          {/* Giờ đặt (24h, mặc định thời gian hiện tại) */}
           <label className="form-label text-start w-100">Giờ đặt</label>
           <div className="input-group mb-3">
             <span className="input-group-text">🕑</span>
+            {/* ĐÃ ẨN PHẦN CHỌN GIỜ: giữ cố định theo thời gian hiện tại */}
+            {/*
             <input
               type="time"
               className="form-control"
-              value={timeHM}     // "HH:mm"
+              value={timeHM}
               onChange={(e) => setTimeHM(e.target.value)}
               step={60}
-              lang="vi"         // ép hiển thị kiểu 24h của VN
+              lang="vi"
+              pattern="[0-9]{2}:[0-9]{2}"
               required
             />
+            */}
+            <div className="form-control bg-light">{formatTimeVN24(timeHM)}</div>
           </div>
 
           {/* Số lượng */}
@@ -178,7 +208,7 @@ export default function HoldPage() {
 
           {/* Tóm tắt */}
           <div className="bg-white border rounded-4 p-3 mb-3">
-            <div className="d-flex justify-content-between">
+            {/* <div className="d-flex justify-content-between">
               <span>Ngày đặt</span>
               <strong>{formatDateVN(dateISO)}</strong>
             </div>
@@ -186,7 +216,7 @@ export default function HoldPage() {
               <span>Giờ đặt</span>
               <strong>{formatTimeVN24(timeHM)}</strong>
             </div>
-            <hr className="my-2" />
+            <hr className="my-2" /> */}
             <div className="d-flex justify-content-between">
               <span>Đơn giá</span>
               <strong>{vnd(unitPrice)}</strong>

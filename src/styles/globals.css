@@ -25,6 +25,74 @@ body {
   color: #111;
 }
 
+/* Avoid showing scrollbars while preserving scroll; prevent horizontal overflow */
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Hide scrollbar visuals (scroll still works) */
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 a {
   text-decoration: none;
 }
+
+/* Global interactive highlighting */
+button,
+.btn {
+  transition: box-shadow 0.2s ease, transform 0.05s ease;
+}
+
+button:hover,
+.btn:hover {
+  box-shadow: 0 6px 16px rgba(26, 115, 232, 0.24);
+}
+
+button:focus,
+button:focus-visible,
+.btn:focus,
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.35), 0 6px 16px rgba(26, 115, 232, 0.24);
+}
+
+/* Inputs: remove highlight effects */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+.form-control {
+  transition: none;
+  box-shadow: none;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus,
+.form-control:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Unified back button */
+.btn-back {
+  appearance: none;
+  border: none;
+  background: #ffffff;
+  color: #222;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: box-shadow .18s ease, transform .06s ease;
+}
+.btn-back:hover { box-shadow: 0 4px 14px rgba(84,166,92,0.25); }
+.btn-back:focus, .btn-back:focus-visible { outline:none; box-shadow: 0 0 0 3px rgba(84,166,92,0.35), 0 4px 14px rgba(84,166,92,0.2); }

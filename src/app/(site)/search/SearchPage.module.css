@@ -1,5 +1,5 @@
 .page {
-  min-height: 100dvh;
+  min-height: auto;
   background: #fff;
 }
 
@@ -35,6 +35,12 @@
   padding: 8px 10px;
 }
 
+/* Highlight container when input is focused */
+.searchWrap:focus-within {
+  border-color: rgb(84, 166, 92);
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.35), 0 2px 8px rgba(84, 166, 92, 0.12);
+}
+
 .searchInput {
   flex: 1;
   border: none;
@@ -45,7 +51,7 @@
 
 /* Body */
 .body {
-  padding: 8px 12px 24px;
+  padding: 8px 12px 76px; /* chừa chỗ cho FloatMenu cố định */
 }
 
 .notice {

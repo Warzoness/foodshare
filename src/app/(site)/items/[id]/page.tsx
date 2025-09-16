@@ -3,6 +3,7 @@
 import styles from "./Detail.module.css";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getCurrentCoordinates } from "@/lib/location";
 import MapModal from "@/components/site/modals/MapModal/MapModal";
 import SaleTag from "@/components/share/SaleTag/SaleTag";
 import Link from "next/link";
@@ -68,6 +69,18 @@ export default function ItemDetailPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openLightbox]);
 
+  // Log current coordinates on initial load/refresh
+  useEffect(() => {
+    (async () => {
+      try {
+        const coords = await getCurrentCoordinates();
+        console.log("[Location] lat:", coords.latitude, "lng:", coords.longitude, "accuracy(m):", coords.accuracy);
+      } catch (e: any) {
+        console.warn("[Location] Failed to get coordinates:", e?.message || e);
+      }
+    })();
+  }, []);
+
   // Scroll thumb vào giữa khi đổi ảnh (nhỏ gọn)
   const thumbRowRef = useRef<HTMLDivElement | null>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -104,7 +117,7 @@ export default function ItemDetailPage() {
 
         )}
 
-        <button className={styles.backBtn} onClick={() => window.history.back()} aria-label="Quay lại">
+        <button className="btn-back" onClick={() => window.history.back()} aria-label="Quay lại" style={{ position: "absolute", top: 10, left: 10 }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: "middle" }}>
             <path d="M15 19l-7-7 7-7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -164,8 +177,20 @@ export default function ItemDetailPage() {
 
         {/* STORE + MINI MAP */}
         <section className="mt-3">
-          <div className="mb-1 fw-semibold">{data.storeName}</div>
-          <div className="text-muted mb-2">Địa chỉ: {data.address}</div>
+          <Link href={`/stores/${data.id}`} className="text-decoration-none">
+            <div className={styles.mapMini}>
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
+                <path fill="#2e7d32" d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z" />
+              </svg>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                <div>
+                  <div className="fw-semibold" style={{ color: "#111" }}>{data.storeName}</div>
+                  <div className="small" style={{ color: "#6b7280" }}>{data.address}</div>
+                </div>
+                <span className="small" style={{ color: "#2e7d32", fontWeight: 700 }}>Xem cửa hàng</span>
+              </div>
+            </div>
+          </Link>
 
           <div className={styles.mapCard}>
             <div className={styles.mapPreview}>
@@ -173,15 +198,10 @@ export default function ItemDetailPage() {
             </div>
 
             <div className={styles.mapMini}>
-              <svg viewBox="0 0 24 24" width="22" height="22">
-                <path fill="#2e7d32" d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z" />
-              </svg>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                <span className="small ms-1">{data.address}</span>
-                <button className={styles.mapBtn} onClick={() => setOpenMap(true)}>
-                  Xem bản đồ
-                </button>
-              </div>
+              <span className="small ms-1" style={{ color: "#111" }}>Vị trí trên bản đồ</span>
+              <button className={styles.mapBtn} onClick={() => setOpenMap(true)}>
+                Xem bản đồ
+              </button>
             </div>
 
 

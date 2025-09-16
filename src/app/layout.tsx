@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import LocationGate from "@/components/share/LocationGate";
 
 export const metadata: Metadata = {
   title: "FoodShare",
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
-      <body>{children}</body>
+      <body>
+        <LocationGate>{children}</LocationGate>
+      </body>
     </html>
   );
 }
