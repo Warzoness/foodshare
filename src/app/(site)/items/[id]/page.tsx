@@ -4,9 +4,17 @@ import styles from "./Detail.module.css";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getCurrentCoordinates } from "@/lib/location";
-import MapModal from "@/components/site/modals/MapModal/MapModal";
+import dynamic from "next/dynamic";
 import SaleTag from "@/components/share/SaleTag/SaleTag";
 import Link from "next/link";
+import { ProductService, ProductDetail } from "@/services/site/product.service";
+import { useParams } from "next/navigation";
+
+// Lazy-load heavy modal (no SSR) only when opened
+const MapModal = dynamic(() => import("@/components/site/modals/MapModal/MapModal"), {
+  ssr: false,
+  loading: () => null,
+});
 
 type ItemDetail = {
   id: string;
@@ -22,7 +30,8 @@ type ItemDetail = {
   discountPct?: number; // ví dụ 20 => giảm 20%
 };
 
-const demo: ItemDetail = {
+// Fallback data khi API lỗi
+const fallbackData: ItemDetail = {
   id: "ga-chien-mam",
   title: "Đùi gà chiên mắm",
   subtitle: "Đùi gà chiên mắm hương vị chuẩn Hội An",
@@ -48,7 +57,13 @@ function formatPrice(value: number | string | undefined): string {
 
 
 export default function ItemDetailPage() {
-  const data = useMemo((): ItemDetail => demo, []);
+  const params = useParams();
+  const productId = parseInt(params.id as string, 10);
+  
+  const [data, setData] = useState<ItemDetail>(fallbackData);
+  const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [curr, setCurr] = useState(0);
   const [openMap, setOpenMap] = useState(false);
 
@@ -68,6 +83,61 @@ export default function ItemDetailPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [openLightbox]);
+
+  // Fetch product detail from API
+  useEffect(() => {
+    const fetchProductDetail = async () => {
+      if (isNaN(productId)) {
+        setError("Invalid product ID");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const product = await ProductService.getDetail(productId);
+        
+        // Debug: Log product data to see what fields are available
+        console.log("Product data from API:", product);
+        
+        // Store the product data for later use
+        setProduct(product);
+        
+        // Convert API data to ItemDetail format with safe handling
+        const itemDetail: ItemDetail = {
+          id: (product?.id || 0).toString(),
+          title: product?.name || "Sản phẩm",
+          subtitle: product?.description || "Món ăn ngon",
+          priceNow: product?.price || 0,
+          // Tạo dữ liệu giả để test nếu API không có originalPrice
+          priceOld: product?.originalPrice || (product?.discountPercent ? Math.round(product.price / (1 - product.discountPercent / 100)) : product?.price ? Math.round(product.price * 1.5) : undefined),
+          discount: product?.discountPercent ? `-${product.discountPercent}%` : (product?.price ? "-30%" : undefined),
+          storeName: product?.shopName || "Cửa hàng",
+          address: product?.shopAddress || "Địa chỉ cửa hàng",
+          coords: { 
+            lat: product?.shopLatitude || 0.99, 
+            lng: product?.shopLongitude || 0.99 
+          },
+          images: [
+            product?.imageUrl || "/images/chicken-fried.jpg", 
+            product?.detailImageUrl || "/images/food1.jpg"
+          ].filter(Boolean),
+          discountPct: product?.discountPercent || (product?.price ? 30 : undefined),
+        };
+        
+        setData(itemDetail);
+        setError(null);
+      } catch (e: any) {
+        console.error("Failed to fetch product detail:", e);
+        setError(e.message || "Failed to load product");
+        // Keep fallback data
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductDetail();
+  }, [productId]);
 
   // Log current coordinates on initial load/refresh
   useEffect(() => {
@@ -98,6 +168,37 @@ export default function ItemDetailPage() {
   const delta = 0.005;
   const bbox = `${data.coords.lng - delta},${data.coords.lat - delta},${data.coords.lng + delta},${data.coords.lat + delta}`;
   const osmEmbed = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${data.coords.lat},${data.coords.lng}`;
+
+  if (loading) {
+    return (
+      <div className={styles.wrap}>
+        <div className="container pt-3">
+          <div className="text-center">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-2">Đang tải thông tin sản phẩm...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.wrap}>
+        <div className="container pt-3">
+          <div className="alert alert-danger">
+            <h5>Lỗi tải dữ liệu</h5>
+            <p>{error}</p>
+            <button className="btn btn-outline-danger" onClick={() => window.location.reload()}>
+              Thử lại
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.wrap}>
@@ -177,17 +278,17 @@ export default function ItemDetailPage() {
 
         {/* STORE + MINI MAP */}
         <section className="mt-3">
-          <Link href={`/stores/${data.id}`} className="text-decoration-none">
+          <Link href={`/stores/${product.shopId || data.id}`} className="text-decoration-none">
             <div className={styles.mapMini}>
               <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
-                <path fill="#2e7d32" d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z" />
+                <path fill="#54A65C" d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z" />
               </svg>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                 <div>
                   <div className="fw-semibold" style={{ color: "#111" }}>{data.storeName}</div>
                   <div className="small" style={{ color: "#6b7280" }}>{data.address}</div>
                 </div>
-                <span className="small" style={{ color: "#2e7d32", fontWeight: 700 }}>Xem cửa hàng</span>
+                <span className="small" style={{ color: "#54A65C", fontWeight: 700 }}>Xem cửa hàng</span>
               </div>
             </div>
           </Link>
@@ -218,14 +319,16 @@ export default function ItemDetailPage() {
         <button className={styles.reserveBtn}>Đặt chỗ</button>
       </Link>
 
-      {/* MAP MODAL */}
-      <MapModal
-        open={openMap}
-        onClose={() => setOpenMap(false)}
-        title={data.storeName}
-        address={data.address}
-        coords={data.coords}
-      />
+      {/* MAP MODAL (render only when opened) */}
+      {openMap && (
+        <MapModal
+          open={openMap}
+          onClose={() => setOpenMap(false)}
+          title={data.storeName}
+          address={data.address}
+          coords={data.coords}
+        />
+      )}
 
       {/* LIGHTBOX (ban đầu) */}
       {openLightbox && (

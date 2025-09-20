@@ -1,0 +1,9 @@
+/* Clean, always-editable search input */
+.wrap{position:relative;display:flex;align-items:center;gap:8px;width:100%;background:#ffffff;border:none;border-radius:999px;padding:10px 14px;box-shadow:0 2px 10px rgba(0,0,0,.06);pointer-events:auto}
+.wrap::after{content:"";position:absolute;inset:2px;border-radius:999px;background:radial-gradient(circle at 50% 50%, rgba(84,166,92,.18) 0%, rgba(84,166,92,0) 65%);opacity:0;transition:opacity .25s ease;pointer-events:none}
+.wrap:focus-within::after,.wrap:hover::after{opacity:1}
+.wrap:focus-within{outline:none}
+.icon{opacity:.7}
+.input{border:none;outline:none;flex:1;background:transparent;font:inherit;height:22px;width:100%}
+.clearBtn{border:none;background:transparent;cursor:pointer;font-size:18px;line-height:1;padding:4px}
+

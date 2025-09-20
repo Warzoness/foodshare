@@ -7,7 +7,9 @@ import ResultsList from "@/components/site/layouts/SearchResult/ResultList";
 import { FoodResult } from "@/components/site/layouts/SearchResult/ResultItem";
 import { ProductService, type SearchProduct } from "@/services/site/product.service";
 import { getCurrentCoordinates } from "@/lib/location";
-import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
+import dynamic from "next/dynamic";
+const FloatMenu = dynamic(() => import("@/components/site/layouts/FloatMenu/FloatMenu"), { ssr: false });
+const ActiveSearchInput = dynamic(() => import("@/components/site/layouts/SearchBar/ActiveSearchInput"), { ssr: false });
 import SortBar, { SortKey } from "@/components/site/layouts/SortBar/SortBar";
 
 const DATA: FoodResult[] = [
@@ -89,7 +91,7 @@ export default function SearchPage() {
     }
   };
 
-  const clearQ = () => { setQ(""); setSubmitted(false); };
+  const clearQ = () => { setQ(""); setSubmitted(false); inputRef.current?.focus(); };
 
   // gợi ý
   const suggestions = useMemo(() => {
@@ -152,18 +154,12 @@ export default function SearchPage() {
           </svg>
         </button>
         <div className={styles.searchWrap}>
-          <i className="fi fi-rr-search"></i>
-          <input
-            ref={inputRef}
+          <ActiveSearchInput
             value={q}
-            onChange={(e) => { setQ(e.target.value); if (!e.target.value) setSubmitted(false); }}
-            onKeyDown={(e) => e.key === "Enter" && doSearch()}
+            onChange={(v) => { setQ(v); if (!v) setSubmitted(false); }}
+            onSubmit={doSearch}
             placeholder="Tìm món / quán gần bạn"
-            className={styles.searchInput}
-            aria-label="Tìm kiếm đồ ăn"
           />
-          {q && <button aria-label="Xoá" onClick={clearQ} className={styles.iconBtn}>×</button>}
-          {/* <button aria-label="Mic" onClick={() => alert("Mic placeholder")} className={styles.iconBtn}>🎤</button> */}
         </div>
       </div>
 

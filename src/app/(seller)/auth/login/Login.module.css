@@ -1,100 +1,233 @@
+/* Login Page Styles */
 .screen {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3ea25a 0%, #2d7a47 100%);
   position: relative;
-  min-height: auto;
-  background: #3ea25a;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  padding: 24px 0;
-}
-
-.frame {
-  position: absolute;
-  inset: 16px;
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  pointer-events: none;
+  justify-content: center;
 }
 
 .brandWrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 8px;
-  margin-bottom: 70px;
+  text-align: center;
+  margin-bottom: 2rem;
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 
 .brand {
-  display: inline-block;
-  font-family: "Georgia", "Times New Roman", serif;
-  font-size: 40px;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: 0.5px;
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-style: italic;
+  font-family: Georgia, serif;
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.7);
+  text-underline-offset: 8px;
 }
 
+.loginCard {
+  background: transparent;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
 
-/* Nút social */
-.btnSocial {
+/* Error Alert */
+.errorAlert {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+}
+
+/* Section Titles */
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Social Buttons */
+.socialButtons {
+  margin-bottom: 2rem;
+}
+
+.socialButton {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 10px;
   justify-content: center;
-  padding: 10px 16px;
-  border-radius: 999px !important;
-  /* pill */
-  border: none;
-  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25), 0 10px 16px rgba(0, 0, 0, 0.12);
-  transition: transform 0.06s ease, box-shadow 0.06s ease;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
 }
 
-.btnSocial:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.28), 0 12px 18px rgba(0, 0, 0, 0.14);
+.socialButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
 }
 
-.btnSocial:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.22), 0 8px 12px rgba(0, 0, 0, 0.12);
+.socialButton:hover::before {
+  left: 100%;
 }
 
-.iconWrap {
-  width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #ffffff;
+.socialButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.googleButton {
+  background: linear-gradient(135deg, #4285f4, #34a853);
+  color: white;
+  box-shadow: 0 4px 16px rgba(66, 133, 244, 0.3);
+}
+
+.googleButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(66, 133, 244, 0.4);
+}
+
+.facebookButton {
+  background: linear-gradient(135deg, #1877f2, #42a5f5);
+  color: white;
+  box-shadow: 0 4px 16px rgba(24, 119, 242, 0.3);
+}
+
+.facebookButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(24, 119, 242, 0.4);
+}
+
+.btnIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 .btnText {
-  color: #333;
-  font-weight: 600;
-  font-size: 14.5px;
+  font-weight: 500;
 }
 
-/* Nút bỏ qua */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Skip Section */
+.skipSection {
+  text-align: center;
+}
+
 .skipBtn {
-  border-radius: 999px !important;
-  border-width: 2px !important;
-  font-weight: 600;
-  backdrop-filter: saturate(120%);
-  --bs-btn-color: #ffffff;
-  --bs-btn-border-color: rgba(255, 255, 255, 0.9);
-  --bs-btn-hover-bg: rgba(255, 255, 255, 0.1);
-  --bs-btn-hover-color: #ffffff;
-  --bs-btn-hover-border-color: #ffffff;
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 }
 
-/* Responsive nhỏ */
-@media (max-width: 576px) {
-  .brand {
-    font-size: 28px;
-    padding: 8px 14px;
-  }
+.skipBtn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
 
-  .btnText {
-    font-size: 14px;
+/* Decorative Frame */
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.frame::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .brand {
+    font-size: 2.5rem;
+  }
+  
+  .brandWrap {
+    top: 15%;
+  }
+  
+  .loginCard {
+    padding: 1.5rem;
+    margin: 1rem;
+    max-width: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand {
+    font-size: 2rem;
+  }
+  
+  .brandWrap {
+    top: 10%;
+  }
+  
+  .loginCard {
+    padding: 1rem;
+    margin: 0.5rem;
+    max-width: 320px;
   }
 }

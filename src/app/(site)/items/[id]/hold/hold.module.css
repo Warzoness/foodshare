@@ -5,4 +5,17 @@
 }
 
 /* backBtn styles moved to global .btn-back */
+ 
+/* Success badge */
+.successBadge {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: #54A65C;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  margin: 8px auto 0;
+  box-shadow: 0 6px 18px rgba(84,166,92,.28);
+}
     

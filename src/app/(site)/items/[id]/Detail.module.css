@@ -71,7 +71,7 @@
 }
 
 .active .thumb {
-  border-color: #2e7d32;
+  border-color: #54A65C;
   /* xanh như mock */
 }
 
@@ -94,7 +94,7 @@
 }
 
 .dotActive {
-  background: #2e7d32;
+  background: #54A65C;
   /* xanh active */
 }
 
@@ -118,7 +118,7 @@
 }
 
 .priceOld {
-  color: #2e7d32;
+  color: #54A65C;
   text-decoration: line-through;
   font-weight: 500;
 }
@@ -163,7 +163,7 @@
 
 .mapBtn {
   border: none;
-  background: #2e7d32;
+  background: #54A65C;
   color: #fff;
   font-weight: 500;
   padding: 8px 12px;
@@ -276,5 +276,5 @@
 }
 
 .lbActive {
-  border-color: #2e7d32;
+  border-color: #54A65C;
 }

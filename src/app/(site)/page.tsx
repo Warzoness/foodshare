@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styles from "./Home.module.css";
 import Link from "next/link";
-import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
+import dynamic from "next/dynamic";
+const FloatMenu = dynamic(() => import("@/components/site/layouts/FloatMenu/FloatMenu"), { ssr: false });
 import { ProductService, Product } from "@/services/site/product.service";
 import { MOCK_PRODUCTS } from "@/types/product";
 import SaleTag from "@/components/share/SaleTag/SaleTag";
-import SearchBar from "@/components/site/layouts/SearchBar/SearchBar";
+const SearchBar = dynamic(() => import("@/components/site/layouts/SearchBar/SearchBar"), { ssr: false });
 
-const USE_API = false; // Đổi thành true khi có API
+const USE_API = true; // Bật dùng API thật
 
 type CardItem = { id: number; name: string; price: string; img: string; discountPct?: number };
 
@@ -94,8 +95,8 @@ export default function HomePage() {
   const fetchHot = useCallback(async () => {
     setLoadingHot(true);
     try {
-      const r = await ProductService.list({ page: 0, size: 12 });
-      setHotRaw(r.content || []);
+      const arr = await ProductService.popular({ page: 0, size: 12 });
+      setHotRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
       setHotRaw(MOCK_PRODUCTS.slice(0, 12) as unknown as Product[]);
@@ -107,8 +108,8 @@ export default function HomePage() {
   const fetchShock = useCallback(async () => {
     setLoadingShock(true);
     try {
-      const r = await ProductService.list({ page: 0, size: 12, priceSort: "asc" });
-      setShockRaw(r.content || []);
+      const arr = await ProductService.topDiscounts({ page: 0, size: 12 });
+      setShockRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
       const m = [...MOCK_PRODUCTS].sort((a, b) => a.price - b.price).slice(0, 12);
@@ -121,11 +122,11 @@ export default function HomePage() {
   const fetchNear = useCallback(async (lat?: number, lon?: number) => {
     setLoadingNear(true);
     try {
-      const r = await ProductService.list({
-        page: 0, size: 12,
-        ...(lat !== undefined && lon !== undefined ? { lat, lon, maxDistanceKm: 5 } : {}),
-      });
-      setNearRaw(r.content || []);
+      // Sử dụng tọa độ mặc định nếu không có vị trí thực tế
+      const finalLat = lat ?? 0.99;
+      const finalLon = lon ?? 0.99;
+      const arr = await ProductService.nearby({ page: 0, size: 12, lat: finalLat, lon: finalLon });
+      setNearRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
       const hasDistance = MOCK_PRODUCTS.some(x => typeof x.distanceKm === "number");
@@ -142,15 +143,8 @@ export default function HomePage() {
     if (USE_API) {
       fetchHot();
       fetchShock();
-      if (typeof window !== "undefined" && "geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          pos => fetchNear(pos.coords.latitude, pos.coords.longitude),
-          () => fetchNear(),
-          { enableHighAccuracy: false, timeout: 8000 }
-        );
-      } else {
-        fetchNear();
-      }
+      // Fix cứng lat lon là 0.99
+      fetchNear(0.99, 0.99);
     } else {
       // Dữ liệu cứng
       setHotRaw(MOCK_PRODUCTS.slice(0, 12) as unknown as Product[]);

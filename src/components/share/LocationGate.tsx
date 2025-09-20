@@ -180,7 +180,7 @@ const actionsStyle: React.CSSProperties = {
 const buttonStyle: React.CSSProperties = {
   appearance: "none",
   border: "none",
-  backgroundColor: "#1a73e8",
+  backgroundColor: "#54A65C",
   color: "#fff",
   padding: "10px 16px",
   borderRadius: 8,

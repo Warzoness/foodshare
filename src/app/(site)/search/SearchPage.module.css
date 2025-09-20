@@ -7,7 +7,7 @@
 .header {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 50; /* ensure input stays above body content */
   display: flex;
   align-items: center;
   gap: 8px;
@@ -30,9 +30,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #e6ebef;
-  border-radius: 999px;
-  padding: 8px 10px;
+  width: 100%;
 }
 
 /* Highlight container when input is focused */
@@ -118,7 +116,7 @@
 .textBtn {
   border: none;
   background: transparent;
-  color: #3b82f6;
+  color: #54A65C;
   cursor: pointer;
   font-weight: 600;
 }

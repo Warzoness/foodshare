@@ -7,7 +7,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-vh-100 d-grid" style={{ gridTemplateColumns: "260px 1fr" }}>
       <aside className="border-end bg-light">
         <div className="p-3 border-bottom">
-          <Link href="/admin" className="fw-bold text-success h5 m-0 d-block">FoodShare Admin</Link>
+          <Link href="/admin" className="fw-bold h5 m-0 d-block" style={{ color: "#54A65C" }}>FoodShare Admin</Link>
           <small className="text-muted">Quản trị hệ thống</small>
         </div>
         <nav className="nav flex-column p-3 gap-1">

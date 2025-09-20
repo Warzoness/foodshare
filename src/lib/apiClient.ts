@@ -9,7 +9,7 @@ export type RequestOptions = {
   retries?: number;      // mặc định 1 (thử lại 1 lần)
 };
 
-const BASE_URL = "https://foodshare-production-aa3c.up.railway.app"; // <-- hardcode
+const BASE_URL = "https://foodshare-production-98da.up.railway.app"; // <-- hardcode
 
 export class ApiClient {
   constructor(

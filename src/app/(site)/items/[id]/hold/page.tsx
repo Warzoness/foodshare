@@ -90,7 +90,12 @@ export default function HoldPage() {
             <Image src={imgSrc} alt={itemName} width={140} height={140} className="rounded-circle object-fit-cover" />
           </div>
 
-          <div className="mt-3 fs-4 text-success">✔</div>
+          <div className={styles.successBadge} aria-hidden>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0" />
+              <path d="M20 6.5L9.5 17 4 11.5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
           <h5 className="mt-1 fw-bold">Giữ chỗ thành công</h5>
 
           <div className="bg-white border rounded-4 p-3 mt-3 w-100" style={{ maxWidth: 520 }}>
@@ -131,7 +136,7 @@ export default function HoldPage() {
           <p className="text-body-secondary mt-3 mb-3">Chỗ của bạn sẽ được giữ trong 30 phút</p>
 
           <div className="d-flex gap-2">
-            <a href="/orders" className="btn btn-success">Đơn hàng</a>
+            <a href="/orders" className="btn" style={{ background: "#54A65C", color: "#fff" }}>Đơn hàng</a>
             <a href="/" className="btn btn-outline-success">Trang chủ</a>
           </div>
         </div>
@@ -165,7 +170,8 @@ export default function HoldPage() {
             {/*
             <input
               type="date"
-              className="form-control border-success"
+              className="form-control"
+              style={{ borderColor: "#54A65C" }}
               value={dateISO}
               onChange={(e) => setDateISO(e.target.value)}
               lang="vi"
@@ -173,7 +179,7 @@ export default function HoldPage() {
               required
             />
             */}
-            <div className="form-control border-success bg-light">{formatDateVN(dateISO)}</div>
+            <div className="form-control bg-light" style={{ borderColor: "#54A65C" }}>{formatDateVN(dateISO)}</div>
           </div>
 
           {/* Giờ đặt (24h, mặc định thời gian hiện tại) */}
@@ -223,7 +229,7 @@ export default function HoldPage() {
             </div>
             <div className="d-flex justify-content-between mt-1">
               <span>Tổng tiền</span>
-              <strong className="text-success">{vnd(total)}</strong>
+              <strong style={{ color: "#54A65C" }}>{vnd(total)}</strong>
             </div>
           </div>
 
@@ -231,7 +237,7 @@ export default function HoldPage() {
             Chỗ của bạn sẽ được giữ trong 30 phút
           </p>
 
-          <button type="submit" className="btn btn-success w-100 py-2 fw-bold">
+          <button type="submit" className="btn w-100 py-2 fw-bold" style={{ background: "#54A65C", color: "#fff" }}>
             Giữ chỗ
           </button>
         </div>

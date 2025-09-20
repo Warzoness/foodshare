@@ -34,12 +34,12 @@
 
 /* Hover → sáng viền icon */
 .navItem:hover i {
-  color: #2e7d32; /* màu nhấn */
+  color: #54A65C; /* màu nhấn */
   text-shadow: 0 0 6px rgba(46, 125, 50, 0.6); /* viền sáng */
 }
 
 /* Active (đang ở route đó) → icon đậm */
 .navItem i[class*="fi-sr-"] {
-  color: #2e7d32; /* icon đậm có màu nhấn */
+  color: #54A65C; /* icon đậm có màu nhấn */
   font-weight: 700;
 }

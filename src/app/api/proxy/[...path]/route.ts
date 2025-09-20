@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const urls = (process.env.API_BASE_URLS ?? "https://foodshare-production-aa3c.up.railway.app")
+const urls = (process.env.API_BASE_URLS ?? "https://foodshare-production-98da.up.railway.app")
   .split(",")
   .map(s => s.trim().replace(/\/+$/, ""))
   .filter(Boolean);

@@ -7,8 +7,7 @@
 
 
 :root {
-  --brand: #2f9e44;
-  /* xanh FoodShare */
+  --brand: #54A65C; /* primary brand green */
   --brand-contrast: #ffffff;
   --muted: #f6f8fa;
 }
@@ -52,7 +51,7 @@ button,
 
 button:hover,
 .btn:hover {
-  box-shadow: 0 6px 16px rgba(26, 115, 232, 0.24);
+  box-shadow: 0 6px 16px rgba(84, 166, 92, 0.24);
 }
 
 button:focus,
@@ -60,7 +59,32 @@ button:focus-visible,
 .btn:focus,
 .btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.35), 0 6px 16px rgba(26, 115, 232, 0.24);
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.35), 0 6px 16px rgba(84, 166, 92, 0.24);
+}
+
+/* Soft radial fade from center on hover/focus for all buttons */
+button,
+.btn {
+  position: relative;
+  overflow: hidden; /* contain the overlay */
+}
+button::after,
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(84, 166, 92, 0.18) 0%, rgba(84, 166, 92, 0) 65%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+button:hover::after,
+button:focus::after,
+button:focus-visible::after,
+.btn:hover::after,
+.btn:focus::after,
+.btn:focus-visible::after {
+  opacity: 1;
 }
 
 /* Inputs: remove highlight effects */
