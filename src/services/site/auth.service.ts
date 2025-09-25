@@ -11,19 +11,42 @@ export const AuthService = {
    */
   async socialLogin(request: SocialLoginRequest): Promise<SocialLoginResponse> {
     try {
-      console.log('🔄 Attempting social login with provider:', request.provider);
+      console.log('🔄 AuthService: Starting social login process');
+      console.log('📋 Request details:', {
+        provider: request.provider,
+        tokenLength: request.token?.length,
+        tokenPreview: request.token?.substring(0, 50) + '...',
+        existingUserId: request.existingUserId,
+        linkEmail: request.linkEmail
+      });
       
       // Step 1: Extract user info from social token (email, name, picture)
+      console.log('🔄 Step 1: Extracting user info from social token...');
       const userInfo = await this.getUserInfoFromSocialToken(request.provider, request.token);
       console.log('📧 Extracted user info from social token:', userInfo);
+      console.log('📧 User info details:', {
+        email: userInfo.email,
+        name: userInfo.name,
+        hasProfilePicture: !!userInfo.profilePictureUrl,
+        profilePictureUrl: userInfo.profilePictureUrl
+      });
       
       // Step 2: Check if user already exists in localStorage by email
+      console.log('🔄 Step 2: Checking existing user in localStorage...');
       const existingUserData = this.findExistingUserByEmail(userInfo.email);
+      console.log('👤 Existing user check result:', {
+        found: !!existingUserData,
+        userId: existingUserData?.userId,
+        name: existingUserData?.name,
+        email: existingUserData?.email
+      });
       
       let response: AuthApiResponse<SocialLoginResponse>;
       
       if (existingUserData) {
-        console.log('👤 User already exists in localStorage, reusing data:', existingUserData);
+        console.log('👤 User already exists in localStorage, reusing data');
+        console.log('📤 Sending request to backend with existing user ID:', existingUserData.userId);
+        
         // User exists locally, reuse their data but get fresh token from server
         response = await apiClient.post<AuthApiResponse<SocialLoginResponse>>(`${AUTH_ENDPOINT}/social`, {
           headers: {
@@ -36,6 +59,8 @@ export const AuthService = {
         });
       } else {
         console.log('🆕 New user, creating account with server');
+        console.log('📤 Sending request to backend for new user creation');
+        
         // New user, create account with server
         response = await apiClient.post<AuthApiResponse<SocialLoginResponse>>(`${AUTH_ENDPOINT}/social`, {
           headers: {
@@ -45,18 +70,32 @@ export const AuthService = {
         });
       }
 
+      console.log('📥 Backend response received:', response);
+      console.log('📥 Response success:', response.success);
+      console.log('📥 Response message:', response.message);
+      console.log('📥 Response data keys:', Object.keys(response.data || {}));
+
       if (!response.success) {
+        console.error('❌ Backend returned error:', response.message);
         throw new Error(response.message || 'Social login failed');
       }
 
-      console.log('✅ Social login successful:', response.data);
+      console.log('✅ Social login successful from backend');
+      console.log('✅ Backend response data:', response.data);
       
       // Step 3: Store user data with email as key for persistence
+      console.log('🔄 Step 3: Storing user data in localStorage...');
       this.storeUserDataByEmail(response.data, userInfo.email);
+      console.log('✅ User data stored successfully');
       
       return response.data;
     } catch (error) {
-      console.error('❌ Social login error:', error);
+      console.error('❌ Social login error in AuthService:', error);
+      console.error('❌ Error details:', {
+        message: (error as Error).message,
+        stack: (error as Error).stack,
+        name: (error as Error).name
+      });
       throw error;
     }
   },
@@ -68,64 +107,131 @@ export const AuthService = {
    * @returns User info with email
    */
   async getUserInfoFromSocialToken(provider: "GOOGLE" | "FACEBOOK" | "APPLE", token: string): Promise<{ email: string; name: string; profilePictureUrl?: string }> {
+    console.log('🔄 getUserInfoFromSocialToken: Starting token processing');
+    console.log('📋 Token details:', {
+      provider,
+      tokenLength: token.length,
+      tokenPreview: token.substring(0, 50) + '...',
+      tokenType: typeof token
+    });
+
     if (provider === "GOOGLE") {
+      console.log('🔄 Processing Google JWT token...');
       // Decode Google JWT token to get user info
       try {
         // Check if token is a valid JWT format (has 3 parts separated by dots)
         const parts = token.split('.');
+        console.log('🔍 JWT token parts count:', parts.length);
+        console.log('🔍 JWT token parts preview:', {
+          header: parts[0]?.substring(0, 20) + '...',
+          payload: parts[1]?.substring(0, 20) + '...',
+          signature: parts[2]?.substring(0, 20) + '...'
+        });
+
         if (parts.length !== 3) {
-          // Mock token fallback - use consistent email for testing
-          return {
-            email: 'testuser@gmail.com', // Consistent email for testing
-            name: 'Test User',
-            profilePictureUrl: undefined
-          };
+          throw new Error('Invalid JWT token format');
         }
         
+        console.log('🔄 Decoding JWT payload...');
         const payload = JSON.parse(atob(parts[1]));
-        console.log('🔍 Decoded JWT payload:', payload);
+        console.log('🔍 Decoded Google JWT payload:', payload);
+        console.log('🔍 Payload details:', {
+          email: payload.email,
+          name: payload.name,
+          picture: payload.picture,
+          aud: payload.aud,
+          iss: payload.iss,
+          exp: payload.exp,
+          iat: payload.iat
+        });
         
-        return {
+        // Validate required fields
+        if (!payload.email || !payload.name) {
+          console.error('❌ Missing required fields in JWT payload:', {
+            hasEmail: !!payload.email,
+            hasName: !!payload.name,
+            email: payload.email,
+            name: payload.name
+          });
+          throw new Error('Missing required user information in token');
+        }
+        
+        const userInfo = {
           email: payload.email,
           name: payload.name,
           profilePictureUrl: payload.picture
         };
+        
+        console.log('✅ Google token decoded successfully:', userInfo);
+        return userInfo;
       } catch (error) {
         console.error('❌ Error decoding Google token:', error);
-        // Mock token fallback - use consistent email for testing
-        return {
-          email: 'testuser@gmail.com', // Consistent email for testing
-          name: 'Test User',
-          profilePictureUrl: undefined
-        };
+        console.error('❌ Error details:', {
+          message: (error as Error).message,
+          stack: (error as Error).stack,
+          tokenPreview: token.substring(0, 100) + '...'
+        });
+        throw new Error('Invalid Google token: ' + (error as Error).message);
       }
     } else if (provider === "FACEBOOK") {
+      console.log('🔄 Processing Facebook access token...');
       // Call Facebook Graph API to get user info
       try {
-        const response = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`);
+        console.log('🔄 Calling Facebook Graph API...');
+        const apiUrl = `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`;
+        console.log('📤 Facebook API URL:', apiUrl);
+        
+        const response = await fetch(apiUrl);
+        console.log('📥 Facebook API response status:', response.status);
+        console.log('📥 Facebook API response headers:', Object.fromEntries(response.headers.entries()));
+        
         const data = await response.json();
+        console.log('📧 Facebook Graph API response:', data);
+        console.log('📧 Response details:', {
+          hasError: !!data.error,
+          hasId: !!data.id,
+          hasName: !!data.name,
+          hasEmail: !!data.email,
+          hasPicture: !!data.picture
+        });
         
         if (data.error) {
+          console.error('❌ Facebook API returned error:', data.error);
           throw new Error(data.error.message);
         }
         
-        return {
+        // Validate required fields
+        if (!data.email || !data.name) {
+          console.error('❌ Missing required fields from Facebook:', {
+            hasEmail: !!data.email,
+            hasName: !!data.name,
+            email: data.email,
+            name: data.name
+          });
+          throw new Error('Missing required user information from Facebook');
+        }
+        
+        const userInfo = {
           email: data.email,
           name: data.name,
           profilePictureUrl: data.picture?.data?.url
         };
+        
+        console.log('✅ Facebook token processed successfully:', userInfo);
+        return userInfo;
       } catch (error) {
         console.error('❌ Error getting Facebook user info:', error);
-        // Mock token fallback - use consistent email for testing
-        return {
-          email: 'testuser@facebook.com', // Consistent email for testing
-          name: 'Test User',
-          profilePictureUrl: undefined
-        };
+        console.error('❌ Error details:', {
+          message: (error as Error).message,
+          stack: (error as Error).stack,
+          tokenPreview: token.substring(0, 20) + '...'
+        });
+        throw new Error('Facebook API error: ' + (error as Error).message);
       }
     }
     
-    throw new Error('Unsupported provider');
+    console.error('❌ Unsupported provider:', provider);
+    throw new Error('Unsupported provider: ' + provider);
   },
 
   /**

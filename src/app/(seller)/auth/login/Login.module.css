@@ -231,3 +231,70 @@
     max-width: 320px;
   }
 }
+
+/* SDK Loading Styles */
+.loadingSDK {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+/* Google Button Container */
+.googleButtonContainer {
+  width: 100%;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 48px;
+}
+
+.googleButtonContainer iframe {
+  border-radius: 8px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Debug Panel Styles */
+.debugPanel {
+  background: rgba(0, 0, 0, 0.8);
+  color: #00ff00;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #00ff00;
+}
+
+.debugPanel h5 {
+  color: #00ff00;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.debugContent p {
+  margin: 0.25rem 0;
+  color: #ffffff;
+}
+
+.debugJson {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+  color: #00ff00;
+  font-size: 0.7rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 150px;
+  overflow-y: auto;
+}

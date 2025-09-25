@@ -1,37 +1,339 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./Login.module.css";
 import Link from "next/link";
+import { AuthService } from "@/services/site/auth.service";
+import { SocialLoginRequest } from "@/types/auth";
+
+// Declare global types for SDKs
+declare global {
+  interface Window {
+    google: any;
+    FB: any;
+    googleSDKLoaded: boolean;
+    facebookSDKLoaded: boolean;
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [sdkLoaded, setSdkLoaded] = useState(false);
 
-  const handleGoogleLogin = () => {
-    setLoading(true);
-    setError(null);
-    
-    // Simulate loading
-    setTimeout(() => {
-      setLoading(false);
-      // Redirect to home page
-      router.push('/');
-    }, 1000);
+  // Load SDKs when component mounts
+  useEffect(() => {
+    loadSDKs();
+  }, []);
+
+  // Auto-render Google button when SDK is loaded
+  useEffect(() => {
+    if (sdkLoaded && window.google) {
+      console.log('🔄 Auto-rendering Google Sign-In Button...');
+      handleGoogleLogin();
+    }
+  }, [sdkLoaded]);
+
+  const loadSDKs = async () => {
+    try {
+      console.log('🔄 Loading Google and Facebook SDKs...');
+      console.log('📋 Configuration:');
+      console.log('  - Google Client ID: 62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com');
+      console.log('  - Facebook App ID: your-facebook-app-id');
+      
+      // Load Google SDK
+      if (!window.google) {
+        console.log('🔄 Loading Google SDK...');
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://accounts.google.com/gsi/client';
+          script.async = true;
+          script.defer = true;
+          script.onload = () => {
+            window.googleSDKLoaded = true;
+            console.log('✅ Google SDK loaded successfully');
+            console.log('🔍 Google SDK object:', window.google);
+            resolve(true);
+          };
+          script.onerror = (error) => {
+            console.error('❌ Google SDK load error:', error);
+            reject(error);
+          };
+          document.head.appendChild(script);
+          console.log('📤 Google SDK script added to DOM');
+        });
+      } else {
+        console.log('✅ Google SDK already loaded');
+      }
+
+      // Load Facebook SDK
+      if (!window.FB) {
+        console.log('🔄 Loading Facebook SDK...');
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://connect.facebook.net/en_US/sdk.js';
+          script.async = true;
+          script.defer = true;
+          script.crossOrigin = 'anonymous';
+          script.onload = () => {
+            console.log('🔄 Initializing Facebook SDK...');
+            // Initialize Facebook SDK
+            window.FB.init({
+              appId: 'your-facebook-app-id',
+              cookie: true,
+              xfbml: true,
+              version: 'v18.0'
+            });
+            window.facebookSDKLoaded = true;
+            console.log('✅ Facebook SDK loaded and initialized');
+            console.log('🔍 Facebook SDK object:', window.FB);
+            resolve(true);
+          };
+          script.onerror = (error) => {
+            console.error('❌ Facebook SDK load error:', error);
+            reject(error);
+          };
+          document.head.appendChild(script);
+          console.log('📤 Facebook SDK script added to DOM');
+        });
+      } else {
+        console.log('✅ Facebook SDK already loaded');
+      }
+
+      setSdkLoaded(true);
+      console.log('✅ All SDKs loaded successfully');
+      console.log('🎯 Ready for authentication');
+    } catch (error) {
+      console.error('❌ Error loading SDKs:', error);
+      setError('Không thể tải SDK đăng nhập');
+    }
   };
 
-  const handleFacebookLogin = () => {
+  const handleGoogleLogin = async () => {
+    if (!sdkLoaded || !window.google) {
+      console.error('❌ Google SDK not loaded:', { sdkLoaded, google: !!window.google });
+      setError('Google SDK chưa được tải. Vui lòng thử lại.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
+    setDebugInfo(null);
     
-    // Simulate loading
-    setTimeout(() => {
+    try {
+      console.log('🔄 Starting Google login process...');
+      console.log('🔍 Google SDK status:', {
+        loaded: !!window.google,
+        accounts: !!window.google?.accounts,
+        id: !!window.google?.accounts?.id
+      });
+      
+      const clientId = '62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com';
+      console.log('🔑 Using Client ID:', clientId);
+      
+      // Initialize Google Identity Services
+      console.log('🔄 Initializing Google Identity Services...');
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (response: any) => {
+          console.log('📧 Google callback triggered');
+          console.log('📧 Google response received:', response);
+          console.log('📧 Response type:', typeof response);
+          console.log('📧 Response keys:', Object.keys(response || {}));
+          
+          if (response && response.credential) {
+            console.log('✅ Valid Google credential received');
+            console.log('🔍 Credential length:', response.credential.length);
+            console.log('🔍 Credential preview:', response.credential.substring(0, 50) + '...');
+            
+            // Process the login
+            processGoogleLogin(response);
+          } else {
+            console.error('❌ Invalid Google response:', response);
+            setError('Phản hồi từ Google không hợp lệ');
+            setLoading(false);
+          }
+        }
+      });
+
+      // Render Google Sign-In Button
+      console.log('🔄 Rendering Google Sign-In Button...');
+      const buttonContainer = document.getElementById('google-login-button');
+      if (buttonContainer) {
+        window.google.accounts.id.renderButton(buttonContainer, {
+          theme: 'outline',
+          size: 'large',
+          type: 'standard',
+          shape: 'rectangular',
+          text: 'signin_with',
+          width: '100%'
+        });
+        console.log('✅ Google Sign-In Button rendered');
+      } else {
+        console.error('❌ Google login button container not found');
+        setError('Không thể tạo nút đăng nhập Google');
+        setLoading(false);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Google login error:', error);
+      setError(error.message || 'Đăng nhập Google thất bại');
       setLoading(false);
-      // Redirect to home page
-      router.push('/');
-    }, 1000);
+    }
+  };
+
+  const processGoogleLogin = async (credential: any) => {
+    try {
+      console.log('📤 Processing Google credential...');
+      console.log('📤 Full credential object:', credential);
+      
+      const loginRequest: SocialLoginRequest = {
+        provider: 'GOOGLE',
+        token: credential.credential
+      };
+      
+      console.log('📤 Sending login request to backend:', loginRequest);
+      console.log('📤 Request token length:', loginRequest.token.length);
+      
+      // Call AuthService
+      console.log('🔄 Calling AuthService.socialLogin...');
+      const response = await AuthService.socialLogin(loginRequest);
+      
+      console.log('✅ Login successful! Backend response:', response);
+      console.log('✅ Response type:', typeof response);
+      console.log('✅ Response keys:', Object.keys(response || {}));
+      
+      setDebugInfo({
+        type: 'success',
+        data: response,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Redirect to intended page or home
+      const nextUrl = searchParams.get('next') || '/';
+      console.log('🔄 Redirecting to:', nextUrl);
+      router.push(nextUrl);
+      
+    } catch (error: any) {
+      console.error('❌ Google login processing error:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      
+      setError(error.message || 'Xử lý đăng nhập Google thất bại');
+      setDebugInfo({
+        type: 'error',
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      console.log('🏁 Google login process finished');
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    if (!sdkLoaded || !window.FB) {
+      console.error('❌ Facebook SDK not loaded:', { sdkLoaded, FB: !!window.FB });
+      setError('Facebook SDK chưa được tải. Vui lòng thử lại.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setDebugInfo(null);
+    
+    try {
+      console.log('🔄 Starting Facebook login process...');
+      console.log('🔍 Facebook SDK status:', {
+        loaded: !!window.FB,
+        login: !!window.FB?.login,
+        init: !!window.FB?.init
+      });
+      
+      const appId = 'your-facebook-app-id';
+      console.log('🔑 Using Facebook App ID:', appId);
+      
+      // Use Facebook SDK
+      console.log('🔄 Calling Facebook login...');
+      const response = await new Promise((resolve, reject) => {
+        window.FB.login((response: any) => {
+          console.log('📧 Facebook login callback triggered');
+          console.log('📧 Facebook response received:', response);
+          console.log('📧 Response type:', typeof response);
+          console.log('📧 Response keys:', Object.keys(response || {}));
+          console.log('📧 Auth response:', response?.authResponse);
+          
+          if (response.authResponse) {
+            console.log('✅ Valid Facebook auth response received');
+            console.log('🔍 Access token length:', response.authResponse.accessToken?.length);
+            console.log('🔍 User ID:', response.authResponse.userID);
+            console.log('🔍 Expires in:', response.authResponse.expiresIn);
+            console.log('🔍 Granted scopes:', response.authResponse.grantedScopes);
+            resolve(response);
+          } else {
+            console.error('❌ Invalid Facebook response:', response);
+            console.error('❌ Response status:', response?.status);
+            reject(new Error('Facebook login was cancelled or failed'));
+          }
+        }, {
+          scope: 'email,public_profile',
+          return_scopes: true
+        });
+      });
+
+      console.log('📤 Facebook response received successfully');
+      console.log('📤 Full response object:', response);
+      
+      const loginRequest: SocialLoginRequest = {
+        provider: 'FACEBOOK',
+        token: (response as any).authResponse.accessToken
+      };
+      
+      console.log('📤 Sending login request to backend:', loginRequest);
+      console.log('📤 Request token length:', loginRequest.token.length);
+      
+      // Call AuthService
+      console.log('🔄 Calling AuthService.socialLogin...');
+      const authResponse = await AuthService.socialLogin(loginRequest);
+      
+      console.log('✅ Login successful! Backend response:', authResponse);
+      console.log('✅ Response type:', typeof authResponse);
+      console.log('✅ Response keys:', Object.keys(authResponse || {}));
+      
+      setDebugInfo({
+        type: 'success',
+        data: authResponse,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Redirect to intended page or home
+      const nextUrl = searchParams.get('next') || '/';
+      console.log('🔄 Redirecting to:', nextUrl);
+      router.push(nextUrl);
+      
+    } catch (error: any) {
+      console.error('❌ Facebook login error:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      
+      setError(error.message || 'Đăng nhập Facebook thất bại');
+      setDebugInfo({
+        type: 'error',
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
+    } finally {
+      console.log('🏁 Facebook login process finished');
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,10 +357,24 @@ export default function LoginPage() {
               <div className={styles.socialButtons}>
                 <h3 className={styles.sectionTitle}>Đăng nhập</h3>
                 
+                {!sdkLoaded && (
+                  <div className={styles.loadingSDK}>
+                    <div className="spinner-border spinner-border-sm me-2" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    Đang tải SDK đăng nhập...
+                  </div>
+                )}
+                
+                {/* Google Sign-In Button Container */}
+                <div id="google-login-button" className={styles.googleButtonContainer}></div>
+                
+                {/* Fallback Google Button */}
                 <button
                   className={`${styles.socialButton} ${styles.googleButton}`}
                   onClick={handleGoogleLogin}
-                  disabled={loading}
+                  disabled={loading || !sdkLoaded}
+                  style={{ display: 'none' }} // Hide fallback button
                 >
                   <span className={styles.btnIcon}>
                     {loading ? (
@@ -92,7 +408,7 @@ export default function LoginPage() {
                 <button
                   className={`${styles.socialButton} ${styles.facebookButton}`}
                   onClick={handleFacebookLogin}
-                  disabled={loading}
+                  disabled={loading || !sdkLoaded}
                 >
                   <span className={styles.btnIcon}>
                     {loading ? (
@@ -118,6 +434,34 @@ export default function LoginPage() {
                   Bỏ qua đăng nhập
                 </Link>
               </div>
+
+              {/* Debug Info Panel */}
+              {debugInfo && (
+                <div className={styles.debugPanel}>
+                  <h5>🐛 Debug Information</h5>
+                  <div className={styles.debugContent}>
+                    <p><strong>Type:</strong> {debugInfo.type}</p>
+                    <p><strong>Timestamp:</strong> {debugInfo.timestamp}</p>
+                    {debugInfo.type === 'success' && (
+                      <div>
+                        <p><strong>Response Data:</strong></p>
+                        <pre className={styles.debugJson}>
+                          {JSON.stringify(debugInfo.data, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {debugInfo.type === 'error' && (
+                      <div>
+                        <p><strong>Error:</strong> {debugInfo.error}</p>
+                        <p><strong>Stack:</strong></p>
+                        <pre className={styles.debugJson}>
+                          {debugInfo.stack}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
       {/* Decorative corner frame (optional) */}
