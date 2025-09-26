@@ -25,6 +25,7 @@ function LoginPageContent() {
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -47,6 +48,20 @@ function LoginPageContent() {
 
     checkExistingAuth();
   }, [router, searchParams]);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+      const isSmallScreen = window.innerWidth <= 768;
+      setIsMobile(isMobileDevice || isSmallScreen);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Load SDKs when component mounts
   useEffect(() => {
@@ -168,13 +183,14 @@ function LoginPageContent() {
             setError('Phản hồi từ Google không hợp lệ');
           }
         },
-        // Mobile-optimized configuration for popup
+        // Mobile-optimized configuration - use redirect for mobile
         use_fedcm_for_prompt: false,
         auto_select: false,
         cancel_on_tap_outside: true,
-        // Enable popup mode for better mobile experience
-        ux_mode: 'popup',
-        // Add mobile-specific optionscls
+        // Use redirect mode for mobile compatibility
+        ux_mode: isMobile ? 'redirect' : 'popup',
+        redirect_uri: isMobile ? `${window.location.origin}/auth/google/callback` : undefined,
+        // Add mobile-specific options
         itp_support: true
       });
 
@@ -188,10 +204,10 @@ function LoginPageContent() {
           shape: 'rectangular',
           text: 'signin_with',
           width: '100%',
-          // Mobile-optimized popup configuration
+          // Mobile-optimized redirect configuration
           use_fedcm_for_prompt: false,
-          // Enable popup mode explicitly
-          ux_mode: 'popup'
+          // Use redirect mode for mobile compatibility
+          ux_mode: isMobile ? 'redirect' : 'popup'
         });
         console.log('✅ Google Sign-In Button rendered');
       } else {
@@ -402,16 +418,22 @@ function LoginPageContent() {
                     <span className="me-2">⚠️</span>
                     <span>{error}</span>
                   </div>
-                  {error.includes('popup') && (
-                    <div className="mt-2 p-2 bg-light rounded">
-                      <strong>Hướng dẫn:</strong>
-                      <ol className="mb-0 mt-1">
-                        <li>Click vào biểu tượng popup bị chặn trên thanh địa chỉ</li>
-                        <li>Chọn "Luôn cho phép popup từ trang này"</li>
-                        <li>Thử đăng nhập lại</li>
-                      </ol>
-                    </div>
-                  )}
+                   {error.includes('popup') && (
+                     <div className="mt-2 p-2 bg-light rounded">
+                       <strong>Hướng dẫn:</strong>
+                       <ol className="mb-0 mt-1">
+                         <li>Click vào biểu tượng popup bị chặn trên thanh địa chỉ</li>
+                         <li>Chọn "Luôn cho phép popup từ trang này"</li>
+                         <li>Thử đăng nhập lại</li>
+                       </ol>
+                     </div>
+                   )}
+                   {isMobile && (
+                     <div className="mt-2 p-2 bg-info bg-opacity-10 rounded">
+                       <strong>📱 Hướng dẫn cho điện thoại:</strong>
+                       <p className="mb-1">Trên điện thoại, bạn sẽ được chuyển hướng đến trang đăng nhập Google. Sau khi đăng nhập thành công, bạn sẽ được chuyển về ứng dụng.</p>
+                     </div>
+                   )}
                   {error.includes('click') && (
                     <div className="mt-2 p-2 bg-info bg-opacity-10 rounded">
                       <strong>💡 Gợi ý:</strong>

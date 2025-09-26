@@ -19,6 +19,7 @@ function GoogleCallbackContent() {
         const code = searchParams.get('code');
         const error = searchParams.get('error');
         const state = searchParams.get('state');
+        const credential = searchParams.get('credential');
         
         if (error) {
           console.error('❌ Google OAuth error:', error);
@@ -27,14 +28,15 @@ function GoogleCallbackContent() {
           return;
         }
         
-        if (!code) {
-          console.error('❌ No authorization code received from Google');
+        // Check for either code (OAuth flow) or credential (GSI flow)
+        if (!code && !credential) {
+          console.error('❌ No authorization code or credential received from Google');
           setError('Không nhận được mã xác thực từ Google');
           setLoading(false);
           return;
         }
         
-        console.log('✅ Google authorization code received:', code.substring(0, 20) + '...');
+        console.log('✅ Google authorization received:', code ? code.substring(0, 20) + '...' : 'credential flow');
         
         // Parse state to get return URL
         let returnUrl = '/';
@@ -49,9 +51,16 @@ function GoogleCallbackContent() {
         
         // For now, we'll use the code as the token
         // In a real implementation, you'd exchange the code for an access token
+        const token = credential || code;
+        if (!token) {
+          setError('Không có token từ Google');
+          setLoading(false);
+          return;
+        }
+        
         const response = await AuthService.socialLogin({
           provider: 'GOOGLE',
-          token: code // Using code as token for now
+          token: token
         });
         
         console.log('✅ Google login successful:', response);
