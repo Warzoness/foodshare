@@ -3,6 +3,9 @@ import { SocialLoginRequest, SocialLoginResponse, AuthApiResponse, UpdateUserReq
 
 const AUTH_ENDPOINT = "/auth";
 
+// Check if running on client side
+const isClient = typeof window !== 'undefined';
+
 export const AuthService = {
   /**
    * Social login with provider token
@@ -241,6 +244,8 @@ export const AuthService = {
    */
   findExistingUserByEmail(email: string): SocialLoginResponse | null {
     try {
+      if (!isClient) return null;
+      
       console.log('🔍 Looking for existing user in localStorage with email:', email);
       
       const userKey = `user_${email}`;
@@ -267,6 +272,8 @@ export const AuthService = {
    */
   storeUserDataByEmail(userData: SocialLoginResponse, email: string): void {
     try {
+      if (!isClient) return;
+      
       // Store with email as key for persistence
       const userKey = `user_${email}`;
       const tokenKey = `token_${email}`;
@@ -294,6 +301,8 @@ export const AuthService = {
    */
   storeUserData(userData: SocialLoginResponse): void {
     try {
+      if (!isClient) return;
+      
       // Store user data with email as key for persistence
       const userKey = `user_${userData.email}`;
       const tokenKey = `token_${userData.email}`;
@@ -318,6 +327,8 @@ export const AuthService = {
    */
   getStoredUserData(): SocialLoginResponse | null {
     try {
+      if (!isClient) return null;
+      
       // First try to get current user
       const currentUserEmail = localStorage.getItem('current_user_email');
       if (currentUserEmail) {
@@ -343,6 +354,19 @@ export const AuthService = {
    */
   getStoredToken(): string | null {
     try {
+      if (!isClient) return null;
+      
+      // First try to get current user's token
+      const currentUserEmail = localStorage.getItem('current_user_email');
+      if (currentUserEmail) {
+        const tokenKey = `token_${currentUserEmail}`;
+        const token = localStorage.getItem(tokenKey);
+        if (token) {
+          return token;
+        }
+      }
+      
+      // Fallback to old method
       return localStorage.getItem('token');
     } catch (error) {
       console.error('❌ Error getting stored token:', error);
@@ -355,6 +379,8 @@ export const AuthService = {
    */
   clearUserData(): void {
     try {
+      if (!isClient) return;
+      
       // Clear current user data
       localStorage.removeItem('user');
       localStorage.removeItem('token');
@@ -489,6 +515,8 @@ export const AuthService = {
    */
   storeLinkedAccount(email: string, userData: SocialLoginResponse): void {
     try {
+      if (!isClient) return;
+      
       const linkedAccounts = this.getLinkedAccounts();
       const accountInfo = {
         email,
@@ -527,6 +555,8 @@ export const AuthService = {
     linkedAt: string;
   }> {
     try {
+      if (!isClient) return [];
+      
       const stored = localStorage.getItem('linked_accounts');
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
@@ -558,6 +588,8 @@ export const AuthService = {
    */
   removeLinkedAccount(email: string): void {
     try {
+      if (!isClient) return;
+      
       const accounts = this.getLinkedAccounts();
       const filtered = accounts.filter(acc => acc.email !== email);
       localStorage.setItem('linked_accounts', JSON.stringify(filtered));

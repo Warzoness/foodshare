@@ -8,7 +8,8 @@ import dynamic from "next/dynamic";
 import SaleTag from "@/components/share/SaleTag/SaleTag";
 import Link from "next/link";
 import { ProductService, ProductDetail } from "@/services/site/product.service";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { AuthService } from "@/services/site/auth.service";
 
 // Lazy-load heavy modal (no SSR) only when opened
 const MapModal = dynamic(() => import("@/components/site/modals/MapModal/MapModal"), {
@@ -58,6 +59,7 @@ function formatPrice(value: number | string | undefined): string {
 
 export default function ItemDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const productId = parseInt(params.id as string, 10);
   
   const [data, setData] = useState<ItemDetail>(fallbackData);
@@ -66,12 +68,27 @@ export default function ItemDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [curr, setCurr] = useState(0);
   const [openMap, setOpenMap] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [openLightbox, setOpenLightbox] = useState(false);
   const openLb = (index: number) => { setCurr(index); setOpenLightbox(true); };
   const closeLb = () => setOpenLightbox(false);
   const prevImg = () => setCurr((i) => (i - 1 + data.images.length) % data.images.length);
   const nextImg = () => setCurr((i) => (i + 1) % data.images.length);
+
+  // Handle reserve button click
+  const handleReserveClick = () => {
+    if (isLoggedIn) {
+      // User is logged in, proceed to hold page
+      const holdUrl = `/items/${data.id}/hold?name=${encodeURIComponent(data.title)}&price=${data.priceNow}`;
+      router.push(holdUrl);
+    } else {
+      // User not logged in, redirect to login with return URL
+      const currentUrl = window.location.pathname + window.location.search;
+      const loginUrl = `/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`;
+      router.push(loginUrl);
+    }
+  };
 
   useEffect(() => {
     if (!openLightbox) return;
@@ -138,6 +155,22 @@ export default function ItemDetailPage() {
 
     fetchProductDetail();
   }, [productId]);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      try {
+        const loggedIn = AuthService.isLoggedIn();
+        setIsLoggedIn(loggedIn);
+        console.log("🔐 Authentication status:", loggedIn);
+      } catch (error) {
+        console.error("❌ Error checking auth status:", error);
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
 
   // Log current coordinates on initial load/refresh
   useEffect(() => {
@@ -278,7 +311,7 @@ export default function ItemDetailPage() {
 
         {/* STORE + MINI MAP */}
         <section className="mt-3">
-          <Link href={`/stores/${product.shopId || data.id}`} className="text-decoration-none">
+          <Link href={`/stores/${product?.shopId || data.id}`} className="text-decoration-none">
             <div className={styles.mapMini}>
               <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden>
                 <path fill="#54A65C" d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z" />
@@ -311,13 +344,15 @@ export default function ItemDetailPage() {
       </div>
 
       {/* STICKY ACTION */}
-      {/* <div className={styles.stickyBar}>
-        <button className={styles.reserveBtn}>Giữ chỗ</button>
-      </div> */}
-
-      <Link className={styles.stickyBar} href={`/items/${data.id}/hold?name=${encodeURIComponent(data.title)}&price=${data.priceNow}`}>
-        <button className={styles.reserveBtn}>Đặt chỗ</button>
-      </Link>
+      <div className={styles.stickyBar}>
+        <button 
+          className={`${styles.reserveBtn} ${!isLoggedIn ? styles.reserveBtnDisabled : ''}`}
+          onClick={handleReserveClick}
+          disabled={loading}
+        >
+          {isLoggedIn ? 'Đặt chỗ' : 'Đăng nhập để đặt chỗ'}
+        </button>
+      </div>
 
       {/* MAP MODAL (render only when opened) */}
       {openMap && (

@@ -35,9 +35,9 @@ export type PageEnvelope<T> = {
   totalPages: number;
   size: number;
   content: T[];
-  number: number;
-  sort: SearchSort[];
-  pageable: PageableInfo;
+  page: number; // API uses 'page' instead of 'number'
+  sort?: SearchSort[];
+  pageable?: PageableInfo;
 };
 
 // ---------- Back-compat types for existing callers ----------
@@ -115,7 +115,7 @@ const PRODUCT_DETAIL_ENDPOINT = "/products";
 
 export const ProductService = {
   search(params: ProductSearchParams) {
-    return apiClient.get<{ data: PageEnvelope<SearchProduct> }>(SEARCH_ENDPOINT, {
+    return apiClient.get<ApiResponse<PageEnvelope<SearchProduct>>>(SEARCH_ENDPOINT, {
       query: params as Record<string, any>,
     });
   },
@@ -178,7 +178,7 @@ export const ProductService = {
       totalElements: pg.totalElements,
       totalPages: pg.totalPages,
       size: pg.size,
-      number: pg.number,
+      number: pg.page, // Use 'page' from API response
     };
   },
 };

@@ -8,12 +8,17 @@
 }
 
 .horizontalBar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 4px;
+}
+
+.filterRow {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: end;
   gap: 10px;
-  overflow: visible;
-  padding: 0 2px 6px;
+  align-items: end;
 }
 
 .filterItem {
@@ -25,8 +30,9 @@
 .actionItem {
   display: flex;
   gap: 8px;
-  align-items: end;
-  grid-column: 1 / -1; /* đẩy nút xuống hàng dưới, full width */
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
 }
 
 .label {
@@ -89,19 +95,28 @@
   padding: 0;
 }
 
-/* Desktop căn đều, không cuộn */
+/* Desktop layout */
 @media (min-width: 1024px) {
   .horizontalBar {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    overflow: visible;
-    padding-bottom: 8px;
+    flex-direction: row;
+    align-items: end;
+    gap: 16px;
   }
-  .filterItem { min-width: 0; }
+  
+  .filterRow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  
+  .actionItem {
+    margin-top: 0;
+    flex-shrink: 0;
+  }
 }
 
-@media (min-width: 480px) and (max-width: 1023px) {
-  .horizontalBar {
+@media (min-width: 768px) and (max-width: 1023px) {
+  .filterRow {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

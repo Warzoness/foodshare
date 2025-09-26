@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./Login.module.css";
 import Link from "next/link";
@@ -10,20 +10,43 @@ import { SocialLoginRequest } from "@/types/auth";
 // Declare global types for SDKs
 declare global {
   interface Window {
-    google: any;
-    FB: any;
+    google: unknown;
+    FB: unknown;
     googleSDKLoaded: boolean;
     facebookSDKLoaded: boolean;
   }
 }
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [sdkLoaded, setSdkLoaded] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkExistingAuth = () => {
+      try {
+        const isLoggedIn = AuthService.isLoggedIn();
+        if (isLoggedIn) {
+          console.log('🔐 User already logged in, redirecting to home');
+          // Get returnUrl if available, otherwise go to home
+          const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
+          router.push(returnUrl);
+          return;
+        }
+        setCheckingAuth(false);
+      } catch (error) {
+        console.error('❌ Error checking existing auth:', error);
+        setCheckingAuth(false);
+      }
+    };
+
+    checkExistingAuth();
+  }, [router, searchParams]);
 
   // Load SDKs when component mounts
   useEffect(() => {
@@ -34,7 +57,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (sdkLoaded && window.google) {
       console.log('🔄 Auto-rendering Google Sign-In Button...');
-      handleGoogleLogin();
+      renderGoogleButton();
     }
   }, [sdkLoaded]);
 
@@ -82,7 +105,7 @@ export default function LoginPage() {
           script.onload = () => {
             console.log('🔄 Initializing Facebook SDK...');
             // Initialize Facebook SDK
-            window.FB.init({
+            (window.FB as any).init({
               appId: 'your-facebook-app-id',
               cookie: true,
               xfbml: true,
@@ -113,87 +136,96 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const renderGoogleButton = () => {
     if (!sdkLoaded || !window.google) {
       console.error('❌ Google SDK not loaded:', { sdkLoaded, google: !!window.google });
-      setError('Google SDK chưa được tải. Vui lòng thử lại.');
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    setDebugInfo(null);
-    
     try {
-      console.log('🔄 Starting Google login process...');
-      console.log('🔍 Google SDK status:', {
-        loaded: !!window.google,
-        accounts: !!window.google?.accounts,
-        id: !!window.google?.accounts?.id
-      });
-      
+      console.log('🔄 Rendering Google Sign-In Button...');
       const clientId = '62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com';
-      console.log('🔑 Using Client ID:', clientId);
       
       // Initialize Google Identity Services
-      console.log('🔄 Initializing Google Identity Services...');
-      window.google.accounts.id.initialize({
+      (window.google as any).accounts.id.initialize({
         client_id: clientId,
-        callback: (response: any) => {
+        callback: (response: unknown) => {
           console.log('📧 Google callback triggered');
           console.log('📧 Google response received:', response);
           console.log('📧 Response type:', typeof response);
           console.log('📧 Response keys:', Object.keys(response || {}));
           
-          if (response && response.credential) {
+          if (response && typeof response === 'object' && response !== null && 'credential' in response) {
             console.log('✅ Valid Google credential received');
-            console.log('🔍 Credential length:', response.credential.length);
-            console.log('🔍 Credential preview:', response.credential.substring(0, 50) + '...');
+            const credential = (response as { credential: string }).credential;
+            console.log('🔍 Credential length:', credential.length);
+            console.log('🔍 Credential preview:', credential.substring(0, 50) + '...');
             
             // Process the login
             processGoogleLogin(response);
           } else {
             console.error('❌ Invalid Google response:', response);
             setError('Phản hồi từ Google không hợp lệ');
-            setLoading(false);
           }
-        }
+        },
+        // Mobile-optimized configuration for popup
+        use_fedcm_for_prompt: false,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        // Enable popup mode for better mobile experience
+        ux_mode: 'popup',
+        // Add mobile-specific optionscls
+        itp_support: true
       });
 
       // Render Google Sign-In Button
-      console.log('🔄 Rendering Google Sign-In Button...');
       const buttonContainer = document.getElementById('google-login-button');
       if (buttonContainer) {
-        window.google.accounts.id.renderButton(buttonContainer, {
+        (window.google as any).accounts.id.renderButton(buttonContainer, {
           theme: 'outline',
           size: 'large',
           type: 'standard',
           shape: 'rectangular',
           text: 'signin_with',
-          width: '100%'
+          width: '100%',
+          // Mobile-optimized popup configuration
+          use_fedcm_for_prompt: false,
+          // Enable popup mode explicitly
+          ux_mode: 'popup'
         });
         console.log('✅ Google Sign-In Button rendered');
       } else {
         console.error('❌ Google login button container not found');
         setError('Không thể tạo nút đăng nhập Google');
-        setLoading(false);
       }
       
-    } catch (error: any) {
-      console.error('❌ Google login error:', error);
-      setError(error.message || 'Đăng nhập Google thất bại');
-      setLoading(false);
+    } catch (error: unknown) {
+      console.error('❌ Google button render error:', error);
+      
+      // Check if it's a popup blocking error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('popup') || errorMessage.includes('blocked')) {
+        setError('Trình duyệt đã chặn popup đăng nhập. Vui lòng cho phép popup cho trang này và thử lại.');
+      } else {
+        setError(errorMessage || 'Không thể tạo nút đăng nhập Google');
+      }
     }
   };
 
-  const processGoogleLogin = async (credential: any) => {
+
+  const processGoogleLogin = async (credential: unknown) => {
+    setLoading(true);
+    setError(null);
+    setDebugInfo(null);
+    
     try {
       console.log('📤 Processing Google credential...');
       console.log('📤 Full credential object:', credential);
       
+      const credentialData = credential as { credential: string };
       const loginRequest: SocialLoginRequest = {
         provider: 'GOOGLE',
-        token: credential.credential
+        token: credentialData.credential
       };
       
       console.log('📤 Sending login request to backend:', loginRequest);
@@ -211,12 +243,12 @@ export default function LoginPage() {
         type: 'success',
         data: response,
         timestamp: new Date().toISOString()
-      });
+      } as any);
       
       // Redirect to intended page or home
-      const nextUrl = searchParams.get('next') || '/';
-      console.log('🔄 Redirecting to:', nextUrl);
-      router.push(nextUrl);
+      const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
+      console.log('🔄 Redirecting to:', returnUrl);
+      router.push(returnUrl);
       
     } catch (error: any) {
       console.error('❌ Google login processing error:', error);
@@ -251,9 +283,9 @@ export default function LoginPage() {
     try {
       console.log('🔄 Starting Facebook login process...');
       console.log('🔍 Facebook SDK status:', {
-        loaded: !!window.FB,
-        login: !!window.FB?.login,
-        init: !!window.FB?.init
+        loaded: !!(window.FB as any),
+        login: !!(window.FB as any)?.login,
+        init: !!(window.FB as any)?.init
       });
       
       const appId = 'your-facebook-app-id';
@@ -262,7 +294,7 @@ export default function LoginPage() {
       // Use Facebook SDK
       console.log('🔄 Calling Facebook login...');
       const response = await new Promise((resolve, reject) => {
-        window.FB.login((response: any) => {
+        (window.FB as any).login((response: any) => {
           console.log('📧 Facebook login callback triggered');
           console.log('📧 Facebook response received:', response);
           console.log('📧 Response type:', typeof response);
@@ -313,9 +345,9 @@ export default function LoginPage() {
       });
       
       // Redirect to intended page or home
-      const nextUrl = searchParams.get('next') || '/';
-      console.log('🔄 Redirecting to:', nextUrl);
-      router.push(nextUrl);
+      const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
+      console.log('🔄 Redirecting to:', returnUrl);
+      router.push(returnUrl);
       
     } catch (error: any) {
       console.error('❌ Facebook login error:', error);
@@ -336,6 +368,26 @@ export default function LoginPage() {
     }
   };
 
+  // Show loading screen while checking authentication
+  if (checkingAuth) {
+    return (
+      <div className={styles.screen}>
+        <div className={styles.brandWrap}>
+          <span className={styles.brand}>FoodShare</span>
+        </div>
+        <div className={styles.loginCard}>
+          <div className={styles.loadingSDK}>
+            <div className="spinner-border spinner-border-sm me-2" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            Đang kiểm tra trạng thái đăng nhập...
+          </div>
+        </div>
+        <div className={styles.frame} />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.screen}>
       <div className={styles.brandWrap}>
@@ -350,6 +402,22 @@ export default function LoginPage() {
                     <span className="me-2">⚠️</span>
                     <span>{error}</span>
                   </div>
+                  {error.includes('popup') && (
+                    <div className="mt-2 p-2 bg-light rounded">
+                      <strong>Hướng dẫn:</strong>
+                      <ol className="mb-0 mt-1">
+                        <li>Click vào biểu tượng popup bị chặn trên thanh địa chỉ</li>
+                        <li>Chọn "Luôn cho phép popup từ trang này"</li>
+                        <li>Thử đăng nhập lại</li>
+                      </ol>
+                    </div>
+                  )}
+                  {error.includes('click') && (
+                    <div className="mt-2 p-2 bg-info bg-opacity-10 rounded">
+                      <strong>💡 Gợi ý:</strong>
+                      <p className="mb-1">Vui lòng click vào nút <strong>&quot;Đăng nhập với Google&quot;</strong> bên dưới để đăng nhập.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -367,65 +435,46 @@ export default function LoginPage() {
                 )}
                 
                 {/* Google Sign-In Button Container */}
-                <div id="google-login-button" className={styles.googleButtonContainer}></div>
+                <div id="google-login-button" className={styles.googleButtonContainer}>
+                  {loading && (
+                    <div className={styles.loadingOverlay}>
+                      <div className={styles.spinner}></div>
+                      <span>Đang đăng nhập...</span>
+                    </div>
+                  )}
+                </div>
                 
-                {/* Fallback Google Button */}
-                <button
-                  className={`${styles.socialButton} ${styles.googleButton}`}
-                  onClick={handleGoogleLogin}
-                  disabled={loading || !sdkLoaded}
-                  style={{ display: 'none' }} // Hide fallback button
-                >
-                  <span className={styles.btnIcon}>
-                    {loading ? (
+                
+                {/* Facebook Sign-In Button Container - Styled like Google */}
+                <div className={styles.facebookButtonContainer}>
+                  <button
+                    className={styles.facebookCustomButton}
+                    onClick={handleFacebookLogin}
+                    disabled={loading || !sdkLoaded}
+                  >
+                    <span className={styles.btnIcon}>
+                      {loading ? (
+                        <div className={styles.spinner}></div>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                          <path
+                            fill="#1877F2"
+                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                          />
+                        </svg>
+                      )}
+                    </span>
+                    <span className={styles.btnText}>
+                      {loading ? "Đang đăng nhập..." : "Đăng nhập với Facebook"}
+                    </span>
+                  </button>
+                  {loading && (
+                    <div className={styles.loadingOverlay}>
                       <div className={styles.spinner}></div>
-                    ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24">
-                        <path
-                          fill="#4285F4"
-                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                        />
-                        <path
-                          fill="#34A853"
-                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                        />
-                        <path
-                          fill="#FBBC05"
-                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                        />
-                        <path
-                          fill="#EA4335"
-                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                  <span className={styles.btnText}>
-                    {loading ? "Đang đăng nhập..." : "Đăng nhập với Google"}
-                  </span>
-                </button>
-
-                <button
-                  className={`${styles.socialButton} ${styles.facebookButton}`}
-                  onClick={handleFacebookLogin}
-                  disabled={loading || !sdkLoaded}
-                >
-                  <span className={styles.btnIcon}>
-                    {loading ? (
-                      <div className={styles.spinner}></div>
-                    ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24">
-                        <path
-                          fill="#1877F2"
-                          d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                  <span className={styles.btnText}>
-                    {loading ? "Đang đăng nhập..." : "Đăng nhập với Facebook"}
-                  </span>
-                </button>
+                      <span>Đang đăng nhập...</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Skip Button */}
@@ -440,22 +489,22 @@ export default function LoginPage() {
                 <div className={styles.debugPanel}>
                   <h5>🐛 Debug Information</h5>
                   <div className={styles.debugContent}>
-                    <p><strong>Type:</strong> {debugInfo.type}</p>
-                    <p><strong>Timestamp:</strong> {debugInfo.timestamp}</p>
-                    {debugInfo.type === 'success' && (
+                    <p><strong>Type:</strong> {(debugInfo as any)?.type}</p>
+                    <p><strong>Timestamp:</strong> {(debugInfo as any)?.timestamp}</p>
+                    {(debugInfo as any)?.type === 'success' && (
                       <div>
                         <p><strong>Response Data:</strong></p>
                         <pre className={styles.debugJson}>
-                          {JSON.stringify(debugInfo.data, null, 2)}
+                          {JSON.stringify((debugInfo as any)?.data, null, 2)}
                         </pre>
                       </div>
                     )}
-                    {debugInfo.type === 'error' && (
+                    {(debugInfo as any)?.type === 'error' && (
                       <div>
-                        <p><strong>Error:</strong> {debugInfo.error}</p>
+                        <p><strong>Error:</strong> {(debugInfo as any)?.error}</p>
                         <p><strong>Stack:</strong></p>
                         <pre className={styles.debugJson}>
-                          {debugInfo.stack}
+                          {(debugInfo as any)?.stack}
                         </pre>
                       </div>
                     )}
@@ -467,5 +516,13 @@ export default function LoginPage() {
       {/* Decorative corner frame (optional) */}
       <div className={styles.frame} />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Đang tải...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

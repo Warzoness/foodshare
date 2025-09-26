@@ -66,8 +66,9 @@ async function forward(req: NextRequest, host: string, pathSegs: string[]) {
 }
 
 // export handler cho mọi method
-async function handler(req: NextRequest, ctx: { params: { path: string[] } }) {
-  const path = ctx.params.path || [];
+async function handler(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
+  const params = await ctx.params;
+  const path = params.path || [];
   let lastErr: unknown;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {

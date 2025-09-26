@@ -34,42 +34,47 @@ export default function FilterBar({
   return (
     <div className={styles.wrap}>
       <div className={styles.horizontalBar}>
-        {/* Khoảng cách */}
-        <div className={styles.filterItem}>
-          <label className={styles.label}>Khoảng cách</label>
-          <select
-            value={draft.distanceKm ?? ""}
-            onChange={e => setDraft(d => ({ ...d, distanceKm: e.target.value === "" ? undefined : Number(e.target.value) }))}
-            className={styles.select}
-          >
-            <option value="">Tất cả</option>
-            {DISTANCES.map(km => <option key={km} value={km}>{`≤ ${km} km`}</option>)}
-          </select>
-        </div>
+        <div className={styles.filterRow}>
+          {/* Khoảng cách */}
+          <div className={styles.filterItem}>
+            <label className={styles.label}>Khoảng cách</label>
+            <select
+              value={draft.distanceKm ?? ""}
+              onChange={e => setDraft(d => ({ ...d, distanceKm: e.target.value === "" ? undefined : Number(e.target.value) }))}
+              className={styles.select}
+            >
+              <option value="">Tất cả</option>
+              {DISTANCES.map(km => <option key={km} value={km}>{`≤ ${km} km`}</option>)}
+            </select>
+          </div>
 
-        {/* Flash deal */}
-        <div className={styles.filterItem}>
-          <label className={styles.label}>Flash deal</label>
-          <select
-            value={draft.flashDealPercent ?? ""}
-            onChange={e => setDraft(d => ({ ...d, flashDealPercent: e.target.value === "" ? undefined : Number(e.target.value) }))}
-            className={styles.select}
-          >
-            <option value="">Tất cả</option>
-            {FLASH_DEALS.map(p => <option key={p} value={p}>{`≥ ${p}%`}</option>)}
-          </select>
-        </div>
+          {/* Flash deal */}
+          <div className={styles.filterItem}>
+            <label className={styles.label}>Flash deal</label>
+            <select
+              value={draft.flashDealPercent ?? ""}
+              onChange={e => setDraft(d => ({ ...d, flashDealPercent: e.target.value === "" ? undefined : Number(e.target.value) }))}
+              className={styles.select}
+            >
+              <option value="">Tất cả</option>
+              {FLASH_DEALS.map(p => <option key={p} value={p}>{`≥ ${p}%`}</option>)}
+            </select>
+          </div>
 
-        {/* Giá đến */}
-        <div className={styles.filterItem}>
-          <label className={styles.label}>Giá đến</label>
-          <input
-            inputMode="numeric"
-            value={draft.priceTo ?? ""}
-            onChange={e => setDraft(d => ({ ...d, priceTo: e.target.value }))}
-            className={styles.input}
-            placeholder="vd: 60000"
-          />
+          {/* Giá đến */}
+          <div className={styles.filterItem}>
+            <label className={styles.label}>Giá đến</label>
+            <input
+              inputMode="numeric"
+              value={draft.priceTo ?? ""}
+              onChange={e => {
+                const value = e.target.value.replace(/[^0-9]/g, ''); // Chỉ cho phép số
+                setDraft(d => ({ ...d, priceTo: value }));
+              }}
+              className={styles.input}
+              placeholder="vd: 60000"
+            />
+          </div>
         </div>
 
         {/* Nút */}

@@ -1,12 +1,21 @@
 import { apiClient } from "@/lib/apiClient";
 import { CreateOrderRequest, CreateOrderResponse, Order, OrderStatus, ApiResponse } from "@/types/order";
-
-// Hardcoded token as requested
-const HARDCODED_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyOjEiLCJ1aWQiOjEsInByb3ZpZGVyIjoiRmFjZWJvb2siLCJlbWFpbCI6InRydW9uZ3RiMTk5OUBnbWFpbC5jb20iLCJpYXQiOjE3NTgyOTQ5MTQsImV4cCI6MTc1OTE1ODkxNH0.YqdsWvnSTM_Q6nlvYh1kJs1mmCrTTAytzfMZVSv08t8";
+import { AuthService } from "./auth.service";
 
 const ORDER_ENDPOINT = "/orders";
 
 export const OrderService = {
+  /**
+   * Check if user is authenticated and get token
+   * @returns Token or throws error
+   */
+  getAuthToken(): string {
+    const token = AuthService.getStoredToken();
+    if (!token) {
+      throw new Error('No authentication token found. Please log in again.');
+    }
+    return token;
+  },
   /**
    * Create a new order
    * @param orderData - Order creation data
@@ -14,10 +23,12 @@ export const OrderService = {
    */
   async createOrder(orderData: CreateOrderRequest): Promise<CreateOrderResponse> {
     try {
+      const token = this.getAuthToken();
+
       const response = await apiClient.post<ApiResponse<CreateOrderResponse>>(ORDER_ENDPOINT, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${HARDCODED_TOKEN}`
+          'Authorization': `Bearer ${token}`
         },
         body: orderData
       });
@@ -40,9 +51,11 @@ export const OrderService = {
    */
   async getOrder(orderId: number): Promise<Order> {
     try {
+      const token = this.getAuthToken();
+
       const response = await apiClient.get<ApiResponse<Order>>(`${ORDER_ENDPOINT}/${orderId}`, {
         headers: {
-          'Authorization': `Bearer ${HARDCODED_TOKEN}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -68,6 +81,8 @@ export const OrderService = {
     status?: OrderStatus;
   } = {}): Promise<Order[]> {
     try {
+      const token = this.getAuthToken();
+
       const { page = 0, size = 10, status } = params;
       
       const queryParams: Record<string, any> = { page, size };
@@ -77,18 +92,33 @@ export const OrderService = {
 
       const response = await apiClient.get<ApiResponse<Order[]>>(ORDER_ENDPOINT, {
         headers: {
-          'Authorization': `Bearer ${HARDCODED_TOKEN}`
+          'Authorization': `Bearer ${token}`
         },
         query: queryParams
       });
 
       if (!response.success) {
+        // Check if it's an authentication error
+        if (response.message?.includes('Unauthorized') || response.message?.includes('token')) {
+          throw new Error('Authentication failed. Please log in again.');
+        }
         throw new Error(response.message || 'Failed to fetch orders');
       }
 
       return response.data || [];
     } catch (error) {
       console.error('Error fetching user orders:', error);
+      
+      // If it's a network error or authentication error, provide more context
+      if (error instanceof Error) {
+        if (error.message.includes('fetch')) {
+          throw new Error('Network error. Please check your connection and try again.');
+        }
+        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+          throw new Error('Authentication failed. Please log in again.');
+        }
+      }
+      
       throw error;
     }
   },
@@ -100,9 +130,11 @@ export const OrderService = {
    */
   async cancelOrder(orderId: number): Promise<Order> {
     try {
+      const token = this.getAuthToken();
+
       const response = await apiClient.patch<ApiResponse<Order>>(`${ORDER_ENDPOINT}/${orderId}/cancel`, {
         headers: {
-          'Authorization': `Bearer ${HARDCODED_TOKEN}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -125,9 +157,11 @@ export const OrderService = {
    */
   async updateOrderStatus(orderId: number, status: OrderStatus): Promise<Order> {
     try {
+      const token = this.getAuthToken();
+
       const response = await apiClient.patch<ApiResponse<Order>>(`${ORDER_ENDPOINT}/${orderId}/status`, {
         headers: {
-          'Authorization': `Bearer ${HARDCODED_TOKEN}`
+          'Authorization': `Bearer ${token}`
         },
         body: { status }
       });
@@ -150,9 +184,11 @@ export const OrderService = {
    */
   async deleteOrder(orderId: number): Promise<boolean> {
     try {
+      const token = this.getAuthToken();
+
       const response = await apiClient.delete<ApiResponse<{ deleted: boolean }>>(`${ORDER_ENDPOINT}/${orderId}`, {
         headers: {
-          'Authorization': `Bearer ${HARDCODED_TOKEN}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

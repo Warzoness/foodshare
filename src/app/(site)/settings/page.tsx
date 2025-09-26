@@ -30,6 +30,8 @@ export default function SettingsPage() {
         }
 
         console.log('✅ User authenticated:', currentUser);
+        console.log('🖼️ Profile picture URL:', currentUser.profilePictureUrl);
+        console.log('🖼️ Profile picture exists:', !!currentUser.profilePictureUrl);
         setUser(currentUser);
         setName(currentUser.name || '');
         setEmail(currentUser.email || '');
@@ -125,21 +127,39 @@ export default function SettingsPage() {
 
       <form onSubmit={onSubmit} className="d-flex flex-column align-items-center">
         <div className={styles.avatar} aria-hidden>
-          {user.profilePictureUrl ? (
-            <img 
-              src={user.profilePictureUrl} 
-              alt={user.name}
-              width="120"
-              height="120"
-              style={{ borderRadius: '50%', objectFit: 'cover' }}
-            />
-          ) : (
-            <svg width="120" height="120" viewBox="0 0 120 120">
-              <circle cx="60" cy="36" r="22" fill="none" stroke="#cbd5e1" strokeWidth="3" />
-              <path d="M20 98c8-18 28-28 40-28s32 10 40 28" fill="none" stroke="#cbd5e1" strokeWidth="3" />
-              <circle cx="86" cy="64" r="10" fill="none" stroke="#cbd5e1" strokeWidth="3" />
-            </svg>
-          )}
+          {(() => {
+            console.log('🖼️ Rendering avatar - profilePictureUrl:', user.profilePictureUrl);
+            console.log('🖼️ Profile picture type:', typeof user.profilePictureUrl);
+            console.log('🖼️ Profile picture truthy:', !!user.profilePictureUrl);
+            
+            if (user.profilePictureUrl) {
+              return (
+                <img 
+                  src={user.profilePictureUrl} 
+                  alt={user.name}
+                  width="120"
+                  height="120"
+                  style={{ borderRadius: '50%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    console.error('❌ Image failed to load:', user.profilePictureUrl);
+                    console.error('❌ Error event:', e);
+                  }}
+                  onLoad={() => {
+                    console.log('✅ Image loaded successfully:', user.profilePictureUrl);
+                  }}
+                />
+              );
+            } else {
+              console.log('🖼️ Using default SVG avatar');
+              return (
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                  <circle cx="60" cy="36" r="22" fill="none" stroke="#cbd5e1" strokeWidth="3" />
+                  <path d="M20 98c8-18 28-28 40-28s32 10 40 28" fill="none" stroke="#cbd5e1" strokeWidth="3" />
+                  <circle cx="86" cy="64" r="10" fill="none" stroke="#cbd5e1" strokeWidth="3" />
+                </svg>
+              );
+            }
+          })()}
         </div>
 
         <div className="text-center mt-1 mb-3 fw-semibold">{user.name}</div>

@@ -187,12 +187,37 @@
   width: 100%;
   max-width: 540px;
   border: none;
-  background: #68b67f;
+  background: #54A65C;
   color: #fff;
   padding: 12px 14px;
   border-radius: 8px;
   font-weight: 800;
   font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(84, 166, 92, 0.3);
+}
+
+.reserveBtn:hover:not(:disabled) {
+  background: #4a9552;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(84, 166, 92, 0.4);
+}
+
+.reserveBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.reserveBtnDisabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: 0 2px 8px rgba(156, 163, 175, 0.2);
+}
+
+.reserveBtnDisabled:hover {
+  background: #9ca3af;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(156, 163, 175, 0.2);
 }
 
 /* Lightbox (giữ như ban đầu – không có dot trong lightbox) */

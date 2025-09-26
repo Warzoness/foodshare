@@ -10,33 +10,45 @@
   z-index: 50; /* ensure input stays above body content */
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 12px;
+  padding: 12px 16px;
   background: #fff;
-  border-bottom: 1px solid #eef2f5;
+  border-bottom: 1px solid #f1f5f9;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .iconBtn {
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 4px;
-  font-size: 18px;
+  padding: 8px;
+  font-size: 20px;
   line-height: 1;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.iconBtn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+.iconBtn:active {
+  transform: scale(0.95);
 }
 
 .searchWrap {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
-}
-
-/* Highlight container when input is focused */
-.searchWrap:focus-within {
-  border-color: rgb(84, 166, 92);
-  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.35), 0 2px 8px rgba(84, 166, 92, 0.12);
 }
 
 .searchInput {
@@ -56,6 +68,51 @@
   color: #6b7280;
   font-size: 14px;
   padding: 16px 0;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 16px;
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #54a65c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 12px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.suggestionText {
+  color: #9ca3af;
+  font-size: 13px;
+  max-width: 280px;
+  line-height: 1.4;
 }
 
 /* Suggestions */
@@ -81,12 +138,23 @@
 }
 
 .chip {
-  padding: 8px 12px;
-  border: 1px solid #e6ebef;
-  border-radius: 999px;
+  padding: 10px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
   background: #f8fafc;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  background: #54a65c;
+  color: white;
+  border-color: #54a65c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(84, 166, 92, 0.2);
 }
 
 .suggestList {
@@ -99,14 +167,24 @@
 .suggestRow {
   width: 100%;
   text-align: left;
-  padding: 10px 8px;
+  padding: 12px 16px;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   border-bottom: 1px solid #f1f5f9;
   background: transparent;
   border: none;
   cursor: pointer;
+  border-radius: 8px;
+  margin: 2px 0;
+  transition: all 0.2s ease;
+  font-size: 15px;
+  color: #374151;
+}
+
+.suggestRow:hover {
+  background: #f8fafc;
+  transform: translateX(4px);
 }
 
 .right {
@@ -119,4 +197,13 @@
   color: #54A65C;
   cursor: pointer;
   font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.textBtn:hover {
+  background: #f0f9f0;
+  transform: scale(1.05);
 }

@@ -257,7 +257,17 @@ export default function OrdersPage() {
             setOrders(uiOrders);
         } catch (err) {
             console.error('Error fetching orders:', err);
-            setError('Không thể tải danh sách đơn hàng từ server');
+            
+            // Check if it's an authentication error
+            const errorMessage = (err as Error).message;
+            if (errorMessage.includes('authentication token') || errorMessage.includes('Unauthorized')) {
+                setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+                // Optionally redirect to login page
+                // router.push('/auth/login');
+            } else {
+                setError('Không thể tải danh sách đơn hàng từ server');
+            }
+            
             // Don't use mock data - show empty state instead
             setOrders([]);
         } finally {

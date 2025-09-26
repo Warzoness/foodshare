@@ -65,21 +65,33 @@ export default function SearchPage() {
     saveRecent(t);
     setSubmitted(true);
     setLoading(true);
+    setItems([]); // Clear previous results
+    
     try {
       let lat: number | undefined;
       let lon: number | undefined;
       try {
-        const coords = await getCurrentCoordinates({ timeout: 8000 });
+        const coords = await getCurrentCoordinates({ timeout: 5000 });
         lat = coords.latitude;
         lon = coords.longitude;
-      } catch {}
+      } catch (error) {
+        console.warn("Location access failed:", error);
+        // Continue without location
+      }
 
-      const res = await ProductService.search({ name: t, page: 0, size: 20, latitude: lat, longitude: lon });
-      const data = res.data; // { data: PageEnvelope<SearchProduct> }
-      const pg = data;
-      setPage(pg.number);
-      setTotalPages(pg.totalPages);
-      const transformed: FoodResult[] = (pg.content || []).map(mapToFoodResult);
+      const res = await ProductService.search({ 
+        name: t, 
+        page: 0, 
+        size: 20, 
+        latitude: lat, 
+        longitude: lon 
+      });
+      
+      // API returns: { code, success, data: { content, page, size, totalElements, totalPages } }
+      const apiData = res.data; // PageEnvelope<SearchProduct>
+      setPage(apiData.page || 0);
+      setTotalPages(apiData.totalPages || 0);
+      const transformed: FoodResult[] = (apiData.content || []).map(mapToFoodResult);
       setItems(transformed);
     } catch (e) {
       console.error("Search failed", e);
@@ -104,17 +116,34 @@ export default function SearchPage() {
   // client-side sort/filter applied on server results
   const results = useMemo(() => {
     if (!submitted) return [] as FoodResult[];
+    
+    // Validate price filter
     const maxPrice = filters.priceTo ? Number(filters.priceTo) : Infinity;
+    const isValidPrice = !isNaN(maxPrice) && maxPrice > 0;
+    
     const filtered = items.filter(i => {
-      const okDist = filters.distanceKm != null ? i.distanceKm <= filters.distanceKm : true;
-      const okPrice = i.price <= maxPrice;
-      const okFlash = filters.flashDealPercent != null ? (i.flashDealPercent ?? 0) >= filters.flashDealPercent : true;
+      // Distance filter
+      const okDist = filters.distanceKm != null ? 
+        (i.distanceKm != null && i.distanceKm <= filters.distanceKm) : true;
+      
+      // Price filter
+      const okPrice = isValidPrice ? i.price <= maxPrice : true;
+      
+      // Flash deal filter
+      const okFlash = filters.flashDealPercent != null ? 
+        (i.flashDealPercent != null && i.flashDealPercent >= filters.flashDealPercent) : true;
+      
       return okDist && okPrice && okFlash;
     });
+    
     const arr = [...filtered];
     switch (sortBy) {
       case "distanceAsc":
-        arr.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
+        arr.sort((a, b) => {
+          const aDist = a.distanceKm ?? Infinity;
+          const bDist = b.distanceKm ?? Infinity;
+          return aDist - bDist;
+        });
         break;
       case "priceAsc":
         arr.sort((a, b) => a.price - b.price);
@@ -123,9 +152,14 @@ export default function SearchPage() {
         arr.sort((a, b) => b.price - a.price);
         break;
       case "flashDesc":
-        arr.sort((a, b) => (b.flashDealPercent ?? 0) - (a.flashDealPercent ?? 0));
+        arr.sort((a, b) => {
+          const aFlash = a.flashDealPercent ?? 0;
+          const bFlash = b.flashDealPercent ?? 0;
+          return bFlash - aFlash;
+        });
         break;
       default:
+        // Relevance sort - keep original order from server
         break;
     }
     return arr;
@@ -232,9 +266,18 @@ export default function SearchPage() {
             <SortBar value={sortBy} onChange={setSortBy} />
 
             {loading ? (
-              <div className={styles.notice}>Đang tìm kiếm…</div>
+              <div className={styles.loadingContainer}>
+                <div className={styles.loadingSpinner}></div>
+                <div className={styles.notice}>Đang tìm kiếm…</div>
+              </div>
             ) : results.length === 0 ? (
-              <div className={styles.notice}>Không có món nào phù hợp.</div>
+              <div className={styles.emptyState}>
+                <div className={styles.emptyIcon}>🔍</div>
+                <div className={styles.notice}>Không có món nào phù hợp với từ khóa &quot;{q}&quot;</div>
+                <div className={styles.suggestionText}>
+                  Thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc
+                </div>
+              </div>
             ) : (
               <ResultsList items={results} />
             )}
