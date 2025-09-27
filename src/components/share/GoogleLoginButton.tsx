@@ -89,10 +89,20 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
   const handleGoogleLogin = () => {
     try {
       if (isMobile()) {
-        // On mobile, use redirect flow instead of popup
-        console.log('Mobile device detected, using redirect flow');
-        const loginUrl = '/auth/login';
-        window.location.href = loginUrl;
+        // On mobile, try popup first, fallback to redirect
+        console.log('Mobile device detected, trying popup with fallback');
+        
+        if (window.google) {
+          try {
+            (window.google as any).accounts.id.prompt();
+          } catch (popupError) {
+            console.log('Popup failed on mobile, redirecting to login page');
+            window.location.href = '/auth/login';
+          }
+        } else {
+          console.log('Google SDK not loaded, redirecting to login page');
+          window.location.href = '/auth/login';
+        }
         return;
       }
 
@@ -106,7 +116,11 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
     } catch (error) {
       console.error('Google login failed:', error);
       // Fallback to redirect
-      router.push('/auth/login');
+      if (isMobile()) {
+        window.location.href = '/auth/login';
+      } else {
+        router.push('/auth/login');
+      }
     }
   };
 

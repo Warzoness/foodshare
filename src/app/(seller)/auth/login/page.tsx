@@ -190,9 +190,10 @@ function LoginPageContent() {
 
       // Configure for mobile vs desktop
       if (isMobile) {
-        console.log('📱 Mobile device detected - using redirect flow');
-        googleConfig.ux_mode = 'redirect';
-        googleConfig.redirect_uri = window.location.origin + '/auth/google/callback';
+        console.log('📱 Mobile device detected - using popup with fallback');
+        // On mobile, still use popup but with better error handling
+        googleConfig.ux_mode = 'popup';
+        googleConfig.use_fedcm_for_prompt = false;
       } else {
         console.log('🖥️ Desktop device detected - using popup flow');
         googleConfig.ux_mode = 'popup';
@@ -242,6 +243,8 @@ function LoginPageContent() {
         } else {
           setError('Trình duyệt đã chặn popup đăng nhập. Vui lòng cho phép popup cho trang này và thử lại.');
         }
+      } else if (errorMessage.includes('invalid') || errorMessage.includes('Yêu cầu không hợp lệ')) {
+        setError('Cấu hình Google OAuth không đúng. Vui lòng liên hệ quản trị viên.');
       } else {
         setError(errorMessage || 'Không thể tạo nút đăng nhập Google');
       }
