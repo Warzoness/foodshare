@@ -1,11 +1,28 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { AuthService } from "@/services/site/auth.service";
 import styles from "./FloatMenu.module.css";
 
 export default function FloatMenu() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleAccountClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Check if user is logged in
+    const isLoggedIn = AuthService.isLoggedIn();
+    
+    if (isLoggedIn) {
+      // User is logged in, go to settings
+      router.push('/settings');
+    } else {
+      // User is not logged in, redirect to login
+      router.push('/auth/login');
+    }
+  };
 
   return (
     <nav className={styles.bottomNav}>
@@ -46,7 +63,10 @@ export default function FloatMenu() {
       </Link>
 
       {/* Account */}
-      <Link href="/settings" className={styles.navItem}>
+      <button 
+        onClick={handleAccountClick}
+        className={`${styles.navItem} ${styles.accountButton}`}
+      >
         <i
           className={
             pathname === "/settings"
@@ -55,7 +75,7 @@ export default function FloatMenu() {
           }
         ></i>
         <span>Tài khoản</span>
-      </Link>
+      </button>
     </nav>
   );
 }

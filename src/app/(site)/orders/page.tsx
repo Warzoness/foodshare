@@ -245,7 +245,7 @@ export default function OrdersPage() {
             setLoading(true);
             setError(null);
             
-            // Double-check authentication before making API call
+            // Check authentication status
             if (!AuthService.isLoggedIn()) {
                 console.log('🔒 User not authenticated, will show login prompt');
                 setError('Vui lòng đăng nhập để xem đơn hàng');
@@ -271,11 +271,12 @@ export default function OrdersPage() {
             if (errorMessage.includes('authentication failed') || 
                 errorMessage.includes('authentication token') || 
                 errorMessage.includes('unauthorized') ||
-                errorMessage.includes('please log in again')) {
-                console.log('🔒 Authentication error detected, showing login prompt');
-                setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-                // Clear stored token but don't redirect
-                AuthService.logout();
+                errorMessage.includes('please log in again') ||
+                errorMessage.includes('authentication failed. please log in again.')) {
+                console.log('🔒 Authentication error detected, showing error message');
+                setError('Oops, có lỗi xảy ra!');
+                // Don't clear token immediately - let user decide
+                // AuthService.logout();
             } else if (errorMessage.includes('network error')) {
                 setError('Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.');
             } else {
@@ -387,7 +388,24 @@ export default function OrdersPage() {
                 ) : error ? (
                     <div className="text-center text-danger py-5">
                         <div className="mb-2">⚠️</div>
-                        {error}
+                        <div className="mb-3">{error}</div>
+                        <div className="d-flex gap-2 justify-content-center">
+                            <button 
+                                className="btn btn-outline-success btn-sm"
+                                onClick={() => fetchOrders()}
+                            >
+                                Thử lại
+                            </button>
+                            <button 
+                                className="btn btn-success btn-sm"
+                                onClick={() => {
+                                    AuthService.logout();
+                                    window.location.href = '/auth/login';
+                                }}
+                            >
+                                Đăng nhập lại
+                            </button>
+                        </div>
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="text-center text-body-secondary py-5">

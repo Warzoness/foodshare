@@ -22,29 +22,31 @@ export default function SettingsPage() {
   useEffect(() => {
     const loadUserData = () => {
       try {
+        // Debug: Check authentication status
+        const isLoggedIn = AuthService.isLoggedIn();
+        console.log('🔐 AuthService.isLoggedIn():', isLoggedIn);
+        
         const currentUser = AuthService.getCurrentUser();
-        if (!currentUser) {
-          console.log('🔒 No user data found, redirecting to login');
-          router.push('/auth/login');
-          return;
+        console.log('👤 AuthService.getCurrentUser():', currentUser);
+        
+        if (currentUser) {
+          console.log('✅ User authenticated:', currentUser);
+          setUser(currentUser);
+          setName(currentUser.name || '');
+          setEmail(currentUser.email || '');
+          setPhone(currentUser.phoneNumber || '');
+        } else {
+          console.log('❌ No user data found');
         }
-
-        console.log('✅ User authenticated:', currentUser);
-        console.log('🖼️ Profile picture URL:', currentUser.profilePictureUrl);
-        console.log('🖼️ Profile picture exists:', !!currentUser.profilePictureUrl);
-        setUser(currentUser);
-        setName(currentUser.name || '');
-        setEmail(currentUser.email || '');
-        setPhone(currentUser.phoneNumber || ''); // Use phoneNumber from user data
         setLoading(false);
       } catch (error) {
         console.error('❌ Load user data error:', error);
-        router.push('/auth/login');
+        setLoading(false);
       }
     };
 
     loadUserData();
-  }, [router]);
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -108,7 +110,18 @@ export default function SettingsPage() {
   }
 
   if (!user) {
-    return null; // Will redirect
+    return (
+      <main className="container py-3" style={{ maxWidth: 560 }}>
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <div className="mt-2">Đang tải thông tin...</div>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (

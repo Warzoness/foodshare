@@ -43,3 +43,21 @@
   color: #54A65C; /* icon đậm có màu nhấn */
   font-weight: 700;
 }
+
+/* Account button styles */
+.accountButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: #7c8a97;
+  font-size: 11px;
+  padding-top: 4px;
+  transition: all 0.2s ease;
+}
+
+.accountButton:hover i {
+  color: #54A65C; /* màu nhấn */
+  text-shadow: 0 0 6px rgba(46, 125, 50, 0.6); /* viền sáng */
+}

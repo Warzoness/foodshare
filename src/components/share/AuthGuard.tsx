@@ -19,7 +19,18 @@ export default function AuthGuard({
   useEffect(() => {
     const checkAuth = () => {
       try {
+        // Debug: Check individual components
+        const token = AuthService.getStoredToken();
+        const userData = AuthService.getStoredUserData();
         const isLoggedIn = AuthService.isLoggedIn();
+        
+        console.log('🔍 AuthGuard Debug:');
+        console.log('  - Token exists:', !!token);
+        console.log('  - UserData exists:', !!userData);
+        console.log('  - isLoggedIn():', isLoggedIn);
+        console.log('  - Token preview:', token?.substring(0, 20) + '...');
+        console.log('  - UserData keys:', userData ? Object.keys(userData) : 'null');
+        
         if (!isLoggedIn) {
           console.log('🔒 User not authenticated');
           setIsAuthenticated(false);
