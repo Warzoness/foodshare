@@ -114,7 +114,6 @@ export default function ItemDetailPage() {
         setLoading(true);
         const product = await ProductService.getDetail(productId);
         
-        // Debug: Log product data to see what fields are available
         console.log("Product data from API:", product);
         
         // Store the product data for later use

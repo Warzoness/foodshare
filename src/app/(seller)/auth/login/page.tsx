@@ -22,7 +22,6 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -255,7 +254,6 @@ function LoginPageContent() {
   const processGoogleLogin = async (credential: unknown) => {
     setLoading(true);
     setError(null);
-    setDebugInfo(null);
     
     try {
       console.log('📤 Processing Google credential...');
@@ -275,14 +273,6 @@ function LoginPageContent() {
       const response = await AuthService.socialLogin(loginRequest);
       
       console.log('✅ Login successful! Backend response:', response);
-      console.log('✅ Response type:', typeof response);
-      console.log('✅ Response keys:', Object.keys(response || {}));
-      
-      setDebugInfo({
-        type: 'success',
-        data: response,
-        timestamp: new Date().toISOString()
-      } as any);
       
       // Redirect to intended page or home
       const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
@@ -296,12 +286,6 @@ function LoginPageContent() {
       console.error('❌ Error stack:', error.stack);
       
       setError(error.message || 'Xử lý đăng nhập Google thất bại');
-      setDebugInfo({
-        type: 'error',
-        error: error.message,
-        stack: error.stack,
-        timestamp: new Date().toISOString()
-      });
     } finally {
       console.log('🏁 Google login process finished');
       setLoading(false);
@@ -317,7 +301,6 @@ function LoginPageContent() {
 
     setLoading(true);
     setError(null);
-    setDebugInfo(null);
     
     try {
       console.log('🔄 Starting Facebook login process...');
@@ -374,14 +357,6 @@ function LoginPageContent() {
       const authResponse = await AuthService.socialLogin(loginRequest);
       
       console.log('✅ Login successful! Backend response:', authResponse);
-      console.log('✅ Response type:', typeof authResponse);
-      console.log('✅ Response keys:', Object.keys(authResponse || {}));
-      
-      setDebugInfo({
-        type: 'success',
-        data: authResponse,
-        timestamp: new Date().toISOString()
-      });
       
       // Redirect to intended page or home
       const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
@@ -395,12 +370,6 @@ function LoginPageContent() {
       console.error('❌ Error stack:', error.stack);
       
       setError(error.message || 'Đăng nhập Facebook thất bại');
-      setDebugInfo({
-        type: 'error',
-        error: error.message,
-        stack: error.stack,
-        timestamp: new Date().toISOString()
-      });
     } finally {
       console.log('🏁 Facebook login process finished');
       setLoading(false);
@@ -534,33 +503,6 @@ function LoginPageContent() {
                 </Link>
               </div>
 
-              {/* Debug Info Panel */}
-              {debugInfo && (
-                <div className={styles.debugPanel}>
-                  <h5>🐛 Debug Information</h5>
-                  <div className={styles.debugContent}>
-                    <p><strong>Type:</strong> {(debugInfo as any)?.type}</p>
-                    <p><strong>Timestamp:</strong> {(debugInfo as any)?.timestamp}</p>
-                    {(debugInfo as any)?.type === 'success' && (
-                      <div>
-                        <p><strong>Response Data:</strong></p>
-                        <pre className={styles.debugJson}>
-                          {JSON.stringify((debugInfo as any)?.data, null, 2)}
-                        </pre>
-                      </div>
-                    )}
-                    {(debugInfo as any)?.type === 'error' && (
-                      <div>
-                        <p><strong>Error:</strong> {(debugInfo as any)?.error}</p>
-                        <p><strong>Stack:</strong></p>
-                        <pre className={styles.debugJson}>
-                          {(debugInfo as any)?.stack}
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
 
       {/* Decorative corner frame (optional) */}

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/services/site/auth.service';
-import GoogleLoginButton from './GoogleLoginButton';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -84,14 +83,20 @@ export default function AuthGuard({
             Bạn cần đăng nhập để xem đơn hàng của mình
           </p>
           
-          <GoogleLoginButton 
-            onSuccess={() => {
-              setIsAuthenticated(true);
+          <button 
+            className="btn btn-success btn-lg px-4"
+            onClick={() => router.push('/auth/login')}
+            style={{ 
+              borderRadius: '12px',
+              padding: '12px 32px',
+              fontSize: '16px',
+              fontWeight: '600',
+              backgroundColor: '#28a745',
+              borderColor: '#28a745'
             }}
-            onError={(error) => {
-              console.error('Login error:', error);
-            }}
-          />
+          >
+            Đăng nhập ngay
+          </button>
         </div>
       </div>
     );
