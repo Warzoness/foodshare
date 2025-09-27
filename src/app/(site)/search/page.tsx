@@ -80,7 +80,7 @@ export default function SearchPage() {
       }
 
       const res = await ProductService.search({ 
-        name: t, 
+        q: t, 
         page: 0, 
         size: 20, 
         latitude: lat, 

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/services/site/auth.service';
+import GoogleLoginButton from './GoogleLoginButton';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -14,24 +15,88 @@ export default function AuthGuard({
   redirectTo = '/auth/login' 
 }: AuthGuardProps) {
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
       try {
         const isLoggedIn = AuthService.isLoggedIn();
         if (!isLoggedIn) {
-          console.log('🔒 User not authenticated, redirecting to login');
-          router.push(redirectTo);
+          console.log('🔒 User not authenticated');
+          setIsAuthenticated(false);
           return;
         }
+        setIsAuthenticated(true);
       } catch (error) {
         console.error('❌ Auth check error:', error);
-        router.push(redirectTo);
+        setIsAuthenticated(false);
       }
     };
 
     checkAuth();
-  }, [router, redirectTo]);
+  }, []);
 
+  const handleLogin = () => {
+    // Check if on mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     window.innerWidth <= 768;
+    
+    if (isMobile) {
+      // On mobile, always use redirect flow for better compatibility
+      console.log('📱 Mobile device detected, using redirect flow');
+      const loginUrl = redirectTo;
+      window.location.href = loginUrl;
+    } else {
+      // On desktop, use normal navigation
+      console.log('🖥️ Desktop device detected, using navigation');
+      router.push(redirectTo);
+    }
+  };
+
+  // Show loading while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Đang kiểm tra đăng nhập...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="container py-5" style={{ maxWidth: 640 }}>
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="d-inline-flex align-items-center justify-content-center rounded-circle bg-light" 
+                 style={{ width: '80px', height: '80px' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+          </div>
+          
+          <h4 className="mb-3 fw-bold">Vui lòng đăng nhập</h4>
+          <p className="text-body-secondary mb-4">
+            Bạn cần đăng nhập để xem đơn hàng của mình
+          </p>
+          
+          <GoogleLoginButton 
+            onSuccess={() => {
+              setIsAuthenticated(true);
+            }}
+            onError={(error) => {
+              console.error('Login error:', error);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Only render children if authenticated
   return <>{children}</>;
 }

@@ -97,29 +97,69 @@ export const OrderService = {
         query: queryParams
       });
 
+      console.log('🔍 Orders API Response:', JSON.stringify(response, null, 2));
+
       if (!response.success) {
+        console.log('❌ API returned success: false');
+        console.log('📝 Response message:', response.message);
+        console.log('📝 Response code:', response.code);
+        
         // Check if it's an authentication error
-        if (response.message?.includes('Unauthorized') || response.message?.includes('token')) {
+        const message = (response.message || '').toLowerCase();
+        const code = (response.code || '').toLowerCase();
+        
+        if (message.includes('unauthorized') || 
+            message.includes('token') || 
+            message.includes('authentication') ||
+            code.includes('401') ||
+            code.includes('unauthorized')) {
           throw new Error('Authentication failed. Please log in again.');
         }
+        
         throw new Error(response.message || 'Failed to fetch orders');
       }
 
       return response.data || [];
     } catch (error) {
-      console.error('Error fetching user orders:', error);
+      console.error('❌ Error fetching user orders:', error);
       
       // If it's a network error or authentication error, provide more context
       if (error instanceof Error) {
-        if (error.message.includes('fetch')) {
+        const errorMessage = error.message.toLowerCase();
+        
+        console.log('🔍 Error message:', errorMessage);
+        console.log('🔍 Error type:', typeof error);
+        console.log('🔍 Full error object:', error);
+        
+        // HTTP 401 Unauthorized
+        if (errorMessage.includes('401') || 
+            errorMessage.includes('unauthorized')) {
+          console.log('🚨 HTTP 401 detected, throwing authentication error');
+          throw new Error('Authentication failed. Please log in again.');
+        }
+        
+        // Network errors
+        if (errorMessage.includes('fetch') || 
+            errorMessage.includes('network') ||
+            errorMessage.includes('connection')) {
           throw new Error('Network error. Please check your connection and try again.');
         }
-        if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        
+        // Authentication errors from API response
+        if (errorMessage.includes('authentication') ||
+            errorMessage.includes('token')) {
           throw new Error('Authentication failed. Please log in again.');
+        }
+        
+        // If it's already our custom error, re-throw it
+        if (errorMessage.includes('authentication failed') || 
+            errorMessage.includes('network error')) {
+          throw error;
         }
       }
       
-      throw error;
+      // For any other errors, provide a generic message
+      throw new Error('Failed to fetch orders. Please try again.');
     }
   },
 

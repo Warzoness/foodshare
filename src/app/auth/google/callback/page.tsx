@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { AuthService } from "@/services/site/auth.service";
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AuthService } from '@/services/site/auth.service';
+import { SocialLoginRequest } from '@/types/auth';
 
 function GoogleCallbackContent() {
   const router = useRouter();
@@ -15,63 +16,45 @@ function GoogleCallbackContent() {
       try {
         console.log('🔄 Processing Google OAuth callback...');
         
-        // Get parameters from URL
-        const code = searchParams.get('code');
-        const error = searchParams.get('error');
-        const state = searchParams.get('state');
+        // Get the credential from URL parameters
         const credential = searchParams.get('credential');
+        const error = searchParams.get('error');
         
         if (error) {
           console.error('❌ Google OAuth error:', error);
-          setError(`Lỗi đăng nhập Google: ${error}`);
+          setError(`Google OAuth error: ${error}`);
           setLoading(false);
           return;
         }
         
-        // Check for either code (OAuth flow) or credential (GSI flow)
-        if (!code && !credential) {
-          console.error('❌ No authorization code or credential received from Google');
-          setError('Không nhận được mã xác thực từ Google');
+        if (!credential) {
+          console.error('❌ No credential found in callback');
+          setError('Không tìm thấy thông tin xác thực từ Google');
           setLoading(false);
           return;
         }
         
-        console.log('✅ Google authorization received:', code ? code.substring(0, 20) + '...' : 'credential flow');
+        console.log('✅ Google credential received:', credential.substring(0, 50) + '...');
         
-        // Parse state to get return URL
-        let returnUrl = '/';
-        try {
-          if (state) {
-            const stateData = JSON.parse(decodeURIComponent(state));
-            returnUrl = stateData.returnUrl || '/';
-          }
-        } catch {
-          console.warn('⚠️ Could not parse state parameter');
-        }
-        
-        // For now, we'll use the code as the token
-        // In a real implementation, you'd exchange the code for an access token
-        const token = credential || code;
-        if (!token) {
-          setError('Không có token từ Google');
-          setLoading(false);
-          return;
-        }
-        
-        const response = await AuthService.socialLogin({
+        // Process the login
+        const loginRequest: SocialLoginRequest = {
           provider: 'GOOGLE',
-          token: token
-        });
+          token: credential
+        };
         
-        console.log('✅ Google login successful:', response);
+        console.log('🔄 Calling AuthService.socialLogin...');
+        const response = await AuthService.socialLogin(loginRequest);
         
-        // Redirect to home or return URL
+        console.log('✅ Login successful! Backend response:', response);
+        
+        // Redirect to intended page or home
+        const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
+        console.log('🔄 Redirecting to:', returnUrl);
         router.push(returnUrl);
         
-      } catch (error: unknown) {
-        console.error('❌ Google callback error:', error);
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        setError(errorMessage || 'Lỗi xử lý đăng nhập Google');
+      } catch (error: any) {
+        console.error('❌ Google callback processing error:', error);
+        setError(error.message || 'Xử lý đăng nhập Google thất bại');
         setLoading(false);
       }
     };
@@ -81,64 +64,43 @@ function GoogleCallbackContent() {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        padding: '20px',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #54a65c',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-          marginBottom: '20px'
-        }}></div>
-        <h2>Đang xử lý đăng nhập...</h2>
-        <p>Vui lòng đợi trong giây lát</p>
-        <style jsx>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+        <div className="text-center">
+          <div className="spinner-border text-primary mb-3" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <h4>Đang xử lý đăng nhập...</h4>
+          <p className="text-muted">Vui lòng chờ trong giây lát</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        padding: '20px',
-        textAlign: 'center'
-      }}>
-        <div style={{ fontSize: '48px', marginBottom: '20px' }}>❌</div>
-        <h2>Đăng nhập thất bại</h2>
-        <p style={{ color: '#666', marginBottom: '20px' }}>{error}</p>
-        <button
-          onClick={() => router.push('/auth/login')}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#54a65c',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }}
-        >
-          Thử lại
-        </button>
+      <div className="container py-5" style={{ maxWidth: 640 }}>
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10" 
+                 style={{ width: '80px', height: '80px' }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+            </div>
+          </div>
+          
+          <h4 className="mb-3 text-danger">Đăng nhập thất bại</h4>
+          <p className="text-body-secondary mb-4">{error}</p>
+          
+          <button 
+            className="btn btn-primary"
+            onClick={() => router.push('/auth/login')}
+          >
+            Thử lại
+          </button>
+        </div>
       </div>
     );
   }
@@ -148,7 +110,13 @@ function GoogleCallbackContent() {
 
 export default function GoogleCallbackPage() {
   return (
-    <Suspense fallback={<div>Đang xử lý...</div>}>
+    <Suspense fallback={
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    }>
       <GoogleCallbackContent />
     </Suspense>
   );

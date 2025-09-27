@@ -100,7 +100,7 @@ export type ApiResponse<T> = {
 
 // ---------- Query Params ----------
 export type ProductSearchParams = {
-  name?: string;
+  q?: string;
   page?: number; // 0-based
   size?: number;
   latitude?: number;

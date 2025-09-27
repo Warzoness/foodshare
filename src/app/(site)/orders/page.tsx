@@ -245,6 +245,14 @@ export default function OrdersPage() {
             setLoading(true);
             setError(null);
             
+            // Double-check authentication before making API call
+            if (!AuthService.isLoggedIn()) {
+                console.log('🔒 User not authenticated, will show login prompt');
+                setError('Vui lòng đăng nhập để xem đơn hàng');
+                setOrders([]);
+                return;
+            }
+            
             console.log('🔄 Fetching orders from API...');
             const apiOrders = await OrderService.getUserOrders({
                 page: 0,
@@ -256,14 +264,20 @@ export default function OrdersPage() {
             console.log('🎨 Converted UI Orders:', uiOrders);
             setOrders(uiOrders);
         } catch (err) {
-            console.error('Error fetching orders:', err);
+            console.error('❌ Error fetching orders:', err);
             
             // Check if it's an authentication error
-            const errorMessage = (err as Error).message;
-            if (errorMessage.includes('authentication token') || errorMessage.includes('Unauthorized')) {
+            const errorMessage = (err as Error).message.toLowerCase();
+            if (errorMessage.includes('authentication failed') || 
+                errorMessage.includes('authentication token') || 
+                errorMessage.includes('unauthorized') ||
+                errorMessage.includes('please log in again')) {
+                console.log('🔒 Authentication error detected, showing login prompt');
                 setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-                // Optionally redirect to login page
-                // router.push('/auth/login');
+                // Clear stored token but don't redirect
+                AuthService.logout();
+            } else if (errorMessage.includes('network error')) {
+                setError('Lỗi kết nối. Vui lòng kiểm tra internet và thử lại.');
             } else {
                 setError('Không thể tải danh sách đơn hàng từ server');
             }

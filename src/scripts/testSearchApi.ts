@@ -7,7 +7,7 @@ async function testSearchAPI() {
     // Test 1: Basic search without location
     console.log("\n1. Testing basic search...");
     const basicSearch = await ProductService.search({
-      name: "bánh mì",
+      q: "bánh mì",
       page: 0,
       size: 5
     });
@@ -16,7 +16,7 @@ async function testSearchAPI() {
     // Test 2: Search with location
     console.log("\n2. Testing search with location...");
     const locationSearch = await ProductService.search({
-      name: "phở",
+      q: "phở",
       page: 0,
       size: 5,
       latitude: 10.7769,

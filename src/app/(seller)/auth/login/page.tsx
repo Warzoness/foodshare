@@ -161,8 +161,8 @@ function LoginPageContent() {
       console.log('🔄 Rendering Google Sign-In Button...');
       const clientId = '62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com';
       
-      // Initialize Google Identity Services
-      (window.google as any).accounts.id.initialize({
+      // Initialize Google Identity Services with mobile-optimized settings
+      const googleConfig: any = {
         client_id: clientId,
         callback: (response: unknown) => {
           console.log('📧 Google callback triggered');
@@ -183,32 +183,48 @@ function LoginPageContent() {
             setError('Phản hồi từ Google không hợp lệ');
           }
         },
-        // Mobile-optimized configuration - use redirect for mobile
-        use_fedcm_for_prompt: false,
         auto_select: false,
         cancel_on_tap_outside: true,
-        // Use redirect mode for mobile compatibility
-        ux_mode: isMobile ? 'redirect' : 'popup',
-        redirect_uri: isMobile ? `${window.location.origin}/auth/google/callback` : undefined,
-        // Add mobile-specific options
         itp_support: true
-      });
+      };
 
-      // Render Google Sign-In Button
+      // Configure for mobile vs desktop
+      if (isMobile) {
+        console.log('📱 Mobile device detected - using redirect flow');
+        googleConfig.ux_mode = 'redirect';
+        googleConfig.redirect_uri = window.location.origin + '/auth/google/callback';
+      } else {
+        console.log('🖥️ Desktop device detected - using popup flow');
+        googleConfig.ux_mode = 'popup';
+        googleConfig.use_fedcm_for_prompt = false;
+      }
+
+      (window.google as any).accounts.id.initialize(googleConfig);
+
+      // Render Google Sign-In Button with mobile-optimized settings
       const buttonContainer = document.getElementById('google-login-button');
       if (buttonContainer) {
-        (window.google as any).accounts.id.renderButton(buttonContainer, {
+        const buttonConfig: any = {
           theme: 'outline',
           size: 'large',
           type: 'standard',
           shape: 'rectangular',
           text: 'signin_with',
-          width: '100%',
-          // Mobile-optimized redirect configuration
-          use_fedcm_for_prompt: false,
-          // Use redirect mode for mobile compatibility
-          ux_mode: isMobile ? 'redirect' : 'popup'
-        });
+          width: '100%'
+        };
+
+        // Configure button for mobile vs desktop
+        if (isMobile) {
+          console.log('📱 Rendering mobile-optimized Google button');
+          buttonConfig.ux_mode = 'redirect';
+          buttonConfig.use_fedcm_for_prompt = false;
+        } else {
+          console.log('🖥️ Rendering desktop Google button');
+          buttonConfig.ux_mode = 'popup';
+          buttonConfig.use_fedcm_for_prompt = false;
+        }
+
+        (window.google as any).accounts.id.renderButton(buttonContainer, buttonConfig);
         console.log('✅ Google Sign-In Button rendered');
       } else {
         console.error('❌ Google login button container not found');
@@ -221,7 +237,11 @@ function LoginPageContent() {
       // Check if it's a popup blocking error
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('popup') || errorMessage.includes('blocked')) {
-        setError('Trình duyệt đã chặn popup đăng nhập. Vui lòng cho phép popup cho trang này và thử lại.');
+        if (isMobile) {
+          setError('Trên điện thoại, vui lòng cho phép popup hoặc thử đăng nhập bằng trình duyệt khác.');
+        } else {
+          setError('Trình duyệt đã chặn popup đăng nhập. Vui lòng cho phép popup cho trang này và thử lại.');
+        }
       } else {
         setError(errorMessage || 'Không thể tạo nút đăng nhập Google');
       }
@@ -431,7 +451,12 @@ function LoginPageContent() {
                    {isMobile && (
                      <div className="mt-2 p-2 bg-info bg-opacity-10 rounded">
                        <strong>📱 Hướng dẫn cho điện thoại:</strong>
-                       <p className="mb-1">Trên điện thoại, bạn sẽ được chuyển hướng đến trang đăng nhập Google. Sau khi đăng nhập thành công, bạn sẽ được chuyển về ứng dụng.</p>
+                       <p className="mb-1">Nếu popup bị chặn, hãy thử:</p>
+                       <ol className="mb-1">
+                         <li>Cho phép popup cho trang này</li>
+                         <li>Thử trình duyệt khác (Chrome, Safari)</li>
+                         <li>Đăng nhập trên máy tính trước</li>
+                       </ol>
                      </div>
                    )}
                   {error.includes('click') && (

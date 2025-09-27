@@ -597,5 +597,12 @@ export const AuthService = {
     } catch (error) {
       console.error('❌ Error removing linked account:', error);
     }
+  },
+
+  /**
+   * Logout user - clear all stored data
+   */
+  logout(): void {
+    this.clearUserData();
   }
 };
