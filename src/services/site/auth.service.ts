@@ -274,19 +274,34 @@ export const AuthService = {
     try {
       if (!isClient) return null;
       
-      // First try to get current user
+      // First try to get current user by email
       const currentUserEmail = localStorage.getItem('current_user_email');
       if (currentUserEmail) {
         const userKey = `user_${currentUserEmail}`;
         const userData = localStorage.getItem(userKey);
         if (userData) {
+          console.log('✅ Found user data by email key:', userKey);
           return JSON.parse(userData);
         }
       }
       
-      // Fallback to old method
+      // Fallback to old method - direct 'user' key
       const userData = localStorage.getItem('user');
-      return userData ? JSON.parse(userData) : null;
+      if (userData) {
+        console.log('✅ Found user data by direct user key');
+        const parsed = JSON.parse(userData);
+        
+        // If we found user data but no current_user_email is set, set it now
+        if (parsed && parsed.email && !currentUserEmail) {
+          console.log('🔄 Setting current_user_email for future lookups:', parsed.email);
+          localStorage.setItem('current_user_email', parsed.email);
+        }
+        
+        return parsed;
+      }
+      
+      console.log('❌ No user data found in localStorage');
+      return null;
     } catch (error) {
       console.error('❌ Error getting stored user data:', error);
       return null;
@@ -357,9 +372,10 @@ export const AuthService = {
   /**
    * Get user information by ID
    * @param userId - User ID
+   * @param preserveProviderInfo - Whether to preserve provider info from current user
    * @returns Promise<User>
    */
-  async getUserInfo(userId: number): Promise<User> {
+  async getUserInfo(userId: number, preserveProviderInfo: boolean = true): Promise<User> {
     try {
       console.log('🔄 Fetching user info for ID:', userId);
       
@@ -379,7 +395,31 @@ export const AuthService = {
       }
 
       console.log('✅ User info fetched successfully:', response.data);
-      return response.data;
+      
+      // Map API response to User type (API returns 'id' but User type expects 'userId')
+      let provider: SocialProvider = 'GOOGLE';
+      let providerId = '';
+      
+      if (preserveProviderInfo) {
+        // Try to get provider info from current user data
+        const currentUser = this.getCurrentUser();
+        if (currentUser) {
+          provider = currentUser.provider;
+          providerId = currentUser.providerId;
+        }
+      }
+      
+      const userData: User = {
+        userId: (response.data as any).userId ?? (response.data as any).id,
+        name: response.data.name,
+        email: response.data.email,
+        phoneNumber: response.data.phoneNumber,
+        provider: provider,
+        providerId: providerId,
+        profilePictureUrl: response.data.profilePictureUrl
+      };
+      
+      return userData;
     } catch (error) {
       console.error('❌ Error fetching user info:', error);
       throw error;

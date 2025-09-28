@@ -36,6 +36,13 @@ export default function SettingsPage() {
         const currentUser = AuthService.getCurrentUser();
         console.log('👤 AuthService.getCurrentUser():', currentUser);
         
+        // Debug localStorage data
+        console.log('🔍 localStorage debug:', {
+          'current_user_email': localStorage.getItem('current_user_email'),
+          'user': localStorage.getItem('user'),
+          'user_parsed': localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null
+        });
+        
         if (!currentUser) {
           console.log('❌ No user data found in localStorage');
           setLoading(false);
@@ -44,8 +51,22 @@ export default function SettingsPage() {
 
         // Call API to get fresh user data
         console.log('🔄 Fetching fresh user data from API for userId:', currentUser.userId);
-        const freshUserData = await AuthService.getUserInfo(currentUser.userId);
+        
+        // Ensure userId is a number
+        const userId = typeof currentUser.userId === 'string' ? parseInt(currentUser.userId, 10) : currentUser.userId;
+        
+        if (isNaN(userId)) {
+          throw new Error('Invalid user ID');
+        }
+        
+        const freshUserData = await AuthService.getUserInfo(userId);
         console.log('✅ Fresh user data from API:', freshUserData);
+        
+        // Validate fresh user data
+        if (!freshUserData.userId) {
+          console.error('❌ API returned invalid user data:', freshUserData);
+          throw new Error('API returned invalid user data');
+        }
         
         // Update state with fresh data from API
         setUser({
@@ -68,12 +89,15 @@ export default function SettingsPage() {
         
         // Fallback to localStorage data if API fails
         const currentUser = AuthService.getCurrentUser();
-        if (currentUser) {
+        if (currentUser && currentUser.userId) {
           console.log('🔄 Falling back to localStorage data');
           setUser(currentUser);
           setName(currentUser.name || '');
           setEmail(currentUser.email || '');
           setPhone(currentUser.phoneNumber || '');
+        } else {
+          console.error('❌ No valid user data found in localStorage either');
+          setError('Không thể tải thông tin người dùng. Vui lòng đăng nhập lại.');
         }
         
         setLoading(false);
@@ -87,7 +111,31 @@ export default function SettingsPage() {
     e.preventDefault();
     
     if (!user) {
-      setError("Không tìm thấy thông tin người dùng");
+      console.error('❌ No user data available for form submission');
+      setError("Không tìm thấy thông tin người dùng. Vui lòng tải lại trang.");
+      return;
+    }
+    
+    if (!user.userId) {
+      console.error('❌ User data missing userId:', user);
+      
+      // Try to reload user data as fallback
+      try {
+        console.log('🔄 Attempting to reload user data...');
+        const currentUser = AuthService.getCurrentUser();
+        if (currentUser && currentUser.userId) {
+          console.log('✅ Found user data in localStorage, updating state');
+          setUser(currentUser);
+          setName(currentUser.name || '');
+          setEmail(currentUser.email || '');
+          setPhone(currentUser.phoneNumber || '');
+          return; // Retry the form submission
+        }
+      } catch (error) {
+        console.error('❌ Failed to reload user data:', error);
+      }
+      
+      setError("Thông tin người dùng không hợp lệ. Vui lòng đăng nhập lại.");
       return;
     }
 
@@ -105,7 +153,25 @@ export default function SettingsPage() {
 
       console.log('🔄 Updating user profile:', updateData);
       
-      const updatedUserResponse = await AuthService.updateUserInfo(user.userId, updateData);
+      // Debug user data
+      console.log('🔍 User data debug:', {
+        user: user,
+        userId: user.userId,
+        userIdType: typeof user.userId,
+        userIdValue: user.userId
+      });
+      
+      // Ensure userId is a number
+      const userId = typeof user.userId === 'string' ? parseInt(user.userId, 10) : user.userId;
+      
+      console.log('🔍 Parsed userId:', userId, 'isNaN:', isNaN(userId));
+      
+      if (isNaN(userId)) {
+        console.error('❌ Invalid user ID:', user.userId, 'Type:', typeof user.userId);
+        throw new Error(`Invalid user ID: ${user.userId} (type: ${typeof user.userId})`);
+      }
+      
+      const updatedUserResponse = await AuthService.updateUserInfo(userId, updateData);
       
       console.log('✅ Profile updated successfully:', updatedUserResponse);
       

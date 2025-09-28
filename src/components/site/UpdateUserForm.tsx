@@ -70,7 +70,14 @@ export default function UpdateUserForm({
     try {
       console.log('🔄 Updating user info:', formData);
 
-      const result = await AuthService.updateUserInfo(user.userId, formData);
+      // Ensure userId is a number
+      const userId = typeof user.userId === 'string' ? parseInt(user.userId, 10) : user.userId;
+      
+      if (isNaN(userId)) {
+        throw new Error('Invalid user ID');
+      }
+
+      const result = await AuthService.updateUserInfo(userId, formData);
 
       console.log('✅ User updated successfully:', result);
       

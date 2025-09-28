@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import SaleTag from "@/components/share/SaleTag/SaleTag";
 import Link from "next/link";
 import { ProductService, ProductDetail } from "@/services/site/product.service";
+import { StoreService } from "@/services/site/store.service";
 import { useParams, useRouter } from "next/navigation";
 import { AuthService } from "@/services/site/auth.service";
 
@@ -64,6 +65,7 @@ export default function ItemDetailPage() {
   
   const [data, setData] = useState<ItemDetail>(fallbackData);
   const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [store, setStore] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [curr, setCurr] = useState(0);
@@ -106,6 +108,20 @@ export default function ItemDetailPage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [openLightbox, nextImg, prevImg]);
 
+  // Fetch store details by shopId
+  const fetchStoreDetail = async (shopId: number) => {
+    try {
+      console.log('🏪 Fetching store details for shopId:', shopId);
+      const storeData = await StoreService.getStoreDetail(shopId);
+      console.log('✅ Store data from API:', storeData);
+      setStore(storeData);
+      return storeData;
+    } catch (error) {
+      console.error('❌ Error fetching store details:', error);
+      return null;
+    }
+  };
+
   // Fetch product detail from API
   useEffect(() => {
     const fetchProductDetail = async () => {
@@ -124,6 +140,11 @@ export default function ItemDetailPage() {
         // Store the product data for later use
         setProduct(product);
         
+        // Fetch store details if shopId is available
+        if (product?.shopId) {
+          await fetchStoreDetail(product.shopId);
+        }
+        
         // Convert API data to ItemDetail format with safe handling
         const itemDetail: ItemDetail = {
           id: (product?.id || 0).toString(),
@@ -133,11 +154,11 @@ export default function ItemDetailPage() {
           // Tạo dữ liệu giả để test nếu API không có originalPrice
           priceOld: product?.originalPrice || (product?.discountPercent ? Math.round(product.price / (1 - product.discountPercent / 100)) : product?.price ? Math.round(product.price * 1.5) : undefined),
           discount: product?.discountPercent ? `-${product.discountPercent}%` : (product?.price ? "-30%" : undefined),
-          storeName: product?.shopName || "Cửa hàng",
-          address: product?.shopAddress || "Địa chỉ cửa hàng",
+          storeName: store?.name || product?.shopName || "Cửa hàng",
+          address: store?.address || product?.shopAddress || "Tên cửa hàng",
           coords: { 
-            lat: product?.shopLatitude || 0.99, 
-            lng: product?.shopLongitude || 0.99 
+            lat: store?.latitude || product?.shopLatitude || 0.99, 
+            lng: store?.longitude || product?.shopLongitude || 0.99 
           },
           images: [
             product?.imageUrl || "/images/chicken-fried.jpg", 
@@ -159,6 +180,22 @@ export default function ItemDetailPage() {
 
     fetchProductDetail();
   }, [productId]);
+
+  // Update data when store information is available
+  useEffect(() => {
+    if (store && data) {
+      console.log('🔄 Updating data with store information:', store);
+      setData(prevData => ({
+        ...prevData,
+        storeName: store.name || prevData.storeName,
+        address: store.address || prevData.address,
+        coords: {
+          lat: store.latitude || prevData.coords.lat,
+          lng: store.longitude || prevData.coords.lng
+        }
+      }));
+    }
+  }, [store]);
 
   // Check authentication status
   useEffect(() => {
@@ -323,7 +360,6 @@ export default function ItemDetailPage() {
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                 <div>
                   <div className="fw-semibold" style={{ color: "#111" }}>{data.storeName}</div>
-                  <div className="small" style={{ color: "#6b7280" }}>{data.address}</div>
                 </div>
                 <span className="small" style={{ color: "#54A65C", fontWeight: 700 }}>Xem cửa hàng</span>
               </div>

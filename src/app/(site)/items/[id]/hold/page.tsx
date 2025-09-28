@@ -148,8 +148,15 @@ export default function HoldPage() {
       // Create pickup time from date and time
       const pickupTime = new Date(`${dateISO}T${timeHM}:00.000Z`).toISOString();
 
+      // Ensure userId is a number
+      const userId = typeof user.userId === 'string' ? parseInt(user.userId, 10) : user.userId;
+      
+      if (isNaN(userId)) {
+        throw new Error('Invalid user ID');
+      }
+
       const orderData: CreateOrderRequest = {
-        userId: user.userId,
+        userId: userId,
         shopId: shopId,
         productId: productId,
         quantity: qty,
