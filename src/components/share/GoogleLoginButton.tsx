@@ -60,7 +60,9 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
       console.error('Failed to load Google Identity Services:', error);
       onError?.('Failed to load Google login');
     });
-  }, []);
+  // Move handleCredentialResponse above useEffect to avoid usage before declaration
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onError]);
 
   const handleCredentialResponse = async (response: any) => {
     try {
@@ -95,7 +97,7 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
         if (window.google) {
           try {
             (window.google as any).accounts.id.prompt();
-          } catch (popupError) {
+          } catch {
             console.log('Popup failed on mobile, redirecting to login page');
             window.location.href = '/auth/login';
           }

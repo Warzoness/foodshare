@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
 import AuthGuard from "@/components/share/AuthGuard";
 import { AuthService } from "@/services/site/auth.service";
@@ -20,27 +21,61 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState<string>("");
 
   useEffect(() => {
-    const loadUserData = () => {
+    const loadUserData = async () => {
       try {
         // Debug: Check authentication status
         const isLoggedIn = AuthService.isLoggedIn();
         console.log('🔐 AuthService.isLoggedIn():', isLoggedIn);
         
+        if (!isLoggedIn) {
+          console.log('❌ User not authenticated');
+          setLoading(false);
+          return;
+        }
+
         const currentUser = AuthService.getCurrentUser();
         console.log('👤 AuthService.getCurrentUser():', currentUser);
         
+        if (!currentUser) {
+          console.log('❌ No user data found in localStorage');
+          setLoading(false);
+          return;
+        }
+
+        // Call API to get fresh user data
+        console.log('🔄 Fetching fresh user data from API for userId:', currentUser.userId);
+        const freshUserData = await AuthService.getUserInfo(currentUser.userId);
+        console.log('✅ Fresh user data from API:', freshUserData);
+        
+        // Update state with fresh data from API
+        setUser({
+          userId: freshUserData.userId,
+          name: freshUserData.name,
+          email: freshUserData.email,
+          phoneNumber: freshUserData.phoneNumber,
+          provider: currentUser.provider, // Keep provider info from localStorage
+          providerId: currentUser.providerId, // Keep provider info from localStorage
+          profilePictureUrl: freshUserData.profilePictureUrl
+        });
+        
+        setName(freshUserData.name || '');
+        setEmail(freshUserData.email || '');
+        setPhone(freshUserData.phoneNumber || '');
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Load user data error:', error);
+        
+        // Fallback to localStorage data if API fails
+        const currentUser = AuthService.getCurrentUser();
         if (currentUser) {
-          console.log('✅ User authenticated:', currentUser);
+          console.log('🔄 Falling back to localStorage data');
           setUser(currentUser);
           setName(currentUser.name || '');
           setEmail(currentUser.email || '');
           setPhone(currentUser.phoneNumber || '');
-        } else {
-          console.log('❌ No user data found');
         }
-        setLoading(false);
-      } catch (error) {
-        console.error('❌ Load user data error:', error);
+        
         setLoading(false);
       }
     };
@@ -144,9 +179,6 @@ export default function SettingsPage() {
             <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <button className={styles.iconBtn} aria-label="Cài đặt">
-          <span className="fi fi-rr-settings"></span>
-        </button>
       </header>
 
       <form onSubmit={onSubmit} className="d-flex flex-column align-items-center">
@@ -158,11 +190,11 @@ export default function SettingsPage() {
             
             if (user.profilePictureUrl) {
               return (
-                <img 
+                <Image 
                   src={user.profilePictureUrl} 
                   alt={user.name}
-                  width="120"
-                  height="120"
+                  width={120}
+                  height={120}
                   style={{ borderRadius: '50%', objectFit: 'cover' }}
                   onError={(e) => {
                     console.error('❌ Image failed to load:', user.profilePictureUrl);

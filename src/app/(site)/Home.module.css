@@ -1,8 +1,28 @@
 /* Nền & khoảng trống cho bottom nav */
 .wrap {
   background: #ffffff;
-  /* min-height: 100vh; */
+  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu là toàn màn hình */
   padding-bottom: 76px; /* chừa chỗ cho FloatMenu cố định */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile: Đảm bảo nội dung lấp đầy màn hình */
+@media (max-width: 768px) {
+  .wrap {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height cho mobile */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Container bên trong cũng cần flex để fill space */
+  .wrap .container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
 }
 
 

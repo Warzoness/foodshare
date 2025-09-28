@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import styles from "./styles.module.css";
 
 export type FoodResult = {
@@ -29,7 +30,7 @@ export default function ResultItem({ item }: { item: FoodResult }) {
 
   return (
     <li className={styles.row} onClick={handleItemClick} style={{ cursor: 'pointer' }}>
-      <img src={item.imgUrl ?? "/food/placeholder.jpg"} alt="" className={styles.thumb} />
+      <Image src={item.imgUrl ?? "/food/placeholder.jpg"} alt="" width={60} height={60} className={styles.thumb} />
       <div className={styles.mid}>
         <div className={styles.title} title={item.name}>{item.name}</div>
         {(item.vendor || item.category) && (

@@ -7,6 +7,7 @@ import styles from "./hold.module.css";
 import { OrderService } from "@/services/site/order.service";
 import { CreateOrderRequest, CreateOrderResponse } from "@/types/order";
 import { AuthService } from "@/services/site/auth.service";
+import Link from "next/link";
 
 /* ========= Utils ========= */
 const VN_TZ = "Asia/Ho_Chi_Minh";
@@ -81,8 +82,8 @@ export default function HoldPage() {
     searchParams: Object.fromEntries(sp.entries())
   });
 
-  const [dateISO, setDateISO] = useState<string>(todayISO());
-  const [timeHM, setTimeHM] = useState<string>(nowHM()); // mặc định giờ hiện tại (24h)
+  const [dateISO] = useState<string>(todayISO());
+  const [timeHM] = useState<string>(nowHM()); // mặc định giờ hiện tại (24h)
   const [qty, setQty] = useState<number>(1);
   const total = useMemo(() => qty * unitPrice, [qty, unitPrice]);
 
@@ -248,8 +249,8 @@ export default function HoldPage() {
           </p>
 
           <div className="d-flex gap-2">
-            <a href="/orders" className="btn" style={{ background: "#54A65C", color: "#fff" }}>Đơn hàng</a>
-            <a href="/" className="btn btn-outline-success">Trang chủ</a>
+            <Link href="/orders" className="btn" style={{ background: "#54A65C", color: "#fff" }}>Đơn hàng</Link>
+            <Link href="/" className="btn btn-outline-success">Trang chủ</Link>
           </div>
         </div>
       </main>

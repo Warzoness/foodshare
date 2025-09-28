@@ -46,22 +46,22 @@ export default function AuthGuard({
     checkAuth();
   }, []);
 
-  const handleLogin = () => {
-    // Check if on mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                     window.innerWidth <= 768;
+  // const handleLogin = () => {
+  //   // Check if on mobile device
+  //   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+  //                    window.innerWidth <= 768;
     
-    if (isMobile) {
-      // On mobile, always use redirect flow for better compatibility
-      console.log('📱 Mobile device detected, using redirect flow');
-      const loginUrl = redirectTo;
-      window.location.href = loginUrl;
-    } else {
-      // On desktop, use normal navigation
-      console.log('🖥️ Desktop device detected, using navigation');
-      router.push(redirectTo);
-    }
-  };
+  //   if (isMobile) {
+  //     // On mobile, always use redirect flow for better compatibility
+  //     console.log('📱 Mobile device detected, using redirect flow');
+  //     const loginUrl = redirectTo;
+  //     window.location.href = loginUrl;
+  //   } else {
+  //     // On desktop, use normal navigation
+  //     console.log('🖥️ Desktop device detected, using navigation');
+  //     router.push(redirectTo);
+  //   }
+  // };
 
   // Show loading while checking authentication
   if (isAuthenticated === null) {

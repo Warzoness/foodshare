@@ -2,7 +2,7 @@
 
 import styles from "./Detail.module.css";
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getCurrentCoordinates } from "@/lib/location";
 import dynamic from "next/dynamic";
 import SaleTag from "@/components/share/SaleTag/SaleTag";
@@ -104,7 +104,7 @@ export default function ItemDetailPage() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [openLightbox]);
+  }, [openLightbox, nextImg, prevImg]);
 
   // Fetch product detail from API
   useEffect(() => {

@@ -170,69 +170,73 @@ function OrderItem({ order }: { order: Order }) {
     };
 
     return (
-        <div className="d-flex gap-3 py-3 border-bottom">
-            <div className={styles.thumb}>
-                <Image
-                    src={imgSrc}
-                    alt={order.name}
-                    width={72}
-                    height={72}
-                    className="rounded-3 object-fit-cover"
-                />
-            </div>
-
-            <div className="flex-grow-1">
-                <div className="d-flex justify-content-between align-items-start">
-                    <h6 className="mb-1 fw-semibold">{order.name}</h6>
-                    <div className="d-flex align-items-center gap-2">
-                        <StatusBadge order={order} />
-                        <button 
-                            className={styles.deleteButton}
-                            onClick={handleDelete}
-                            title="Xóa đơn hàng"
-                        >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/>
-                            </svg>
-                        </button>
-                    </div>
+        <div className="py-3 border-bottom">
+            <div className="d-flex gap-3">
+                <div className={styles.thumb}>
+                    <Image
+                        src={imgSrc}
+                        alt={order.name}
+                        width={72}
+                        height={72}
+                        className="rounded-3 object-fit-cover"
+                    />
                 </div>
 
-                <ul className={`${styles.meta} list-unstyled mb-0 small text-body-secondary`}>
-                    <li>
-                        <span className="fw-medium">Số lượng:</span> {order.qty}
-                    </li>
-                    <li>
-                        <span className="fw-medium">Thời gian:</span> {order.time}
-                    </li>
-                    {order.orderCode && (
+                <div className="flex-grow-1">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h6 className="mb-0 fw-semibold">{order.name}</h6>
+                        <StatusBadge order={order} />
+                    </div>
+
+                    <ul className={`${styles.meta} list-unstyled mb-3 small text-body-secondary`}>
                         <li>
-                            <span className="fw-medium">Mã đơn hàng:</span> {order.orderCode}
+                            <span className="fw-medium">Số lượng:</span> {order.qty}
                         </li>
-                    )}
-                    <li>
-                        <span className="fw-medium">Cửa hàng:</span> {order.store}
-                    </li>
-                    {order.unitPrice && (
                         <li>
-                            <span className="fw-medium">Giá đơn vị:</span> {order.unitPrice.toLocaleString('vi-VN')} VNĐ
+                            <span className="fw-medium">Thời gian:</span> {order.time}
                         </li>
-                    )}
-                    {order.totalPrice && (
+                        {order.orderCode && (
+                            <li>
+                                <span className="fw-medium">Mã đơn hàng:</span> {order.orderCode}
+                            </li>
+                        )}
                         <li>
-                            <span className="fw-medium">Tổng tiền:</span> 
-                            <span className="fw-bold text-primary ms-1">
-                                {order.totalPrice.toLocaleString('vi-VN')} VNĐ
-                            </span>
+                            <span className="fw-medium">Cửa hàng:</span> {order.store}
                         </li>
-                    )}
-                </ul>
+                        {order.unitPrice && (
+                            <li>
+                                <span className="fw-medium">Giá đơn vị:</span> {order.unitPrice.toLocaleString('vi-VN')} VNĐ
+                            </li>
+                        )}
+                        {order.totalPrice && (
+                            <li>
+                                <span className="fw-medium">Tổng tiền:</span> 
+                                <span className="fw-bold text-primary ms-1">
+                                    {order.totalPrice.toLocaleString('vi-VN')} VNĐ
+                                </span>
+                            </li>
+                        )}
+                    </ul>
+                </div>
+            </div>
+            
+            {/* Cancel button moved below the card */}
+            <div className="d-flex justify-content-center">
+                <button 
+                    className={styles.deleteButton}
+                    onClick={handleDelete}
+                    title="Hủy đơn hàng"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/>
+                    </svg>
+                    Hủy đơn hàng
+                </button>
             </div>
         </div>
     );
 }
 export default function OrdersPage() {
-    const router = useRouter();
     const [active, setActive] = useState<TabKey>("ACTIVE");
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -314,48 +318,17 @@ export default function OrdersPage() {
         <AuthGuard>
             <main className="container py-3" style={{ maxWidth: 640 }}>
             {/* Header */}
-            <div className="d-flex align-items-center justify-content-between mb-2">
-                <div className="d-flex align-items-center gap-2">
-                    <button 
-                        className="btn btn-outline-light border-0 p-2 rounded-circle d-flex align-items-center justify-content-center" 
-                        onClick={() => history.back()} 
-                        aria-label="Quay lại"
-                        style={{
-                            width: "40px",
-                            height: "40px",
-                            backgroundColor: "rgba(0, 0, 0, 0.1)",
-                            transition: "all 0.2s ease",
-                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.15)";
-                            e.currentTarget.style.transform = "scale(1.05)";
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
-                            e.currentTarget.style.transform = "scale(1)";
-                        }}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ color: "#333" }}>
-                            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </button>
-                    <h5 className="mb-0 fw-bold">Đơn hàng của tôi</h5>
-                </div>
+            <div className="d-flex align-items-center gap-2 mb-2">
                 <button 
-                    className="btn btn-outline-secondary btn-sm" 
-                    onClick={fetchOrders}
-                    disabled={loading}
-                    aria-label="Làm mới"
+                    className="btn-back" 
+                    onClick={() => history.back()} 
+                    aria-label="Quay lại"
                 >
-                    {loading ? (
-                        <span className="spinner-border spinner-border-sm" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </span>
-                    ) : (
-                        "🔄"
-                    )}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                 </button>
+                <h5 className="mb-0 fw-bold">Đơn hàng của tôi</h5>
             </div>
 
             {/* Tabs – underline style */}

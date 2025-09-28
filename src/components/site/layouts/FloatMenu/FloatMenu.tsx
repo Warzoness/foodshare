@@ -27,7 +27,7 @@ export default function FloatMenu() {
   return (
     <nav className={styles.bottomNav}>
       {/* Home */}
-      <Link href="/" className={styles.navItem}>
+      <Link href="/" className={`${styles.navItem} ${pathname === "/" ? styles.active : ""}`}>
         <i
           className={
             pathname === "/"
@@ -39,7 +39,7 @@ export default function FloatMenu() {
       </Link>
 
       {/* Search */}
-      <Link href="/search" className={styles.navItem}>
+      <Link href="/search" className={`${styles.navItem} ${pathname === "/search" ? styles.active : ""}`}>
         <i
           className={
             pathname === "/search"
@@ -51,7 +51,7 @@ export default function FloatMenu() {
       </Link>
 
       {/* Favorites */}
-      <Link href="/orders" className={styles.navItem}>
+      <Link href="/orders" className={`${styles.navItem} ${pathname === "/orders" ? styles.active : ""}`}>
         <i
           className={
             pathname === "/orders"
@@ -65,7 +65,7 @@ export default function FloatMenu() {
       {/* Account */}
       <button 
         onClick={handleAccountClick}
-        className={`${styles.navItem} ${styles.accountButton}`}
+        className={`${styles.navItem} ${styles.accountButton} ${pathname === "/settings" ? styles.active : ""}`}
       >
         <i
           className={

@@ -38,10 +38,20 @@
   text-shadow: 0 0 6px rgba(46, 125, 50, 0.6); /* viền sáng */
 }
 
-/* Active (đang ở route đó) → icon đậm */
+/* Active (đang ở route đó) → icon đậm và text highlight */
 .navItem i[class*="fi-sr-"] {
   color: #54A65C; /* icon đậm có màu nhấn */
   font-weight: 700;
+}
+
+/* Active text color */
+.navItem:has(i[class*="fi-sr-"]) {
+  color: #54A65C; /* text cũng có màu nhấn khi active */
+}
+
+/* Fallback for browsers that don't support :has() */
+.navItem.active {
+  color: #54A65C;
 }
 
 /* Account button styles */
@@ -60,4 +70,13 @@
 .accountButton:hover i {
   color: #54A65C; /* màu nhấn */
   text-shadow: 0 0 6px rgba(46, 125, 50, 0.6); /* viền sáng */
+}
+
+/* Active account button */
+.accountButton.active {
+  color: #54A65C; /* text cũng có màu nhấn khi active */
+}
+
+.accountButton.active i {
+  color: #54A65C; /* icon cũng có màu nhấn khi active */
 }

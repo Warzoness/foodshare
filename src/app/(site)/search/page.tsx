@@ -42,8 +42,8 @@ export default function SearchPage() {
   // server results
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<FoodResult[]>([]);
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [, setPage] = useState(0);
+  const [, setTotalPages] = useState(0);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -103,7 +103,7 @@ export default function SearchPage() {
     }
   };
 
-  const clearQ = () => { setQ(""); setSubmitted(false); inputRef.current?.focus(); };
+  // const clearQ = () => { setQ(""); setSubmitted(false); inputRef.current?.focus(); };
 
   // gợi ý
   const suggestions = useMemo(() => {
