@@ -1,9 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./hold.module.css";
+import { OrderService } from "@/services/site/order.service";
+import { CreateOrderRequest, CreateOrderResponse } from "@/types/order";
+import { AuthService } from "@/services/site/auth.service";
 
 /* ========= Utils ========= */
 const VN_TZ = "Asia/Ho_Chi_Minh";
@@ -51,16 +54,32 @@ function vnd(n: number) {
 }
 
 /* ========= Page ========= */
-type SuccessData = { code: string };
+type SuccessData = { 
+  order: CreateOrderResponse;
+  code: string;
+};
 
 export default function HoldPage() {
   const router = useRouter();
-  useParams<{ id: string }>(); // nếu cần id
+  const params = useParams<{ id: string }>();
   const sp = useSearchParams();
 
+  const productId = parseInt(params.id as string, 10);
   const itemName = sp.get("name") ?? "Gà sốt cay";
   const unitPrice = Number(sp.get("price") ?? 45000);
   const imgSrc = sp.get("img") ?? "/images/chicken-fried.jpg";
+  const shopId = parseInt(sp.get("shopId") ?? "1", 10);
+
+  // Debug logging
+  console.log('🔍 Hold page params:', { 
+    productId, 
+    itemName, 
+    unitPrice, 
+    imgSrc, 
+    shopId,
+    urlParams: params,
+    searchParams: Object.fromEntries(sp.entries())
+  });
 
   const [dateISO, setDateISO] = useState<string>(todayISO());
   const [timeHM, setTimeHM] = useState<string>(nowHM()); // mặc định giờ hiện tại (24h)
@@ -68,11 +87,98 @@ export default function HoldPage() {
   const total = useMemo(() => qty * unitPrice, [qty, unitPrice]);
 
   const [success, setSuccess] = useState<SuccessData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
-  function onSubmit(e: React.FormEvent) {
+  // Check authentication status
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      try {
+        const loggedIn = AuthService.isLoggedIn();
+        setIsLoggedIn(loggedIn);
+        setAuthChecked(true);
+        console.log("🔐 Authentication status:", loggedIn);
+        
+        // Only redirect to login if not logged in and not coming from login page
+        if (!loggedIn) {
+          // Check if we're coming from login page to avoid redirect loop
+          const referrer = document.referrer;
+          const isFromLogin = referrer.includes('/auth/login');
+          
+          if (!isFromLogin) {
+            const currentUrl = window.location.pathname + window.location.search;
+            const loginUrl = `/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`;
+            console.log("🔄 Redirecting to login:", loginUrl);
+            router.replace(loginUrl);
+          } else {
+            console.log("🔄 Coming from login page, not redirecting to avoid loop");
+          }
+        }
+      } catch (error) {
+        console.error("❌ Error checking auth status:", error);
+        setIsLoggedIn(false);
+        setAuthChecked(true);
+      }
+    };
+
+    checkAuthStatus();
+  }, [router]);
+
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const code = String(Math.floor(2_000_000 + Math.random() * 8_000_000));
-    setSuccess({ code });
+    
+    if (!isLoggedIn) {
+      setError("Vui lòng đăng nhập để đặt chỗ");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Get current user ID from auth service
+      const user = AuthService.getCurrentUser();
+      if (!user || !user.userId) {
+        throw new Error("Không thể lấy thông tin người dùng");
+      }
+
+      // Create pickup time from date and time
+      const pickupTime = new Date(`${dateISO}T${timeHM}:00.000Z`).toISOString();
+
+      const orderData: CreateOrderRequest = {
+        userId: user.userId,
+        shopId: shopId,
+        productId: productId,
+        quantity: qty,
+        pickupTime: pickupTime,
+        unitPrice: unitPrice,
+        totalPrice: total
+      };
+
+      console.log('🛒 Creating order with data:', orderData);
+
+      const order = await OrderService.createOrder(orderData);
+
+      console.log('✅ Order created successfully:', order);
+
+      // Generate a simple order code for display
+      const code = String(Math.floor(2_000_000 + Math.random() * 8_000_000));
+      
+      setSuccess({ 
+        order,
+        code 
+      });
+
+    } catch (error) {
+      console.error('❌ Failed to create order:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Không thể đặt chỗ. Vui lòng thử lại.';
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   /* ----- Success screen ----- */
@@ -116,8 +222,12 @@ export default function HoldPage() {
               <span className="fw-semibold">{formatTimeVN24(timeHM)}</span>
             </div>
             <div className="d-flex justify-content-between mb-1">
-              <span className="fw-medium">Mã đặt chỗ:</span>
-              <span className="fw-semibold">{success.code}</span>
+              <span className="fw-medium">Mã đơn hàng:</span>
+              <span className="fw-semibold">#{success.order.id}</span>
+            </div>
+            <div className="d-flex justify-content-between mb-1">
+              <span className="fw-medium">Trạng thái:</span>
+              <span className="fw-semibold" style={{ color: "#54A65C" }}>{success.order.status}</span>
             </div>
 
             <hr className="my-2" />
@@ -133,12 +243,28 @@ export default function HoldPage() {
           </div>
 
 
-          <p className="text-body-secondary mt-3 mb-3">Chỗ của bạn sẽ được giữ trong 30 phút</p>
+          <p className="text-body-secondary mt-3 mb-3">
+            Đơn hàng sẽ hết hạn lúc: {new Date(success.order.expiresAt).toLocaleString('vi-VN')}
+          </p>
 
           <div className="d-flex gap-2">
             <a href="/orders" className="btn" style={{ background: "#54A65C", color: "#fff" }}>Đơn hàng</a>
             <a href="/" className="btn btn-outline-success">Trang chủ</a>
           </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Show loading while checking authentication
+  if (!authChecked) {
+    return (
+      <main className="container py-3" style={{ maxWidth: 560 }}>
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Đang kiểm tra đăng nhập...</span>
+          </div>
+          <p className="mt-2">Đang kiểm tra đăng nhập...</p>
         </div>
       </main>
     );
@@ -233,12 +359,23 @@ export default function HoldPage() {
             </div>
           </div>
 
+          {error && (
+            <div className="alert alert-danger mb-3" role="alert">
+              {error}
+            </div>
+          )}
+
           <p className="text-body-secondary text-center mb-3">
             Chỗ của bạn sẽ được giữ trong 30 phút
           </p>
 
-          <button type="submit" className="btn w-100 py-2 fw-bold" style={{ background: "#54A65C", color: "#fff" }}>
-            Giữ chỗ
+          <button 
+            type="submit" 
+            className="btn w-100 py-2 fw-bold" 
+            style={{ background: "#54A65C", color: "#fff" }}
+            disabled={isLoading || !isLoggedIn}
+          >
+            {isLoading ? 'Đang đặt chỗ...' : 'Giữ chỗ'}
           </button>
         </div>
       </form>

@@ -78,9 +78,14 @@ export default function ItemDetailPage() {
 
   // Handle reserve button click
   const handleReserveClick = () => {
+    console.log('🛒 Reserve button clicked');
+    console.log('📋 Product data:', { productId, product, data });
+    
     if (isLoggedIn) {
       // User is logged in, proceed to hold page
-      const holdUrl = `/items/${data.id}/hold?name=${encodeURIComponent(data.title)}&price=${data.priceNow}`;
+      // Use the real productId from URL params, not data.id (which might be fallback)
+      const holdUrl = `/items/${productId}/hold?name=${encodeURIComponent(data.title)}&price=${data.priceNow}&shopId=${product?.shopId || 1}&img=${encodeURIComponent(data.images[0])}`;
+      console.log('🔗 Hold URL:', holdUrl);
       router.push(holdUrl);
     } else {
       // User not logged in, redirect to login with return URL

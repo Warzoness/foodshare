@@ -1,6 +1,6 @@
 // Auth types for FoodShare app
 
-export type SocialProvider = "GOOGLE" | "FACEBOOK" | "APPLE";
+export type SocialProvider = "GOOGLE" | "APPLE";
 
 export type SocialLoginRequest = {
   provider: SocialProvider;
@@ -33,6 +33,14 @@ export type User = {
   phoneNumber?: string;
   provider: SocialProvider;
   providerId: string;
+  profilePictureUrl: string;
+};
+
+export type UpdateUserResponse = {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber: string;
   profilePictureUrl: string;
 };
 

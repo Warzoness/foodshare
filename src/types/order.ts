@@ -1,20 +1,25 @@
 // Order types for FoodShare app
 
 export type CreateOrderRequest = {
+  userId: number;
   shopId: number;
   productId: number;
   quantity: number;
-  pickupTime: string; // ISO 8601 format: "2025-09-20T14:30:00"
+  pickupTime: string; // ISO 8601 format: "2025-09-28T09:38:42.662Z"
   unitPrice: number;
   totalPrice: number;
 };
 
 export type CreateOrderResponse = {
-  orderId: number;
+  id: number;
+  userId: number;
+  shopId: number;
+  productId: number;
+  quantity: number;
   status: string;
-  message: string;
-  createdAt: string;
   pickupTime: string;
+  expiresAt: string;
+  unitPrice: number;
   totalPrice: number;
 };
 

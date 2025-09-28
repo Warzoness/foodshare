@@ -70,9 +70,20 @@ export default function SettingsPage() {
 
       console.log('🔄 Updating user profile:', updateData);
       
-      const updatedUser = await AuthService.updateUserInfo(user.userId, updateData);
+      const updatedUserResponse = await AuthService.updateUserInfo(user.userId, updateData);
       
-      console.log('✅ Profile updated successfully:', updatedUser);
+      console.log('✅ Profile updated successfully:', updatedUserResponse);
+      
+      // Convert UpdateUserResponse to User format for local state
+      const updatedUser: User = {
+        userId: updatedUserResponse.id,
+        name: updatedUserResponse.name,
+        email: updatedUserResponse.email,
+        phoneNumber: updatedUserResponse.phoneNumber,
+        provider: user.provider, // Keep existing provider info
+        providerId: user.providerId, // Keep existing provider info
+        profilePictureUrl: updatedUserResponse.profilePictureUrl
+      };
       
       // Update local state
       setUser(updatedUser);

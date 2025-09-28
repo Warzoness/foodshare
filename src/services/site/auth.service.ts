@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { SocialLoginRequest, SocialLoginResponse, AuthApiResponse, UpdateUserRequest, User, SocialProvider } from "@/types/auth";
+import { SocialLoginRequest, SocialLoginResponse, AuthApiResponse, UpdateUserRequest, User, SocialProvider, UpdateUserResponse } from "@/types/auth";
 
 const AUTH_ENDPOINT = "/auth";
 
@@ -109,7 +109,7 @@ export const AuthService = {
    * @param token - Social provider token
    * @returns User info with email
    */
-  async getUserInfoFromSocialToken(provider: "GOOGLE" | "FACEBOOK" | "APPLE", token: string): Promise<{ email: string; name: string; profilePictureUrl?: string }> {
+  async getUserInfoFromSocialToken(provider: "GOOGLE" | "APPLE", token: string): Promise<{ email: string; name: string; profilePictureUrl?: string }> {
     console.log('🔄 getUserInfoFromSocialToken: Starting token processing');
     console.log('📋 Token details:', {
       provider,
@@ -175,61 +175,6 @@ export const AuthService = {
           tokenPreview: token.substring(0, 100) + '...'
         });
         throw new Error('Invalid Google token: ' + (error as Error).message);
-      }
-    } else if (provider === "FACEBOOK") {
-      console.log('🔄 Processing Facebook access token...');
-      // Call Facebook Graph API to get user info
-      try {
-        console.log('🔄 Calling Facebook Graph API...');
-        const apiUrl = `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${token}`;
-        console.log('📤 Facebook API URL:', apiUrl);
-        
-        const response = await fetch(apiUrl);
-        console.log('📥 Facebook API response status:', response.status);
-        console.log('📥 Facebook API response headers:', Object.fromEntries(response.headers.entries()));
-        
-        const data = await response.json();
-        console.log('📧 Facebook Graph API response:', data);
-        console.log('📧 Response details:', {
-          hasError: !!data.error,
-          hasId: !!data.id,
-          hasName: !!data.name,
-          hasEmail: !!data.email,
-          hasPicture: !!data.picture
-        });
-        
-        if (data.error) {
-          console.error('❌ Facebook API returned error:', data.error);
-          throw new Error(data.error.message);
-        }
-        
-        // Validate required fields
-        if (!data.email || !data.name) {
-          console.error('❌ Missing required fields from Facebook:', {
-            hasEmail: !!data.email,
-            hasName: !!data.name,
-            email: data.email,
-            name: data.name
-          });
-          throw new Error('Missing required user information from Facebook');
-        }
-        
-        const userInfo = {
-          email: data.email,
-          name: data.name,
-          profilePictureUrl: data.picture?.data?.url
-        };
-        
-        console.log('✅ Facebook token processed successfully:', userInfo);
-        return userInfo;
-      } catch (error) {
-        console.error('❌ Error getting Facebook user info:', error);
-        console.error('❌ Error details:', {
-          message: (error as Error).message,
-          stack: (error as Error).stack,
-          tokenPreview: token.substring(0, 20) + '...'
-        });
-        throw new Error('Facebook API error: ' + (error as Error).message);
       }
     }
     
@@ -461,12 +406,12 @@ export const AuthService = {
   },
 
   /**
-   * Update user information
+   * Update user information (PUT /api/users/{userId})
    * @param userId - User ID
    * @param updateData - User update data
-   * @returns Promise<User>
+   * @returns Promise<UpdateUserResponse>
    */
-  async updateUserInfo(userId: number, updateData: UpdateUserRequest): Promise<User> {
+  async updateUserInfo(userId: number, updateData: UpdateUserRequest): Promise<UpdateUserResponse> {
     try {
       console.log('🔄 Updating user info for ID:', userId, 'with data:', updateData);
       
@@ -475,7 +420,7 @@ export const AuthService = {
         throw new Error('No authentication token found');
       }
 
-      const response = await apiClient.put<AuthApiResponse<User>>(`/api/users/${userId}`, {
+      const response = await apiClient.put<AuthApiResponse<UpdateUserResponse>>(`/api/users/${userId}`, {
         body: updateData,
         headers: {
           'Authorization': `Bearer ${token}`

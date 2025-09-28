@@ -11,9 +11,7 @@ import { SocialLoginRequest } from "@/types/auth";
 declare global {
   interface Window {
     google: unknown;
-    FB: unknown;
     googleSDKLoaded: boolean;
-    facebookSDKLoaded: boolean;
   }
 }
 
@@ -77,10 +75,9 @@ function LoginPageContent() {
 
   const loadSDKs = async () => {
     try {
-      console.log('🔄 Loading Google and Facebook SDKs...');
+      console.log('🔄 Loading Google SDK...');
       console.log('📋 Configuration:');
       console.log('  - Google Client ID: 62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com');
-      console.log('  - Facebook App ID: your-facebook-app-id');
       
       // Load Google SDK
       if (!window.google) {
@@ -107,39 +104,6 @@ function LoginPageContent() {
         console.log('✅ Google SDK already loaded');
       }
 
-      // Load Facebook SDK
-      if (!window.FB) {
-        console.log('🔄 Loading Facebook SDK...');
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://connect.facebook.net/en_US/sdk.js';
-          script.async = true;
-          script.defer = true;
-          script.crossOrigin = 'anonymous';
-          script.onload = () => {
-            console.log('🔄 Initializing Facebook SDK...');
-            // Initialize Facebook SDK
-            (window.FB as any).init({
-              appId: 'your-facebook-app-id',
-              cookie: true,
-              xfbml: true,
-              version: 'v18.0'
-            });
-            window.facebookSDKLoaded = true;
-            console.log('✅ Facebook SDK loaded and initialized');
-            console.log('🔍 Facebook SDK object:', window.FB);
-            resolve(true);
-          };
-          script.onerror = (error) => {
-            console.error('❌ Facebook SDK load error:', error);
-            reject(error);
-          };
-          document.head.appendChild(script);
-          console.log('📤 Facebook SDK script added to DOM');
-        });
-      } else {
-        console.log('✅ Facebook SDK already loaded');
-      }
 
       setSdkLoaded(true);
       console.log('✅ All SDKs loaded successfully');
@@ -292,89 +256,6 @@ function LoginPageContent() {
     }
   };
 
-  const handleFacebookLogin = async () => {
-    if (!sdkLoaded || !window.FB) {
-      console.error('❌ Facebook SDK not loaded:', { sdkLoaded, FB: !!window.FB });
-      setError('Facebook SDK chưa được tải. Vui lòng thử lại.');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    
-    try {
-      console.log('🔄 Starting Facebook login process...');
-      console.log('🔍 Facebook SDK status:', {
-        loaded: !!(window.FB as any),
-        login: !!(window.FB as any)?.login,
-        init: !!(window.FB as any)?.init
-      });
-      
-      const appId = 'your-facebook-app-id';
-      console.log('🔑 Using Facebook App ID:', appId);
-      
-      // Use Facebook SDK
-      console.log('🔄 Calling Facebook login...');
-      const response = await new Promise((resolve, reject) => {
-        (window.FB as any).login((response: any) => {
-          console.log('📧 Facebook login callback triggered');
-          console.log('📧 Facebook response received:', response);
-          console.log('📧 Response type:', typeof response);
-          console.log('📧 Response keys:', Object.keys(response || {}));
-          console.log('📧 Auth response:', response?.authResponse);
-          
-          if (response.authResponse) {
-            console.log('✅ Valid Facebook auth response received');
-            console.log('🔍 Access token length:', response.authResponse.accessToken?.length);
-            console.log('🔍 User ID:', response.authResponse.userID);
-            console.log('🔍 Expires in:', response.authResponse.expiresIn);
-            console.log('🔍 Granted scopes:', response.authResponse.grantedScopes);
-            resolve(response);
-          } else {
-            console.error('❌ Invalid Facebook response:', response);
-            console.error('❌ Response status:', response?.status);
-            reject(new Error('Facebook login was cancelled or failed'));
-          }
-        }, {
-          scope: 'email,public_profile',
-          return_scopes: true
-        });
-      });
-
-      console.log('📤 Facebook response received successfully');
-      console.log('📤 Full response object:', response);
-      
-      const loginRequest: SocialLoginRequest = {
-        provider: 'FACEBOOK',
-        token: (response as any).authResponse.accessToken
-      };
-      
-      console.log('📤 Sending login request to backend:', loginRequest);
-      console.log('📤 Request token length:', loginRequest.token.length);
-      
-      // Call AuthService
-      console.log('🔄 Calling AuthService.socialLogin...');
-      const authResponse = await AuthService.socialLogin(loginRequest);
-      
-      console.log('✅ Login successful! Backend response:', authResponse);
-      
-      // Redirect to intended page or home
-      const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
-      console.log('🔄 Redirecting to:', returnUrl);
-      router.push(returnUrl);
-      
-    } catch (error: any) {
-      console.error('❌ Facebook login error:', error);
-      console.error('❌ Error type:', typeof error);
-      console.error('❌ Error message:', error.message);
-      console.error('❌ Error stack:', error.stack);
-      
-      setError(error.message || 'Đăng nhập Facebook thất bại');
-    } finally {
-      console.log('🏁 Facebook login process finished');
-      setLoading(false);
-    }
-  };
 
   // Show loading screen while checking authentication
   if (checkingAuth) {
@@ -464,36 +345,6 @@ function LoginPageContent() {
                 </div>
                 
                 
-                {/* Facebook Sign-In Button Container - Styled like Google */}
-                <div className={styles.facebookButtonContainer}>
-                  <button
-                    className={styles.facebookCustomButton}
-                    onClick={handleFacebookLogin}
-                    disabled={loading || !sdkLoaded}
-                  >
-                    <span className={styles.btnIcon}>
-                      {loading ? (
-                        <div className={styles.spinner}></div>
-                      ) : (
-                        <svg width="20" height="20" viewBox="0 0 24 24">
-                          <path
-                            fill="#1877F2"
-                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
-                          />
-                        </svg>
-                      )}
-                    </span>
-                    <span className={styles.btnText}>
-                      {loading ? "Đang đăng nhập..." : "Đăng nhập với Facebook"}
-                    </span>
-                  </button>
-                  {loading && (
-                    <div className={styles.loadingOverlay}>
-                      <div className={styles.spinner}></div>
-                      <span>Đang đăng nhập...</span>
-                    </div>
-                  )}
-                </div>
               </div>
 
               {/* Skip Button */}

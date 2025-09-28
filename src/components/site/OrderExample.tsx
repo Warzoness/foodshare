@@ -16,6 +16,7 @@ export default function OrderExample() {
 
     try {
       const orderData: CreateOrderRequest = {
+        userId: 1,
         shopId: 1,
         productId: 1,
         quantity: 2,
@@ -25,7 +26,7 @@ export default function OrderExample() {
       };
 
       const response = await OrderService.createOrder(orderData);
-      setResult(`Order created successfully! Order ID: ${response.orderId}`);
+      setResult(`Order created successfully! Response: ${JSON.stringify(response)}`);
     } catch (err: any) {
       setError(err.message || "Failed to create order");
     } finally {

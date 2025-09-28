@@ -12,18 +12,66 @@ export const OrderService = {
   getAuthToken(): string {
     const token = AuthService.getStoredToken();
     if (!token) {
-      throw new Error('No authentication token found. Please log in again.');
+      throw new Error('Không tìm thấy token xác thực. Vui lòng đăng nhập lại.');
     }
     return token;
   },
+
   /**
-   * Create a new order
+   * Translate error messages to Vietnamese
+   * @param message - English error message
+   * @returns Vietnamese error message
+   */
+  translateErrorMessage(message: string): string {
+    const translations: Record<string, string> = {
+      'Insufficient stock': 'Không đủ hàng trong kho',
+      'Product not found': 'Không tìm thấy sản phẩm',
+      'Shop not found': 'Không tìm thấy cửa hàng',
+      'User not found': 'Không tìm thấy người dùng',
+      'Invalid quantity': 'Số lượng không hợp lệ',
+      'Invalid pickup time': 'Thời gian lấy hàng không hợp lệ',
+      'Order already exists': 'Đơn hàng đã tồn tại',
+      'Payment failed': 'Thanh toán thất bại',
+      'Network error': 'Lỗi mạng',
+      'Server error': 'Lỗi máy chủ',
+      'Authentication failed': 'Xác thực thất bại',
+      'Unauthorized': 'Không có quyền truy cập',
+      'Forbidden': 'Bị cấm truy cập',
+      'Not found': 'Không tìm thấy',
+      'Bad request': 'Yêu cầu không hợp lệ',
+      'Internal server error': 'Lỗi máy chủ nội bộ',
+      'Service unavailable': 'Dịch vụ không khả dụng',
+      'Timeout': 'Hết thời gian chờ',
+      'Failed to create order': 'Không thể tạo đơn hàng',
+      'Order creation failed': 'Tạo đơn hàng thất bại'
+    };
+
+    // Check for exact match first
+    if (translations[message]) {
+      return translations[message];
+    }
+
+    // Check for partial matches (case insensitive)
+    const lowerMessage = message.toLowerCase();
+    for (const [english, vietnamese] of Object.entries(translations)) {
+      if (lowerMessage.includes(english.toLowerCase())) {
+        return vietnamese;
+      }
+    }
+
+    // Return original message if no translation found
+    return message;
+  },
+  /**
+   * Create a new order (POST /orders)
    * @param orderData - Order creation data
    * @returns Promise<CreateOrderResponse>
    */
   async createOrder(orderData: CreateOrderRequest): Promise<CreateOrderResponse> {
     try {
       const token = this.getAuthToken();
+
+      console.log('🛒 Creating order with data:', JSON.stringify(orderData, null, 2));
 
       const response = await apiClient.post<ApiResponse<CreateOrderResponse>>(ORDER_ENDPOINT, {
         headers: {
@@ -33,13 +81,18 @@ export const OrderService = {
         body: orderData
       });
 
+      console.log('📦 Order creation response:', JSON.stringify(response, null, 2));
+
       if (!response.success) {
-        throw new Error(response.message || 'Failed to create order');
+        // Translate common error messages to Vietnamese
+        const errorMessage = response.message || 'Không thể tạo đơn hàng';
+        const translatedMessage = this.translateErrorMessage(errorMessage);
+        throw new Error(translatedMessage);
       }
 
       return response.data;
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error('❌ Error creating order:', error);
       throw error;
     }
   },
@@ -60,7 +113,9 @@ export const OrderService = {
       });
 
       if (!response.success) {
-        throw new Error(response.message || 'Order not found');
+        const errorMessage = response.message || 'Không tìm thấy đơn hàng';
+        const translatedMessage = this.translateErrorMessage(errorMessage);
+        throw new Error(translatedMessage);
       }
 
       return response.data;
@@ -113,10 +168,12 @@ export const OrderService = {
             message.includes('authentication') ||
             code.includes('401') ||
             code.includes('unauthorized')) {
-          throw new Error('Authentication failed. Please log in again.');
+          throw new Error('Xác thực thất bại. Vui lòng đăng nhập lại.');
         }
         
-        throw new Error(response.message || 'Failed to fetch orders');
+        const errorMessage = response.message || 'Không thể tải danh sách đơn hàng';
+        const translatedMessage = this.translateErrorMessage(errorMessage);
+        throw new Error(translatedMessage);
       }
 
       return response.data || [];
@@ -135,31 +192,31 @@ export const OrderService = {
         if (errorMessage.includes('401') || 
             errorMessage.includes('unauthorized')) {
           console.log('🚨 HTTP 401 detected, throwing authentication error');
-          throw new Error('Authentication failed. Please log in again.');
+          throw new Error('Xác thực thất bại. Vui lòng đăng nhập lại.');
         }
         
         // Network errors
         if (errorMessage.includes('fetch') || 
             errorMessage.includes('network') ||
             errorMessage.includes('connection')) {
-          throw new Error('Network error. Please check your connection and try again.');
+          throw new Error('Lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.');
         }
         
         // Authentication errors from API response
         if (errorMessage.includes('authentication') ||
             errorMessage.includes('token')) {
-          throw new Error('Authentication failed. Please log in again.');
+          throw new Error('Xác thực thất bại. Vui lòng đăng nhập lại.');
         }
         
         // If it's already our custom error, re-throw it
-        if (errorMessage.includes('authentication failed') || 
-            errorMessage.includes('network error')) {
+        if (errorMessage.includes('xác thực thất bại') || 
+            errorMessage.includes('lỗi mạng')) {
           throw error;
         }
       }
       
       // For any other errors, provide a generic message
-      throw new Error('Failed to fetch orders. Please try again.');
+      throw new Error('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
     }
   },
 
@@ -179,7 +236,9 @@ export const OrderService = {
       });
 
       if (!response.success) {
-        throw new Error(response.message || 'Failed to cancel order');
+        const errorMessage = response.message || 'Không thể hủy đơn hàng';
+        const translatedMessage = this.translateErrorMessage(errorMessage);
+        throw new Error(translatedMessage);
       }
 
       return response.data;
@@ -207,7 +266,9 @@ export const OrderService = {
       });
 
       if (!response.success) {
-        throw new Error(response.message || 'Failed to update order status');
+        const errorMessage = response.message || 'Không thể cập nhật trạng thái đơn hàng';
+        const translatedMessage = this.translateErrorMessage(errorMessage);
+        throw new Error(translatedMessage);
       }
 
       return response.data;
@@ -235,7 +296,9 @@ export const OrderService = {
       if (response.success) {
         return response.data.deleted;
       } else {
-        throw new Error(response.message || 'Failed to delete order');
+        const errorMessage = response.message || 'Không thể xóa đơn hàng';
+        const translatedMessage = this.translateErrorMessage(errorMessage);
+        throw new Error(translatedMessage);
       }
     } catch (error) {
       console.error('❌ Error deleting order:', error);

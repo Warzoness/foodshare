@@ -14,8 +14,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Google Identity Services */}
         <script src="https://accounts.google.com/gsi/client" async defer></script>
-        {/* Facebook SDK */}
-        <script async defer crossOrigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
       </head>
       <body>
         <LocationGate>{children}</LocationGate>
