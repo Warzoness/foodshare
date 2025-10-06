@@ -16,11 +16,11 @@ export default function OrderExample() {
 
     try {
       const orderData: CreateOrderRequest = {
-        userId: 1,
+        userId: 1, // This should come from auth context
         shopId: 1,
         productId: 1,
         quantity: 2,
-        pickupTime: "2025-09-20T14:30:00",
+        pickupTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
         unitPrice: 150000,
         totalPrice: 300000
       };
@@ -93,7 +93,7 @@ export default function OrderExample() {
   "shopId": 1,
   "productId": 1,
   "quantity": 2,
-  "pickupTime": "2025-09-20T14:30:00",
+  "pickupTime": "Tomorrow (dynamic)",
   "unitPrice": 150000,
   "totalPrice": 300000
 }`}

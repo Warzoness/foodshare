@@ -36,8 +36,8 @@ export default function OrderPlacementExample({
     setError(null);
 
     try {
-      // Get current user ID (you might need to get this from auth context)
-      const userId = 1; // This should come from your auth context
+      // Get current user ID from auth context
+      const userId = 1; // TODO: Get from auth context
 
       const orderData: CreateOrderRequest = {
         userId,

@@ -9,16 +9,6 @@ export default function TestOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const testOrderData = {
-    userId: 1,
-    shopId: 1,
-    productId: 1,
-    quantity: 2,
-    pickupTime: "2025-09-26T06:06:19.071Z",
-    unitPrice: 50000,
-    totalPrice: 100000
-  };
-
   const testOrderCreation = async () => {
     setLoading(true);
     setError(null);
@@ -26,7 +16,6 @@ export default function TestOrderPage() {
 
     try {
       console.log('🧪 Testing Order Creation API...');
-      console.log('📋 Test data:', testOrderData);
       
       // Check authentication first
       console.log('🔍 Checking authentication...');
@@ -45,8 +34,19 @@ export default function TestOrderPage() {
         throw new Error('No authentication token found. Please log in first.');
       }
       
-      // Test the API call
+      // Test the API call with dynamic data
       console.log('📤 Making POST request to /orders...');
+      const testOrderData = {
+        userId: userData?.userId || 1,
+        shopId: 1,
+        productId: 1,
+        quantity: 2,
+        pickupTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
+        unitPrice: 50000,
+        totalPrice: 100000
+      };
+      
+      console.log('📋 Test data:', testOrderData);
       const response = await OrderService.createOrder(testOrderData);
       
       console.log('📥 API Response:', response);
@@ -93,9 +93,11 @@ export default function TestOrderPage() {
 
       <div className="mb-4">
         <h3>Test Data</h3>
-        <pre className="bg-light p-3 rounded">
-          {JSON.stringify(testOrderData, null, 2)}
-        </pre>
+        <div className="card p-3">
+          <p><strong>Note:</strong> Test data is generated dynamically based on current user and time.</p>
+          <p><strong>User ID:</strong> {AuthService.getStoredUserData()?.userId || 'Not available'}</p>
+          <p><strong>Pickup Time:</strong> Tomorrow (dynamic)</p>
+        </div>
       </div>
 
       <div className="mb-4">

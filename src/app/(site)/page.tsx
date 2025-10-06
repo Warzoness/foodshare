@@ -6,12 +6,11 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 const FloatMenu = dynamic(() => import("@/components/site/layouts/FloatMenu/FloatMenu"), { ssr: false });
 import { ProductService, Product } from "@/services/site/product.service";
-import { MOCK_PRODUCTS } from "@/types/product";
 import FlashDealTag from "@/components/share/FlashDealTag/FlashDealTag";
 import { getCurrentCoordinates } from "@/lib/location";
 const SearchBar = dynamic(() => import("@/components/site/layouts/SearchBar/SearchBar"), { ssr: false });
 
-const USE_API = true; // Bật dùng API thật
+const USE_API = true; // Always use real API data
 
 type CardItem = { id: number; name: string; price: string; img: string; discountPct?: number; totalOrders?: number; distanceKm?: number };
 
@@ -113,7 +112,7 @@ export default function HomePage() {
       setHotRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
-      setHotRaw(MOCK_PRODUCTS.slice(0, 12) as unknown as Product[]);
+      setHotRaw([]);
     } finally {
       setLoadingHot(false);
     }
@@ -130,8 +129,7 @@ export default function HomePage() {
       setShockRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
-      const m = [...MOCK_PRODUCTS].sort((a, b) => a.price - b.price).slice(0, 12);
-      setShockRaw(m as unknown as Product[]);
+      setShockRaw([]);
     } finally {
       setLoadingShock(false);
     }
@@ -145,11 +143,7 @@ export default function HomePage() {
       setNearRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
-      const hasDistance = MOCK_PRODUCTS.some(x => typeof x.distanceKm === "number");
-      const m = hasDistance
-        ? [...MOCK_PRODUCTS].sort((a, b) => (a.distanceKm ?? 999) - (b.distanceKm ?? 999))
-        : [...MOCK_PRODUCTS];
-      setNearRaw(m.slice(0, 12) as unknown as Product[]);
+      setNearRaw([]);
     } finally {
       setLoadingNear(false);
     }
@@ -162,14 +156,10 @@ export default function HomePage() {
       // Fix cứng lat lon là 0.99
       fetchNear(0.99, 0.99);
     } else {
-      // Dữ liệu cứng
-      setHotRaw(MOCK_PRODUCTS.slice(0, 12) as unknown as Product[]);
-      setShockRaw([...MOCK_PRODUCTS].sort((a, b) => a.price - b.price).slice(0, 12) as unknown as Product[]);
-      const hasDistance = MOCK_PRODUCTS.some(x => typeof x.distanceKm === "number");
-      const m = hasDistance
-        ? [...MOCK_PRODUCTS].sort((a, b) => (a.distanceKm ?? 999) - (b.distanceKm ?? 999))
-        : [...MOCK_PRODUCTS];
-      setNearRaw(m.slice(0, 12) as unknown as Product[]);
+      // No mock data fallback - show empty state
+      setHotRaw([]);
+      setShockRaw([]);
+      setNearRaw([]);
       setLoadingHot(false);
       setLoadingShock(false);
       setLoadingNear(false);

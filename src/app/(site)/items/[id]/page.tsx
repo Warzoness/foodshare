@@ -32,19 +32,16 @@ type ItemDetail = {
   discountPct?: number; // ví dụ 20 => giảm 20%
 };
 
-// Fallback data khi API lỗi
+// Fallback data when API fails
 const fallbackData: ItemDetail = {
-  id: "ga-chien-mam",
-  title: "Đùi gà chiên mắm",
-  subtitle: "Đùi gà chiên mắm hương vị chuẩn Hội An",
-  priceNow: 100000,
-  priceOld: 200000,
-  discount: "-50%",
-  storeName: "Cửa hàng gà rán",
-  address: "22 Láng Hạ",
-  coords: { lat: 21.013564, lng: 105.816215 },
-  images: ["/images/chicken-fried.jpg", "/images/food1.jpg"],
-  discountPct: 50,
+  id: "fallback",
+  title: "Sản phẩm không khả dụng",
+  subtitle: "Không thể tải thông tin sản phẩm",
+  priceNow: 0,
+  storeName: "Cửa hàng",
+  address: "Địa chỉ không khả dụng",
+  coords: { lat: 0, lng: 0 },
+  images: ["/images/chicken-fried.jpg"],
 };
 
 function formatPrice(value: number | string | undefined): string {

@@ -7,6 +7,7 @@ interface FlashDealTagProps {
 }
 
 export default function FlashDealTag({ discountPercentage, className, size = "sm" }: FlashDealTagProps) {
+  // Don't render if discountPercentage is falsy, 0, or negative
   if (!discountPercentage || discountPercentage <= 0) {
     return null;
   }

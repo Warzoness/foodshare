@@ -13,14 +13,6 @@ const FloatMenu = dynamic(() => import("@/components/site/layouts/FloatMenu/Floa
 const ActiveSearchInput = dynamic(() => import("@/components/site/layouts/SearchBar/ActiveSearchInput"), { ssr: false });
 import SortBar, { SortKey } from "@/components/site/layouts/SortBar/SortBar";
 
-const DATA: FoodResult[] = [
-  { id: 1, name: "Bánh Mì Gà", price: 2225000, distanceKm: 1.2, flashDealPercent: 30, totalOrders: 150, imgUrl: "/images/chicken-fried.jpg", vendor: "Cô Ba", category: "Đồ ăn" },
-  { id: 2, name: "Phở Bò", price: 45000, distanceKm: 4.8, totalOrders: 89, imgUrl: "/images/chicken-fried.jpg", vendor: "Gia Truyền", category: "Đồ ăn" },
-  { id: 3, name: "Cơm Sườn", price: 35000, distanceKm: 6.5, flashDealPercent: 10, totalOrders: 234, imgUrl: "/images/chicken-fried.jpg", vendor: "Quán 79", category: "Đồ ăn" },
-  { id: 4, name: "Bún Chả", price: 55000, distanceKm: 2.0, flashDealPercent: 25, totalOrders: 67, imgUrl: "/images/chicken-fried.jpg", vendor: "Hương Liễu", category: "Đồ ăn" },
-  { id: 5, name: "Trà Sữa", price: 30000, distanceKm: 1.5, flashDealPercent: 15, totalOrders: 312, imgUrl: "/images/chicken-fried.jpg", vendor: "Sweetie", category: "Đồ uống" },
-];
-
 const TRENDING = ["bánh mì", "phở bò", "cơm sườn", "trà sữa", "bún chả"];
 const LS_KEY = "recentSearches_food_v1";
 
@@ -44,8 +36,9 @@ export default function SearchPage() {
   // server results
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<FoodResult[]>([]);
-  const [, setPage] = useState(0);
-  const [, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -83,14 +76,16 @@ export default function SearchPage() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(next)); } catch { }
   };
 
-  const doSearch = async (term = q) => {
+  const doSearch = async (term = q, page = 0) => {
     const t = term.trim();
     if (!t) return;
     setQ(t);
     saveRecent(t);
     setSubmitted(true);
     setLoading(true);
-    setItems([]); // Clear previous results
+    if (page === 0) {
+      setItems([]); // Clear previous results only for first page
+    }
     
     try {
       let currentLat: number | undefined;
@@ -106,7 +101,7 @@ export default function SearchPage() {
 
       const res = await ProductService.search({ 
         q: t, 
-        page: 0, 
+        page: page, 
         size: 20, 
         lat: currentLat,
         lon: currentLon
@@ -114,25 +109,36 @@ export default function SearchPage() {
       
       // API returns: { code, success, data: { content, page, size, totalElements, totalPages } }
       const apiData = res.data; // PageEnvelope<SearchProduct>
-      setPage(apiData.page || 0);
+      setCurrentPage(apiData.page || 0);
       setTotalPages(apiData.totalPages || 0);
+      setTotalElements(apiData.totalElements || 0);
+      
       const transformed: FoodResult[] = (apiData.content || []).map(mapToFoodResult);
-      setItems(transformed);
+      if (page === 0) {
+        setItems(transformed);
+      } else {
+        setItems(prev => [...prev, ...transformed]);
+      }
     } catch (e) {
       console.error("Search failed", e);
-      setItems([]);
-      setPage(0);
+      if (page === 0) {
+        setItems([]);
+      }
+      setCurrentPage(0);
       setTotalPages(0);
+      setTotalElements(0);
     } finally {
       setLoading(false);
     }
   };
 
   // Hàm search tất cả sản phẩm (cho "Xem thêm")
-  const doSearchAll = async () => {
+  const doSearchAll = async (page = 0) => {
     setSubmitted(true);
     setLoading(true);
-    setItems([]); // Clear previous results
+    if (page === 0) {
+      setItems([]); // Clear previous results only for first page
+    }
     
     try {
       let currentLat: number | undefined;
@@ -148,7 +154,7 @@ export default function SearchPage() {
 
       const res = await ProductService.search({ 
         q: "", // Search tất cả
-        page: 0, 
+        page: page, 
         size: 20, 
         lat: currentLat,
         lon: currentLon
@@ -156,17 +162,54 @@ export default function SearchPage() {
       
       // API returns: { code, success, data: { content, page, size, totalElements, totalPages } }
       const apiData = res.data; // PageEnvelope<SearchProduct>
-      setPage(apiData.page || 0);
+      setCurrentPage(apiData.page || 0);
       setTotalPages(apiData.totalPages || 0);
+      setTotalElements(apiData.totalElements || 0);
+      
       const transformed: FoodResult[] = (apiData.content || []).map(mapToFoodResult);
-      setItems(transformed);
+      if (page === 0) {
+        setItems(transformed);
+      } else {
+        setItems(prev => [...prev, ...transformed]);
+      }
     } catch (e) {
       console.error("Search failed", e);
-      setItems([]);
-      setPage(0);
+      if (page === 0) {
+        setItems([]);
+      }
+      setCurrentPage(0);
       setTotalPages(0);
+      setTotalElements(0);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load more function
+  const loadMore = async () => {
+    if (currentPage < totalPages - 1 && !loading) {
+      const nextPage = currentPage + 1;
+      // Store current scroll position before loading
+      const currentScrollY = window.scrollY;
+      
+      try {
+        if (q.trim()) {
+          await doSearch(q, nextPage);
+        } else {
+          await doSearchAll(nextPage);
+        }
+        
+        // Restore scroll position after loading with a small delay
+        // to ensure DOM has updated
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: currentScrollY,
+            behavior: 'instant'
+          });
+        });
+      } catch (error) {
+        console.error('Failed to load more results:', error);
+      }
     }
   };
 
@@ -176,9 +219,20 @@ export default function SearchPage() {
   const suggestions = useMemo(() => {
     const key = q.trim().toLowerCase();
     if (!key) return TRENDING.slice(0, 5);
-    const names = Array.from(new Set(DATA.map(d => d.name)));
-    return names.filter(n => n.toLowerCase().includes(key)).slice(0, 8);
+    // No mock data suggestions - only show trending when no search query
+    return [];
   }, [q]);
+
+  // Reset pagination when filters or sort change (but not when loading more)
+  useEffect(() => {
+    if (submitted && items.length > 0 && !loading) {
+      // Only reset if we're not in the middle of loading more
+      setCurrentPage(0);
+      setTotalPages(0);
+      setTotalElements(0);
+      setItems([]);
+    }
+  }, [filters, sortBy]);
 
   // client-side sort/filter applied on server results
   const results = useMemo(() => {
@@ -194,7 +248,7 @@ export default function SearchPage() {
         (i.distanceKm != null && i.distanceKm <= filters.distanceKm) : true;
       
       // Price filter
-      const okPrice = isValidPrice ? i.price <= maxPrice : true;
+      const okPrice = isValidPrice ? (i.price && i.price <= maxPrice) : true;
       
       // Flash deal filter
       const okFlash = filters.flashDealPercent != null ? 
@@ -213,10 +267,10 @@ export default function SearchPage() {
         });
         break;
       case "priceAsc":
-        arr.sort((a, b) => a.price - b.price);
+        arr.sort((a, b) => (a.price || 0) - (b.price || 0));
         break;
       case "priceDesc":
-        arr.sort((a, b) => b.price - a.price);
+        arr.sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
       case "flashDesc":
         arr.sort((a, b) => {
@@ -241,15 +295,15 @@ export default function SearchPage() {
 
   function mapToFoodResult(p: SearchProduct): FoodResult {
     return {
-      id: p.productId,
-      name: p.name,
-      price: p.price,
-      imgUrl: p.imageUrl,
-      distanceKm: p.distanceKm,
-      vendor: p.shopName,
-      category: "", // not provided by API
-      flashDealPercent: p.discountPercentage,
-      totalOrders: p.totalOrders,
+      id: p.productId && p.productId > 0 ? p.productId : "unknown",
+      name: p.name && p.name.trim() ? p.name : "Sản phẩm",
+      price: p.price && p.price > 0 ? p.price : undefined,
+      imgUrl: p.imageUrl && p.imageUrl.trim() ? p.imageUrl : "/food/placeholder.jpg",
+      distanceKm: p.distanceKm && p.distanceKm > 0 ? p.distanceKm : undefined,
+      vendor: p.shopName && p.shopName.trim() ? p.shopName : "Cửa hàng",
+      category: undefined, // not provided by API
+      flashDealPercent: p.discountPercentage && p.discountPercentage > 0 ? p.discountPercentage : undefined,
+      totalOrders: p.totalOrders && p.totalOrders > 0 ? p.totalOrders : undefined,
     };
   }
 
@@ -354,7 +408,39 @@ export default function SearchPage() {
                 </div>
               </div>
             ) : (
-              <ResultsList items={results} />
+              <>
+                <ResultsList items={results} />
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className={styles.paginationContainer}>
+                    <div className={styles.paginationInfo}>
+                      Hiển thị {results.length} / {totalElements} kết quả
+                      {results.length < items.length && (
+                        <span className={styles.filteredNote}>
+                          (đã lọc từ {items.length} kết quả)
+                        </span>
+                      )}
+                    </div>
+                    {currentPage < totalPages - 1 && (
+                      <button 
+                        className={styles.loadMoreBtn}
+                        onClick={loadMore}
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <>
+                            <div className={styles.loadingSpinnerSmall}></div>
+                            Đang tải...
+                          </>
+                        ) : (
+                          'Tải thêm'
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
