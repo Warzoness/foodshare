@@ -335,24 +335,24 @@ export default function SettingsPage() {
       <form onSubmit={onSubmit} className="d-flex flex-column align-items-center">
         <div className={styles.avatar} aria-hidden>
           {(() => {
-            console.log('🖼️ Rendering avatar - profilePictureUrl:', user.profilePictureUrl);
-            console.log('🖼️ Profile picture type:', typeof user.profilePictureUrl);
-            console.log('🖼️ Profile picture truthy:', !!user.profilePictureUrl);
+            console.log('🖼️ Rendering avatar - profilePictureUrl:', user?.profilePictureUrl);
+            console.log('🖼️ Profile picture type:', typeof user?.profilePictureUrl);
+            console.log('🖼️ Profile picture truthy:', !!user?.profilePictureUrl);
             
-            if (user.profilePictureUrl) {
+            if (user?.profilePictureUrl) {
               return (
                 <Image 
                   src={user.profilePictureUrl} 
-                  alt={user.name}
+                  alt={user.name || 'User'}
                   width={120}
                   height={120}
                   style={{ borderRadius: '50%', objectFit: 'cover' }}
                   onError={(e) => {
-                    console.error('❌ Image failed to load:', user.profilePictureUrl);
+                    console.error('❌ Image failed to load:', user?.profilePictureUrl);
                     console.error('❌ Error event:', e);
                   }}
                   onLoad={() => {
-                    console.log('✅ Image loaded successfully:', user.profilePictureUrl);
+                    console.log('✅ Image loaded successfully:', user?.profilePictureUrl);
                   }}
                 />
               );
@@ -369,7 +369,7 @@ export default function SettingsPage() {
           })()}
         </div>
 
-        <div className="text-center mt-1 mb-3 fw-semibold">{user.name}</div>
+        <div className="text-center mt-1 mb-3 fw-semibold">{user?.name || 'User'}</div>
 
         <div className="w-100" style={{ maxWidth: 520 }}>
           {/* Success Message */}

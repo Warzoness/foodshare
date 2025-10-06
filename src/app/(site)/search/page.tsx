@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import styles from "./SearchPage.module.css";
 import FilterBar, { FilterValues } from "@/components/site/layouts/FilterBar/FilterBar";
@@ -16,7 +16,7 @@ import SortBar, { SortKey } from "@/components/site/layouts/SortBar/SortBar";
 const TRENDING = ["bánh mì", "phở bò", "cơm sườn", "trà sữa", "bún chả"];
 const LS_KEY = "recentSearches_food_v1";
 
-export default function SearchPage() {
+function SearchPageContent() {
   const searchParams = useSearchParams();
   const [q, setQ] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -103,8 +103,8 @@ export default function SearchPage() {
         q: t, 
         page: page, 
         size: 20, 
-        lat: currentLat,
-        lon: currentLon
+        latitude: currentLat,
+        longitude: currentLon
       });
       
       // API returns: { code, success, data: { content, page, size, totalElements, totalPages } }
@@ -156,8 +156,8 @@ export default function SearchPage() {
         q: "", // Search tất cả
         page: page, 
         size: 20, 
-        lat: currentLat,
-        lon: currentLon
+        latitude: currentLat,
+        longitude: currentLon
       });
       
       // API returns: { code, success, data: { content, page, size, totalElements, totalPages } }
@@ -448,5 +448,24 @@ export default function SearchPage() {
 
       <FloatMenu />
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.container}>
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+          <div className="text-center">
+            <div className="spinner-border" role="status" style={{ color: '#54A65C' }}>
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <div className="mt-2">Đang tải...</div>
+          </div>
+        </div>
+      </div>
+    }>
+      <SearchPageContent />
+    </Suspense>
   );
 }

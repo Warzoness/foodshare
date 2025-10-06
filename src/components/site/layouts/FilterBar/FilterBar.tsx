@@ -57,7 +57,7 @@ export default function FilterBar({
               onChange={(selectedOption) => 
                 setDraft(d => ({ 
                   ...d, 
-                  distanceKm: selectedOption?.value === "" ? undefined : Number(selectedOption?.value) 
+                  distanceKm: (selectedOption as { value: string; label: string } | null)?.value === "" ? undefined : Number((selectedOption as { value: string; label: string } | null)?.value) 
                 }))
               }
               options={distanceOptions}
@@ -75,7 +75,7 @@ export default function FilterBar({
               onChange={(selectedOption) => 
                 setDraft(d => ({ 
                   ...d, 
-                  flashDealPercent: selectedOption?.value === "" ? undefined : Number(selectedOption?.value) 
+                  flashDealPercent: (selectedOption as { value: string; label: string } | null)?.value === "" ? undefined : Number((selectedOption as { value: string; label: string } | null)?.value) 
                 }))
               }
               options={flashDealOptions}

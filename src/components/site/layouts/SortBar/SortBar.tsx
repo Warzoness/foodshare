@@ -26,7 +26,7 @@ export default function SortBar({
       <label className={styles.label}>Sắp xếp</label>
       <Select
         value={sortOptions.find(option => option.value === value)}
-        onChange={(selectedOption) => onChange(selectedOption?.value as SortKey)}
+        onChange={(selectedOption) => onChange((selectedOption as { value: string; label: string } | null)?.value as SortKey)}
         options={sortOptions}
         styles={customSelectStyles}
         isSearchable={false}

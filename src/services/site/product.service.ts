@@ -120,7 +120,7 @@ const NEARBY_ENDPOINT = "/products/nearby";
 const PRODUCT_DETAIL_ENDPOINT = "/products";
 
 export const ProductService = {
-  search(params: { q: string; size: number; lon: number | undefined; page: number; lat: number | undefined }) {
+  search(params: { q: string; size: number; longitude: number | undefined; page: number; latitude: number | undefined }) {
     return apiClient.get<ApiResponse<PageEnvelope<SearchProduct>>>(SEARCH_ENDPOINT, {
       query: params as Record<string, any>,
     });
@@ -173,6 +173,7 @@ export const ProductService = {
   } = {}): Promise<PageResult<Product>> {
     const { page = 0, size = 12, lat, lon } = params;
     const res = await this.search({
+      q: "", // Empty query for listing all products
       page,
       size,
       latitude: lat,
