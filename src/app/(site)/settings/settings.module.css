@@ -52,7 +52,7 @@
   font-weight: 700;
   padding: 10px 16px;
   margin-top: 16px;
-  box-shadow: 0 3px 0 rgba(0,0,0,0.18), 0 10px 16px rgba(0,0,0,0.08);
+  /*box-shadow: 0 3px 0 rgba(0,0,0,0.18), 0 10px 16px rgba(0,0,0,0.08);*/
   transition: transform 0.06s ease, box-shadow 0.18s ease;
 }
 
@@ -65,6 +65,44 @@
 .submitBtn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(84,166,92,0.35), 0 12px 18px rgba(84,166,92,0.22);
+}
+
+/* Input styling giống FilterBar */
+.input {
+  border: 1px solid #e6ebef;
+  border-radius: 10px;
+  padding: 12px 16px;
+  outline: none;
+  font: inherit;
+  background: #fff;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  font-size: 14px;
+  line-height: 1.4;
+  min-height: 40px;
+  width: 100%;
+  position: relative;
+  cursor: pointer;
+}
+
+.input:hover {
+  border-color: #54a65c !important;
+  box-shadow: 0 0 0 2px rgba(84, 166, 92, 0.1) !important;
+}
+
+.input:focus {
+  border-color: #54a65c !important;
+  box-shadow: 0 0 0 2px rgba(84, 166, 92, 0.15) !important;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Tạo không gian cho FloatMenu ở cuối trang */
+.settingsContainer {
+  padding-bottom: 80px !important;
 }
 
 

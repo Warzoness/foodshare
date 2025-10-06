@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Select from "react-select";
 import styles from "./FilterBar.module.css";
+import { customSelectStyles } from "@/styles/reactSelectStyles";
 
 export type FilterValues = {
   distanceKm?: number;
@@ -12,6 +14,17 @@ export type FilterValues = {
 const DISTANCES = [1, 2, 3, 5, 10];
 const FLASH_DEALS = [10, 20, 30, 40, 50];
 
+// Tạo options cho React Select
+const distanceOptions = [
+  { value: "", label: "Tất cả" },
+  ...DISTANCES.map(km => ({ value: km.toString(), label: `≤ ${km} km` }))
+];
+
+const flashDealOptions = [
+  { value: "", label: "Tất cả" },
+  ...FLASH_DEALS.map(p => ({ value: p.toString(), label: `≥ ${p}%` }))
+];
+
 export default function FilterBar({
   value, onApply, onRemoveTag, onClearAll,
 }:{
@@ -21,6 +34,7 @@ export default function FilterBar({
   onClearAll: ()=>void;
 }) {
   const [draft, setDraft] = useState<FilterValues>(value);
+  const [activeButton, setActiveButton] = useState<'filter' | 'clear' | null>(null);
   useEffect(()=>setDraft(value), [value]);
 
   const tags = useMemo(()=> {
@@ -38,27 +52,37 @@ export default function FilterBar({
           {/* Khoảng cách */}
           <div className={styles.filterItem}>
             <label className={styles.label}>Khoảng cách</label>
-            <select
-              value={draft.distanceKm ?? ""}
-              onChange={e => setDraft(d => ({ ...d, distanceKm: e.target.value === "" ? undefined : Number(e.target.value) }))}
-              className={styles.select}
-            >
-              <option value="">Tất cả</option>
-              {DISTANCES.map(km => <option key={km} value={km}>{`≤ ${km} km`}</option>)}
-            </select>
+            <Select
+              value={distanceOptions.find(option => option.value === (draft.distanceKm?.toString() ?? ""))}
+              onChange={(selectedOption) => 
+                setDraft(d => ({ 
+                  ...d, 
+                  distanceKm: selectedOption?.value === "" ? undefined : Number(selectedOption?.value) 
+                }))
+              }
+              options={distanceOptions}
+              styles={customSelectStyles}
+              isSearchable={false}
+              placeholder="Chọn khoảng cách"
+            />
           </div>
 
           {/* Flash deal */}
           <div className={styles.filterItem}>
             <label className={styles.label}>Flash deal</label>
-            <select
-              value={draft.flashDealPercent ?? ""}
-              onChange={e => setDraft(d => ({ ...d, flashDealPercent: e.target.value === "" ? undefined : Number(e.target.value) }))}
-              className={styles.select}
-            >
-              <option value="">Tất cả</option>
-              {FLASH_DEALS.map(p => <option key={p} value={p}>{`≥ ${p}%`}</option>)}
-            </select>
+            <Select
+              value={flashDealOptions.find(option => option.value === (draft.flashDealPercent?.toString() ?? ""))}
+              onChange={(selectedOption) => 
+                setDraft(d => ({ 
+                  ...d, 
+                  flashDealPercent: selectedOption?.value === "" ? undefined : Number(selectedOption?.value) 
+                }))
+              }
+              options={flashDealOptions}
+              styles={customSelectStyles}
+              isSearchable={false}
+              placeholder="Chọn flash deal"
+            />
           </div>
 
           {/* Giá đến */}
@@ -79,8 +103,28 @@ export default function FilterBar({
 
         {/* Nút */}
         <div className={styles.actionItem}>
-          <button onClick={()=>onApply(draft)} className={styles.btnPrimary}>Lọc</button>
-          <button onClick={onClearAll} className={styles.btnGhost}>Xoá</button>
+          <button 
+            onClick={() => {
+              setActiveButton('filter');
+              onApply(draft);
+              // Giữ trạng thái active trong 2 giây
+              setTimeout(() => setActiveButton(null), 2000);
+            }} 
+            className={`${styles.btnPrimary} ${activeButton === 'filter' ? styles.active : ''}`}
+          >
+            Lọc
+          </button>
+          <button 
+            onClick={() => {
+              setActiveButton('clear');
+              onClearAll();
+              // Giữ trạng thái active trong 2 giây
+              setTimeout(() => setActiveButton(null), 2000);
+            }} 
+            className={`${styles.btnGhost} ${activeButton === 'clear' ? styles.active : ''}`}
+          >
+            Xoá
+          </button>
         </div>
       </div>
 

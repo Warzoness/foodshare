@@ -1,6 +1,6 @@
 .hero :global(img) {
   display: block;
-  border: 3px solid #2f8cff; /* viền xanh như mock */
+  border: 3px solid #54a65c; /* viền xanh như mock */
   box-shadow: 0 2px 10px rgba(0,0,0,.06);
 }
 
@@ -8,8 +8,8 @@
  
 /* Success badge */
 .successBadge {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   background: #54A65C;
   color: #fff;

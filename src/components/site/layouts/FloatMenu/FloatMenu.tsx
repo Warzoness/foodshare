@@ -1,8 +1,8 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 import Link from "next/link";
-import { AuthService } from "@/services/site/auth.service";
+import {AuthService} from "@/services/site/auth.service";
 import styles from "./FloatMenu.module.css";
 
 export default function FloatMenu() {
@@ -11,10 +11,10 @@ export default function FloatMenu() {
 
   const handleAccountClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     // Check if user is logged in
     const isLoggedIn = AuthService.isLoggedIn();
-    
+
     if (isLoggedIn) {
       // User is logged in, go to settings
       router.push('/settings');
@@ -43,8 +43,8 @@ export default function FloatMenu() {
         <i
           className={
             pathname === "/search"
-              ? "fi fi-sr-search" // thay bằng icon 
-              : "fi fi-rs-search" // thay bằng icon 
+              ? "fi fi-sr-search" // thay bằng icon
+              : "fi fi-rs-search" // thay bằng icon
           }
         ></i>
         <span>Tìm kiếm</span>
@@ -62,20 +62,32 @@ export default function FloatMenu() {
         <span>Giữ chỗ</span>
       </Link>
 
+
+        {/* Search */}
+        <Link href="/settings" className={`${styles.navItem} ${pathname === "/settings" ? styles.active : ""}`}>
+            <i
+                className={
+                    pathname === "/settings"
+                        ? "fi fi-sr-user" // thay bằng icon
+                        : "i fi-rr-user" // thay bằng icon
+                }
+            ></i>
+            <span>Tài khoản</span>
+        </Link>
       {/* Account */}
-      <button 
-        onClick={handleAccountClick}
-        className={`${styles.navItem} ${styles.accountButton} ${pathname === "/settings" ? styles.active : ""}`}
-      >
-        <i
-          className={
-            pathname === "/settings"
-              ? "fi fi-sr-user" // icon đậm
-              : "fi fi-rr-user" // icon thường
-          }
-        ></i>
-        <span>Tài khoản</span>
-      </button>
+      {/*<button */}
+      {/*  onClick={handleAccountClick}*/}
+      {/*  className={`${styles.navItem} ${styles.accountButton} ${pathname === "/settings" ? styles.active : ""}`}*/}
+      {/*>*/}
+      {/*  <i*/}
+      {/*    className={*/}
+      {/*      pathname === "/settings"*/}
+      {/*        ? "fi fi-sr-user" // icon đậm*/}
+      {/*        : "fi fi-rr-user" // icon thường*/}
+      {/*    }*/}
+      {/*  ></i>*/}
+      {/*  <span>Tài khoản</span>*/}
+      {/*</button>*/}
     </nav>
   );
 }

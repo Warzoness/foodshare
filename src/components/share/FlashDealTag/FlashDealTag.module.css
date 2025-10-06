@@ -1,0 +1,64 @@
+.flashDealTag {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  background: #fbbf24; /* màu vàng */
+  color: #dc2626; /* màu đỏ */
+  padding: 1px 3px 4px 6px;
+  border-radius: 3px;
+  font-size: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  max-width: 30px;
+  /*overflow: hidden;*/
+}
+
+.flashIcon {
+  font-size: 8px;
+  line-height: 1;
+}
+
+.percentage {
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Size lớn hơn cho màn home */
+.large {
+  padding: 3px 1px;
+  border-radius: 6px;
+  font-size: 12px;
+  max-width: 60px;
+  top: 4px;
+  right: 4px;
+}
+
+.large .percentage {
+  font-size: 12px;
+}
+
+.large .flashIcon {
+  font-size: 12px;
+}
+
+/* Size lớn nhất cho trang chi tiết */
+.extraLarge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  max-width: 80px;
+  top: 8px;
+  right: 8px;
+}
+
+.extraLarge .percentage {
+  font-size: 16px;
+}
+
+.extraLarge .flashIcon {
+  font-size: 16px;
+}

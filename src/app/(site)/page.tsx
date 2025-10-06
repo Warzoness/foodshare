@@ -7,12 +7,13 @@ import dynamic from "next/dynamic";
 const FloatMenu = dynamic(() => import("@/components/site/layouts/FloatMenu/FloatMenu"), { ssr: false });
 import { ProductService, Product } from "@/services/site/product.service";
 import { MOCK_PRODUCTS } from "@/types/product";
-import SaleTag from "@/components/share/SaleTag/SaleTag";
+import FlashDealTag from "@/components/share/FlashDealTag/FlashDealTag";
+import { getCurrentCoordinates } from "@/lib/location";
 const SearchBar = dynamic(() => import("@/components/site/layouts/SearchBar/SearchBar"), { ssr: false });
 
 const USE_API = true; // Bật dùng API thật
 
-type CardItem = { id: number; name: string; price: string; img: string; discountPct?: number };
+type CardItem = { id: number; name: string; price: string; img: string; discountPct?: number; totalOrders?: number; distanceKm?: number };
 
 
 
@@ -27,6 +28,8 @@ const toCard = (p: Product): CardItem => ({
   price: priceToLabel(p.price),
   img: p.imageUrl || "/images/chicken-fried.jpg",
   discountPct: p.discountPercent ?? undefined,
+  totalOrders: p.totalOrders,
+  distanceKm: p.distanceKm,
 });
 function Section({
   title, items, seeMoreHref = "/items", loading = false,
@@ -65,12 +68,19 @@ function Section({
                 <div className={styles.thumbWrap}>
                   <div className={styles.thumb} style={{ backgroundImage: `url(${it.img})` }} aria-label={it.name} />
                   {typeof it.discountPct === "number" && (
-                    <SaleTag percent={it.discountPct ?? 0} corner size="sm" width={70} />
+                    <FlashDealTag discountPercentage={it.discountPct ?? 0} size="md" />
                   )}
                 </div>
                 <div className={styles.cardMeta}>
                   <div className={styles.itemName} title={it.name}>{it.name}</div>
                   <div className={styles.price}>{it.price}</div>
+                  {((it.totalOrders && it.totalOrders > 0) || it.distanceKm) && (
+                    <div className={styles.metaInfo}>
+                      {/*{it.totalOrders && it.totalOrders > 0 && <span className={styles.orders}>đã bán {it.totalOrders}</span>}*/}
+                      {/*{it.totalOrders && it.totalOrders > 0 && it.distanceKm && <span className={styles.separator}>.</span>}*/}
+                      {it.distanceKm && <span className={styles.distance}>đã bán {it.totalOrders} | {it.distanceKm} km</span>}
+                    </div>
+                  )}
                 </div>
               </article>
             </Link>
@@ -95,7 +105,11 @@ export default function HomePage() {
   const fetchHot = useCallback(async () => {
     setLoadingHot(true);
     try {
-      const arr = await ProductService.popular({ page: 0, size: 12 });
+      const { latitude, longitude } = await getCurrentCoordinates();
+      // Sử dụng tọa độ mặc định nếu không có vị trí thực tế
+      const finalLat = latitude ?? 0.99;
+      const finalLon = longitude ?? 0.99;
+      const arr = await ProductService.popular({ page: 0, size: 12, lat: finalLat, lon: finalLon });
       setHotRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
@@ -108,7 +122,11 @@ export default function HomePage() {
   const fetchShock = useCallback(async () => {
     setLoadingShock(true);
     try {
-      const arr = await ProductService.topDiscounts({ page: 0, size: 12 });
+      const { latitude, longitude } = await getCurrentCoordinates();
+      // Sử dụng tọa độ mặc định nếu không có vị trí thực tế
+      const finalLat = latitude ?? 0.99;
+      const finalLon = longitude ?? 0.99;
+      const arr = await ProductService.topDiscounts({ page: 0, size: 12, lat: finalLat, lon: finalLon });
       setShockRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
@@ -122,10 +140,8 @@ export default function HomePage() {
   const fetchNear = useCallback(async (lat?: number, lon?: number) => {
     setLoadingNear(true);
     try {
-      // Sử dụng tọa độ mặc định nếu không có vị trí thực tế
-      const finalLat = lat ?? 0.99;
-      const finalLon = lon ?? 0.99;
-      const arr = await ProductService.nearby({ page: 0, size: 12, lat: finalLat, lon: finalLon });
+      const { latitude, longitude } = await getCurrentCoordinates();
+      const arr = await ProductService.nearby({ page: 0, size: 12, lat: latitude, lon: longitude });
       setNearRaw(arr || []);
     } catch (e: any) {
       setErr(e.message || "Failed to fetch");
@@ -173,9 +189,9 @@ export default function HomePage() {
         </div>
         {err && <div className="alert alert-danger">{err}</div>}
 
-        <Section title="Mua nhiều" items={hot} loading={loadingHot} />
-        <Section title="Giảm sốc" items={shock} loading={loadingShock} />
-        <Section title="Gần bạn" items={near} loading={loadingNear} />
+        <Section title="Mua nhiều" items={hot} loading={loadingHot} seeMoreHref="/search?sort=ordersDesc" />
+        <Section title="Giảm sốc" items={shock} loading={loadingShock} seeMoreHref="/search?flashDeal=30" />
+        <Section title="Gần bạn" items={near} loading={loadingNear} seeMoreHref="/search?distance=10" />
       </div>
       <FloatMenu />
     </div>

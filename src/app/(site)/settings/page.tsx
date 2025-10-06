@@ -29,6 +29,7 @@ export default function SettingsPage() {
         
         if (!isLoggedIn) {
           console.log('❌ User not authenticated');
+          setError('Vui lòng đăng nhập để xem thông tin tài khoản');
           setLoading(false);
           return;
         }
@@ -87,17 +88,29 @@ export default function SettingsPage() {
       } catch (error) {
         console.error('❌ Load user data error:', error);
         
-        // Fallback to localStorage data if API fails
-        const currentUser = AuthService.getCurrentUser();
-        if (currentUser && currentUser.userId) {
-          console.log('🔄 Falling back to localStorage data');
-          setUser(currentUser);
-          setName(currentUser.name || '');
-          setEmail(currentUser.email || '');
-          setPhone(currentUser.phoneNumber || '');
+        // Check if it's an authentication error
+        const errorMessage = (error as Error).message.toLowerCase();
+        if (errorMessage.includes('authentication failed') || 
+            errorMessage.includes('authentication token') || 
+            errorMessage.includes('unauthorized') ||
+            errorMessage.includes('please log in again') ||
+            errorMessage.includes('authentication failed. please log in again.')) {
+          console.log('🔒 Authentication error detected, clearing user data');
+          AuthService.clearUserData();
+          // AuthGuard will handle showing login screen
         } else {
-          console.error('❌ No valid user data found in localStorage either');
-          setError('Không thể tải thông tin người dùng. Vui lòng đăng nhập lại.');
+          // Fallback to localStorage data if API fails
+          const currentUser = AuthService.getCurrentUser();
+          if (currentUser && currentUser.userId) {
+            console.log('🔄 Falling back to localStorage data');
+            setUser(currentUser);
+            setName(currentUser.name || '');
+            setEmail(currentUser.email || '');
+            setPhone(currentUser.phoneNumber || '');
+          } else {
+            console.error('❌ No valid user data found in localStorage either');
+            setError('Không thể tải thông tin người dùng. Vui lòng đăng nhập lại.');
+          }
         }
         
         setLoading(false);
@@ -195,7 +208,19 @@ export default function SettingsPage() {
       
     } catch (err) {
       console.error('❌ Error updating profile:', err);
-      setError(err instanceof Error ? err.message : "Có lỗi xảy ra khi cập nhật thông tin");
+      
+      // Check if it's an authentication error
+      const errorMessage = (err as Error).message.toLowerCase();
+      if (errorMessage.includes('authentication failed') || 
+          errorMessage.includes('authentication token') || 
+          errorMessage.includes('unauthorized') ||
+          errorMessage.includes('please log in again') ||
+          errorMessage.includes('authentication failed. please log in again.')) {
+        console.log('🔒 Authentication error detected during profile update');
+        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+      } else {
+        setError(err instanceof Error ? err.message : "Có lỗi xảy ra khi cập nhật thông tin");
+      }
     } finally {
       setUpdating(false);
     }
@@ -208,10 +233,10 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <main className="container py-3" style={{ maxWidth: 560 }}>
+      <main className={`container py-3 ${styles.settingsContainer}`} style={{ maxWidth: 560 }}>
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
           <div className="text-center">
-            <div className="spinner-border text-primary" role="status">
+            <div className="spinner-border" role="status" style={{ color: '#54A65C' }}>
               <span className="visually-hidden">Loading...</span>
             </div>
             <div className="mt-2">Đang kiểm tra đăng nhập...</div>
@@ -221,12 +246,12 @@ export default function SettingsPage() {
     );
   }
 
-  if (!user) {
+  if (!user && !error) {
     return (
-      <main className="container py-3" style={{ maxWidth: 560 }}>
+      <main className={`container py-3 ${styles.settingsContainer}`} style={{ maxWidth: 560 }}>
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
           <div className="text-center">
-            <div className="spinner-border text-primary" role="status">
+            <div className="spinner-border" role="status" style={{ color: '#54A65C' }}>
               <span className="visually-hidden">Loading...</span>
             </div>
             <div className="mt-2">Đang tải thông tin...</div>
@@ -236,9 +261,69 @@ export default function SettingsPage() {
     );
   }
 
+  // Hiển thị thông báo lỗi authentication
+  if (error && !user) {
+    return (
+      <main className={`container py-3 ${styles.settingsContainer}`} style={{ maxWidth: 560 }}>
+        <header className={styles.header}>
+          <button className={styles.backBtn} onClick={() => history.back()} aria-label="Quay lại">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </header>
+
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+          <div className="text-center">
+            <div className="mb-3">
+              <div style={{ 
+                width: '80px', 
+                height: '80px', 
+                backgroundColor: '#FEF2F2', 
+                borderRadius: '50%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                margin: '0 auto',
+                marginBottom: '16px'
+              }}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2">
+                  <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                </svg>
+              </div>
+            </div>
+            <h5 className="fw-bold mb-2" style={{ color: '#1F2937' }}>Vui lòng đăng nhập</h5>
+            <p className="text-muted mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              {error}
+            </p>
+            <button 
+              className="btn px-4 py-2" 
+              style={{ 
+                backgroundColor: '#54A65C', 
+                borderColor: '#54A65C', 
+                color: 'white', 
+                borderRadius: '8px', 
+                fontSize: '14px', 
+                fontWeight: '500' 
+              }}
+              onClick={() => {
+                AuthService.clearUserData();
+                window.location.href = '/auth/login';
+              }}
+            >
+              Đăng nhập ngay
+            </button>
+          </div>
+        </div>
+
+        <FloatMenu />
+      </main>
+    );
+  }
+
   return (
     <AuthGuard>
-      <main className="container py-3" style={{ maxWidth: 560 }}>
+      <main className={`container py-3 ${styles.settingsContainer}`} style={{ maxWidth: 560 }}>
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={() => history.back()} aria-label="Quay lại">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -317,7 +402,7 @@ export default function SettingsPage() {
 
           <label className="form-label">Tên</label>
           <input
-            className="form-control border-success"
+            className={styles.input}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nhập tên"
@@ -327,7 +412,7 @@ export default function SettingsPage() {
 
           <label className="form-label mt-3">Email</label>
           <input
-            className="form-control"
+            className={styles.input}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -338,7 +423,7 @@ export default function SettingsPage() {
 
           <label className="form-label mt-3">Số điện thoại</label>
           <input
-            className="form-control"
+            className={styles.input}
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             inputMode="numeric"
@@ -354,7 +439,7 @@ export default function SettingsPage() {
           >
             {updating ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style={{ color: '#54A65C' }}></span>
                 Đang cập nhật...
               </>
             ) : (

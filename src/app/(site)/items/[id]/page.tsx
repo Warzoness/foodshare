@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { getCurrentCoordinates } from "@/lib/location";
 import dynamic from "next/dynamic";
-import SaleTag from "@/components/share/SaleTag/SaleTag";
+import FlashDealTag from "@/components/share/FlashDealTag/FlashDealTag";
 import Link from "next/link";
 import { ProductService, ProductDetail } from "@/services/site/product.service";
 import { StoreService } from "@/services/site/store.service";
@@ -288,8 +288,7 @@ export default function ItemDetailPage() {
 
         {/* Tag ôm sát góc trên-phải */}
         {typeof data.discountPct === "number" && (
-          <SaleTag percent={data.discountPct ?? 0} corner size="md" width="clamp(120px, 22vw, 240px)" />
-
+          <FlashDealTag discountPercentage={data.discountPct ?? 0} size="lg" />
         )}
 
         <button className="btn-back" onClick={() => window.history.back()} aria-label="Quay lại" style={{ position: "absolute", top: 10, left: 10 }}>
@@ -341,6 +340,19 @@ export default function ItemDetailPage() {
         <section className="mt-2">
           <h5 className="fw-bold mb-1">{data.title}</h5>
           <div className="text-muted">{data.subtitle}</div>
+
+          {/* Thông tin số lượng */}
+        {(product?.totalOrders !== undefined || product?.quantityAvailable !== undefined) && (
+          <div className="mt-2 mb-2" style={{ fontSize: '14px', color: '#6b7280' }}>
+            {product?.totalOrders !== undefined && (
+              <span>Đã bán: <strong style={{ color: '#54a65c' }}>{product.totalOrders}</strong></span>
+            )}
+            {product?.totalOrders !== undefined && product?.quantityAvailable !== undefined && <span> • </span>}
+            {product?.quantityAvailable !== undefined && (
+              <span>Còn lại: <strong style={{ color: '#dc2626' }}>{product.quantityAvailable}</strong></span>
+            )}
+          </div>
+        )}
 
           <div className={styles.priceRow}>
             <span className={styles.priceNow}>{formatPrice(data.priceNow)} VND</span>

@@ -27,6 +27,11 @@
   min-width: 0;
 }
 
+/* Style cho React Select container */
+.filterItem > div {
+  min-height: 40px;
+}
+
 .actionItem {
   display: flex;
   gap: 8px;
@@ -40,13 +45,37 @@
   color: #6b7280;
 }
 
-.select, .input {
+.input {
   border: 1px solid #e6ebef;
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 12px 16px;
   outline: none;
   font: inherit;
   background: #fff;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  font-size: 14px;
+  line-height: 1.4;
+  min-height: 40px;
+  width: 100%;
+  position: relative;
+  cursor: pointer;
+}
+
+.input:hover {
+  border-color: #54a65c !important;
+  box-shadow: 0 0 0 2px rgba(84, 166, 92, 0.1) !important;
+}
+
+.input:focus {
+  border-color: #54a65c !important;
+  box-shadow: 0 0 0 2px rgba(84, 166, 92, 0.15) !important;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .btnPrimary {
@@ -57,6 +86,27 @@
   padding: 8px 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnPrimary:hover {
+  border: 2px solid #54a65c !important;
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.15) !important;
+}
+
+.btnPrimary:active {
+  background: #54a65c !important;
+  color: #fff !important;
+  border: 2px solid #54a65c !important;
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.15) !important;
+}
+
+/* Active state cho button Lọc */
+.btnPrimary.active {
+  background: #54a65c !important;
+  color: #fff !important;
+  border: 2px solid #54a65c !important;
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.15) !important;
 }
 
 .btnGhost {
@@ -66,6 +116,40 @@
   padding: 8px 12px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnGhost:hover {
+  border-color: #54a65c !important;
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.15) !important;
+}
+
+.btnGhost:active {
+  background: #54a65c !important;
+  color: #fff !important;
+  border-color: #54a65c !important;
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.15) !important;
+}
+
+/* Active state cho button Xóa */
+.btnGhost.active {
+  background: #54a65c !important;
+  color: #fff !important;
+  border-color: #54a65c !important;
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.15) !important;
+}
+
+/* Khi một button active, button còn lại sẽ có nền trắng chữ đen */
+.btnPrimary:not(.active) {
+  background: #fff !important;
+  color: #000 !important;
+  border: 1px solid #e6ebef !important;
+}
+
+.btnGhost:not(.active) {
+  background: #fff !important;
+  color: #000 !important;
+  border: 1px solid #e6ebef !important;
 }
 
 .chips {

@@ -28,6 +28,9 @@ export type Order = {
   userId: number;
   shopId: number;
   productId: number;
+  productName: string;
+  productImage: string;
+  shopName: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;

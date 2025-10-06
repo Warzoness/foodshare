@@ -235,7 +235,13 @@ export default function HoldPage() {
             </div>
             <div className="d-flex justify-content-between mb-1">
               <span className="fw-medium">Trạng thái:</span>
-              <span className="fw-semibold" style={{ color: "#54A65C" }}>{success.order.status}</span>
+              <span className="fw-semibold" style={{ color: "#54A65C" }}>
+                {success.order.status === "1" && "Chờ xác nhận"}
+                {success.order.status === "2" && "Đã xác nhận"}
+                {success.order.status === "3" && "Hoàn thành"}
+                {success.order.status === "4" && "Hủy"}
+                {!["1", "2", "3", "4"].includes(success.order.status) && success.order.status}
+              </span>
             </div>
 
             <hr className="my-2" />

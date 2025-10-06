@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import styles from "./SearchPage.module.css";
 import FilterBar, { FilterValues } from "@/components/site/layouts/FilterBar/FilterBar";
 import ResultsList from "@/components/site/layouts/SearchResult/ResultList";
@@ -13,17 +14,18 @@ const ActiveSearchInput = dynamic(() => import("@/components/site/layouts/Search
 import SortBar, { SortKey } from "@/components/site/layouts/SortBar/SortBar";
 
 const DATA: FoodResult[] = [
-  { id: 1, name: "Bánh Mì Gà", price: 2225000, distanceKm: 1.2, flashDealPercent: 30, imgUrl: "/images/chicken-fried.jpg", vendor: "Cô Ba", category: "Đồ ăn" },
-  { id: 2, name: "Phở Bò", price: 45000, distanceKm: 4.8, imgUrl: "/images/chicken-fried.jpg", vendor: "Gia Truyền", category: "Đồ ăn" },
-  { id: 3, name: "Cơm Sườn", price: 35000, distanceKm: 6.5, flashDealPercent: 10, imgUrl: "/images/chicken-fried.jpg", vendor: "Quán 79", category: "Đồ ăn" },
-  { id: 4, name: "Bún Chả", price: 55000, distanceKm: 2.0, flashDealPercent: 25, imgUrl: "/images/chicken-fried.jpg", vendor: "Hương Liễu", category: "Đồ ăn" },
-  { id: 5, name: "Trà Sữa", price: 30000, distanceKm: 1.5, flashDealPercent: 15, imgUrl: "/images/chicken-fried.jpg", vendor: "Sweetie", category: "Đồ uống" },
+  { id: 1, name: "Bánh Mì Gà", price: 2225000, distanceKm: 1.2, flashDealPercent: 30, totalOrders: 150, imgUrl: "/images/chicken-fried.jpg", vendor: "Cô Ba", category: "Đồ ăn" },
+  { id: 2, name: "Phở Bò", price: 45000, distanceKm: 4.8, totalOrders: 89, imgUrl: "/images/chicken-fried.jpg", vendor: "Gia Truyền", category: "Đồ ăn" },
+  { id: 3, name: "Cơm Sườn", price: 35000, distanceKm: 6.5, flashDealPercent: 10, totalOrders: 234, imgUrl: "/images/chicken-fried.jpg", vendor: "Quán 79", category: "Đồ ăn" },
+  { id: 4, name: "Bún Chả", price: 55000, distanceKm: 2.0, flashDealPercent: 25, totalOrders: 67, imgUrl: "/images/chicken-fried.jpg", vendor: "Hương Liễu", category: "Đồ ăn" },
+  { id: 5, name: "Trà Sữa", price: 30000, distanceKm: 1.5, flashDealPercent: 15, totalOrders: 312, imgUrl: "/images/chicken-fried.jpg", vendor: "Sweetie", category: "Đồ uống" },
 ];
 
 const TRENDING = ["bánh mì", "phở bò", "cơm sườn", "trà sữa", "bún chả"];
 const LS_KEY = "recentSearches_food_v1";
 
 export default function SearchPage() {
+  const searchParams = useSearchParams();
   const [q, setQ] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
@@ -50,6 +52,29 @@ export default function SearchPage() {
     try { setRecent(JSON.parse(localStorage.getItem(LS_KEY) || "[]")); } catch { }
   }, []);
 
+  // Xử lý URL parameters từ "Xem thêm"
+  useEffect(() => {
+    const sort = searchParams.get('sort');
+    const flashDeal = searchParams.get('flashDeal');
+    const distance = searchParams.get('distance');
+
+    if (sort === 'ordersDesc') {
+      setSortBy('ordersDesc');
+      setQ(''); // Tìm kiếm tất cả
+      doSearchAll(); // Tự động search
+    } else if (flashDeal) {
+      const percent = parseInt(flashDeal);
+      setFilters(prev => ({ ...prev, flashDealPercent: percent }));
+      setQ(''); // Tìm kiếm tất cả
+      doSearchAll(); // Tự động search
+    } else if (distance) {
+      const km = parseInt(distance);
+      setFilters(prev => ({ ...prev, distanceKm: km }));
+      setQ(''); // Tìm kiếm tất cả
+      doSearchAll(); // Tự động search
+    }
+  }, [searchParams]);
+
   const saveRecent = (term: string) => {
     const t = term.trim();
     if (!t) return;
@@ -68,12 +93,12 @@ export default function SearchPage() {
     setItems([]); // Clear previous results
     
     try {
-      let lat: number | undefined;
-      let lon: number | undefined;
+      let currentLat: number | undefined;
+      let currentLon: number | undefined;
       try {
         const coords = await getCurrentCoordinates({ timeout: 5000 });
-        lat = coords.latitude;
-        lon = coords.longitude;
+        currentLat = coords.latitude;
+        currentLon = coords.longitude;
       } catch (error) {
         console.warn("Location access failed:", error);
         // Continue without location
@@ -83,8 +108,50 @@ export default function SearchPage() {
         q: t, 
         page: 0, 
         size: 20, 
-        latitude: lat, 
-        longitude: lon 
+        lat: currentLat,
+        lon: currentLon
+      });
+      
+      // API returns: { code, success, data: { content, page, size, totalElements, totalPages } }
+      const apiData = res.data; // PageEnvelope<SearchProduct>
+      setPage(apiData.page || 0);
+      setTotalPages(apiData.totalPages || 0);
+      const transformed: FoodResult[] = (apiData.content || []).map(mapToFoodResult);
+      setItems(transformed);
+    } catch (e) {
+      console.error("Search failed", e);
+      setItems([]);
+      setPage(0);
+      setTotalPages(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Hàm search tất cả sản phẩm (cho "Xem thêm")
+  const doSearchAll = async () => {
+    setSubmitted(true);
+    setLoading(true);
+    setItems([]); // Clear previous results
+    
+    try {
+      let currentLat: number | undefined;
+      let currentLon: number | undefined;
+      try {
+        const coords = await getCurrentCoordinates({ timeout: 5000 });
+        currentLat = coords.latitude;
+        currentLon = coords.longitude;
+      } catch (error) {
+        console.warn("Location access failed:", error);
+        // Continue without location
+      }
+
+      const res = await ProductService.search({ 
+        q: "", // Search tất cả
+        page: 0, 
+        size: 20, 
+        lat: currentLat,
+        lon: currentLon
       });
       
       // API returns: { code, success, data: { content, page, size, totalElements, totalPages } }
@@ -158,6 +225,13 @@ export default function SearchPage() {
           return bFlash - aFlash;
         });
         break;
+      case "ordersDesc":
+        arr.sort((a, b) => {
+          const aOrders = a.totalOrders ?? 0;
+          const bOrders = b.totalOrders ?? 0;
+          return bOrders - aOrders;
+        });
+        break;
       default:
         // Relevance sort - keep original order from server
         break;
@@ -174,7 +248,8 @@ export default function SearchPage() {
       distanceKm: p.distanceKm,
       vendor: p.shopName,
       category: "", // not provided by API
-      flashDealPercent: undefined,
+      flashDealPercent: p.discountPercentage,
+      totalOrders: p.totalOrders,
     };
   }
 

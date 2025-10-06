@@ -49,12 +49,12 @@ function convertApiOrderToUIOrder(apiOrder: ApiOrder): Order {
 
     return {
         id: apiOrder.id,
-        name: `Sản phẩm ${apiOrder.productId}`, // TODO: Get actual product name
+        name: `Sản phẩm ${apiOrder.productName}`, // TODO: Get actual product name
         qty: apiOrder.quantity,
         orderCode: apiOrder.id.toString(),
         time: formattedTime,
-        store: `Cửa hàng ${apiOrder.shopId}`, // TODO: Get actual store name
-        imageUrl: "/images/chicken-fried.jpg", // TODO: Get actual product image
+        store: `Cửa hàng ${apiOrder.shopName}`, // TODO: Get actual store name
+        imageUrl: apiOrder.productImage, // TODO: Get actual product image
         status: statusMap[apiOrder.status] || "PENDING",
         unitPrice: apiOrder.unitPrice,
         totalPrice: apiOrder.totalPrice,
@@ -153,19 +153,23 @@ function StatusBadge({ order }: { order: Order }) {
 
 function OrderItem({ order }: { order: Order }) {
     const imgSrc = order.imageUrl || "/images/chicken-fried.jpg";
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = async () => {
-        if (confirm(`Bạn có chắc muốn xóa đơn hàng "${order.name}"?`)) {
-            try {
-                console.log('🗑️ Deleting order:', order.id);
-                await OrderService.deleteOrder(order.id);
-                console.log('✅ Order deleted successfully');
-                // TODO: Refresh orders list or remove from UI
-                window.location.reload(); // Temporary solution
-            } catch (error) {
-                console.error('❌ Error deleting order:', error);
-                alert('Không thể xóa đơn hàng. Vui lòng thử lại.');
-            }
+        setIsDeleting(true);
+        try {
+            console.log('🗑️ Deleting order:', order.id);
+            await OrderService.deleteOrder(order.id);
+            console.log('✅ Order deleted successfully');
+            setShowConfirmModal(false);
+            // TODO: Refresh orders list or remove from UI
+            window.location.reload(); // Temporary solution
+        } catch (error) {
+            console.error('❌ Error deleting order:', error);
+            alert('Không thể xóa đơn hàng. Vui lòng thử lại.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -211,7 +215,7 @@ function OrderItem({ order }: { order: Order }) {
                         {order.totalPrice && (
                             <li>
                                 <span className="fw-medium">Tổng tiền:</span> 
-                                <span className="fw-bold text-primary ms-1">
+                                <span className="fw-bold ms-1" style={{ color: '#54A65C' }}>
                                     {order.totalPrice.toLocaleString('vi-VN')} VNĐ
                                 </span>
                             </li>
@@ -220,19 +224,87 @@ function OrderItem({ order }: { order: Order }) {
                 </div>
             </div>
             
-            {/* Cancel button moved below the card */}
-            <div className="d-flex justify-content-center">
-                <button 
-                    className={styles.deleteButton}
-                    onClick={handleDelete}
-                    title="Hủy đơn hàng"
-                >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
-                        <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/>
-                    </svg>
-                    Hủy đơn hàng
-                </button>
-            </div>
+            {/* Cancel button moved below the card - only show if not cancelled or completed */}
+            {order.status !== "CANCELLED" && order.status !== "PICKED_UP" && (
+                <div className="d-flex justify-content-center">
+                    <button 
+                        className={styles.deleteButton}
+                        onClick={() => setShowConfirmModal(true)}
+                        title="Hủy đơn hàng"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="me-2">
+                            <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/>
+                        </svg>
+                        Hủy đơn hàng
+                    </button>
+                </div>
+            )}
+
+            {/* Confirmation Modal */}
+            {showConfirmModal && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content" style={{ border: 'none', borderRadius: '16px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+                            <div className="modal-body text-center p-4">
+                                <div className="mb-3">
+                                    <div style={{ 
+                                        width: '64px', 
+                                        height: '64px', 
+                                        backgroundColor: '#FEF2F2', 
+                                        borderRadius: '50%', 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center', 
+                                        margin: '0 auto',
+                                        marginBottom: '16px'
+                                    }}>
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2">
+                                            <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h5 className="fw-bold mb-2" style={{ color: '#1F2937' }}>Xác nhận hủy đơn hàng</h5>
+                                <p className="text-muted mb-4" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                                    Bạn có chắc chắn muốn hủy đơn hàng <strong>"{order.name}"</strong>?<br/>
+                                    Hành động này không thể hoàn tác.
+                                </p>
+                                <div className="d-flex gap-3 justify-content-center">
+                                    <button 
+                                        className="btn btn-outline-secondary px-4 py-2" 
+                                        style={{ borderRadius: '8px', fontSize: '14px', fontWeight: '500' }}
+                                        onClick={() => setShowConfirmModal(false)}
+                                        disabled={isDeleting}
+                                    >
+                                        Hủy bỏ
+                                    </button>
+                                    <button 
+                                        className="btn px-4 py-2" 
+                                        style={{ 
+                                            backgroundColor: '#EF4444', 
+                                            borderColor: '#EF4444', 
+                                            color: 'white', 
+                                            borderRadius: '8px', 
+                                            fontSize: '14px', 
+                                            fontWeight: '500' 
+                                        }}
+                                        onClick={handleDelete}
+                                        disabled={isDeleting}
+                                    >
+                                        {isDeleting ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style={{ color: '#54A65C' }}></span>
+                                                Đang xử lý...
+                                            </>
+                                        ) : (
+                                            'Xác nhận hủy'
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -316,7 +388,7 @@ export default function OrdersPage() {
 
     return (
         <AuthGuard>
-            <main className="container py-3" style={{ maxWidth: 640 }}>
+            <main className={`container py-3 ${styles.mainContainer}`}>
             {/* Header */}
             <div className="d-flex align-items-center gap-2 mb-2">
                 <button 
@@ -353,7 +425,7 @@ export default function OrdersPage() {
             <div className="bg-white rounded-3 border p-2 p-sm-3">
                 {loading ? (
                     <div className="text-center text-body-secondary py-5">
-                        <div className="spinner-border spinner-border-sm me-2" role="status">
+                        <div className="spinner-border spinner-border-sm me-2" role="status" style={{ color: '#54A65C' }}>
                             <span className="visually-hidden">Loading...</span>
                         </div>
                         Đang tải đơn hàng...

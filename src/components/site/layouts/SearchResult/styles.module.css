@@ -23,6 +23,12 @@
   background: #fff;
 }
 
+.thumbContainer {
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
 .thumb {
   width: 64px; height: 64px;
   border-radius: 12px;
@@ -43,6 +49,8 @@
 }
 
 .meta { display:flex; align-items:center; gap:6px; font-size:13px; color:#111827; }
+
+.price { color: #54a65c; font-weight: 600; }
 
 .more {
   width: 36px; height: 36px; border-radius: 999px;

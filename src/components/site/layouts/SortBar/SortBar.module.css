@@ -7,16 +7,15 @@
   margin-bottom: 8px;
 }
 
+/* Style cho React Select container */
+.sortWrap > div {
+  min-height: 40px;
+  flex: 1;
+}
+
 .label {
   font-size: 12px;
   color: #6b7280;
 }
 
-.select {
-  border: 1px solid #e6ebef;
-  border-radius: 10px;
-  padding: 8px 10px;
-  outline: none;
-  background: #fff;
-  font: inherit;
-}
+/* React Select sẽ tự động style, không cần CSS cho select HTML nữa */

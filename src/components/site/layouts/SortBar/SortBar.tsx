@@ -1,8 +1,19 @@
 "use client";
 
+import Select from "react-select";
 import styles from "./SortBar.module.css";
+import { customSelectStyles } from "@/styles/reactSelectStyles";
 
-export type SortKey = "relevance" | "distanceAsc" | "priceAsc" | "priceDesc" | "flashDesc";
+export type SortKey = "relevance" | "distanceAsc" | "priceAsc" | "priceDesc" | "flashDesc" | "ordersDesc";
+
+const sortOptions = [
+  { value: "relevance", label: "Phù hợp nhất" },
+  { value: "distanceAsc", label: "Khoảng cách (gần → xa)" },
+  { value: "priceAsc", label: "Giá (thấp → cao)" },
+  { value: "priceDesc", label: "Giá (cao → thấp)" },
+  { value: "flashDesc", label: "Flash deal (cao → thấp)" },
+  { value: "ordersDesc", label: "Mua nhiều (cao → thấp)" },
+];
 
 export default function SortBar({
   value, onChange,
@@ -12,19 +23,15 @@ export default function SortBar({
 }) {
   return (
     <div className={styles.sortWrap}>
-      <label className={styles.label} htmlFor="sort">Sắp xếp</label>
-      <select
-        id="sort"
-        className={styles.select}
-        value={value}
-        onChange={(e)=>onChange(e.target.value as SortKey)}
-      >
-        <option value="relevance">Phù hợp nhất</option>
-        <option value="distanceAsc">Khoảng cách (gần → xa)</option>
-        <option value="priceAsc">Giá (thấp → cao)</option>
-        <option value="priceDesc">Giá (cao → thấp)</option>
-        <option value="flashDesc">Flash deal (cao → thấp)</option>
-      </select>
+      <label className={styles.label}>Sắp xếp</label>
+      <Select
+        value={sortOptions.find(option => option.value === value)}
+        onChange={(selectedOption) => onChange(selectedOption?.value as SortKey)}
+        options={sortOptions}
+        styles={customSelectStyles}
+        isSearchable={false}
+        placeholder="Chọn cách sắp xếp"
+      />
     </div>
   );
 }

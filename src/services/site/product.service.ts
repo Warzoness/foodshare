@@ -11,6 +11,8 @@ export type SearchProduct = {
   shopLatitude: number;
   shopLongitude: number;
   distanceKm: number;
+  discountPercentage?: number;
+  totalOrders?: number;
 };
 
 export type SearchSort = {
@@ -56,6 +58,7 @@ export type Product = {
   imageUrl?: string;
   distanceKm?: number;
   discountPercent?: number;
+  totalOrders?: number;
 };
 
 // API Response types based on actual API structure
@@ -71,8 +74,9 @@ export type ApiProduct = {
   shopName: string;
   shopLatitude: number;
   shopLongitude: number;
-  distancekm?: number;
-  totalorders?: number;
+  distanceKm?: number;
+  totalOrders?: number;
+  quantityAvailable?: number;
 };
 
 export type ProductDetail = {
@@ -90,6 +94,8 @@ export type ProductDetail = {
   shopLatitude: number;
   shopLongitude: number;
   distanceKm?: number;
+  totalOrders?: number;
+  quantityAvailable?: number;
 };
 
 export type ApiResponse<T> = {
@@ -114,23 +120,23 @@ const NEARBY_ENDPOINT = "/products/nearby";
 const PRODUCT_DETAIL_ENDPOINT = "/products";
 
 export const ProductService = {
-  search(params: ProductSearchParams) {
+  search(params: { q: string; size: number; lon: number | undefined; page: number; lat: number | undefined }) {
     return apiClient.get<ApiResponse<PageEnvelope<SearchProduct>>>(SEARCH_ENDPOINT, {
       query: params as Record<string, any>,
     });
   },
-  async topDiscounts(params: { page?: number; size?: number } = {}) {
-    const { page = 0, size = 12 } = params;
+  async topDiscounts(params: { page?: number; size?: number; lat?: number; lon?: number } = {}) {
+    const { page = 0, size = 12, lat, lon } = params;
     const res = await apiClient.get<ApiResponse<{ content: ApiProduct[] }>>(TOP_DISCOUNTS_ENDPOINT, {
-      query: { page, size },
+      query: { page, size, lat, lon },
     });
     const products = res.data?.content || [];
     return products.map(mapApiProductToProduct);
   },
-  async popular(params: { page?: number; size?: number } = {}) {
-    const { page = 0, size = 12 } = params;
+  async popular(params: { page?: number; size?: number; lat?: number; lon?: number } = {}) {
+    const { page = 0, size = 12, lat, lon } = params;
     const res = await apiClient.get<ApiResponse<{ content: ApiProduct[] }>>(POPULAR_ENDPOINT, {
-      query: { page, size },
+      query: { page, size, lat, lon },
     });
     const products = res.data?.content || [];
     return products.map(mapApiProductToProduct);
@@ -200,8 +206,9 @@ function mapApiProductToProduct(p: ApiProduct): Product {
     name: p.name,
     price: p.price,
     imageUrl: p.imageUrl,
-    distanceKm: p.distancekm,
+    distanceKm: p.distanceKm,
     discountPercent: p.discountPercentage,
+    totalOrders: p.totalOrders,
   };
 }
 
@@ -220,6 +227,8 @@ function mapApiProductToProductDetail(p: ApiProduct): ProductDetail {
     shopAddress: undefined, // API không có field này
     shopLatitude: p?.shopLatitude || 0.99,
     shopLongitude: p?.shopLongitude || 0.99,
-    distanceKm: p?.distancekm,
+    distanceKm: p?.distanceKm,
+    totalOrders: p?.totalOrders,
+    quantityAvailable: p?.quantityAvailable,
   };
 }
