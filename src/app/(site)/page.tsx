@@ -95,54 +95,45 @@ export default function HomePage() {
   const [loadingHot, setLoadingHot] = useState(USE_API);
   const [loadingShock, setLoadingShock] = useState(USE_API);
   const [loadingNear, setLoadingNear] = useState(USE_API);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const [hotRaw, setHotRaw] = useState<Product[]>([]);
   const [shockRaw, setShockRaw] = useState<Product[]>([]);
   const [nearRaw, setNearRaw] = useState<Product[]>([]);
 
-  // Nếu dùng API thật
-  const fetchHot = useCallback(async () => {
+  const fetchHot = useCallback(async (lat: number, lon: number) => {
     setLoadingHot(true);
     try {
-      const { latitude, longitude } = await getCurrentCoordinates();
-      // Sử dụng tọa độ mặc định nếu không có vị trí thực tế
-      const finalLat = latitude ?? 0.99;
-      const finalLon = longitude ?? 0.99;
-      const arr = await ProductService.popular({ page: 0, size: 12, lat: finalLat, lon: finalLon });
+      const arr = await ProductService.popular({ page: 0, size: 12, lat, lon });
       setHotRaw(arr || []);
     } catch (e: any) {
-      setErr(e.message || "Failed to fetch");
+      setErr(e.message || "Failed to fetch hot items");
       setHotRaw([]);
     } finally {
       setLoadingHot(false);
     }
   }, []);
 
-  const fetchShock = useCallback(async () => {
+  const fetchShock = useCallback(async (lat: number, lon: number) => {
     setLoadingShock(true);
     try {
-      const { latitude, longitude } = await getCurrentCoordinates();
-      // Sử dụng tọa độ mặc định nếu không có vị trí thực tế
-      const finalLat = latitude ?? 0.99;
-      const finalLon = longitude ?? 0.99;
-      const arr = await ProductService.topDiscounts({ page: 0, size: 12, lat: finalLat, lon: finalLon });
+      const arr = await ProductService.topDiscounts({ page: 0, size: 12, lat, lon });
       setShockRaw(arr || []);
     } catch (e: any) {
-      setErr(e.message || "Failed to fetch");
+      setErr(e.message || "Failed to fetch discount items");
       setShockRaw([]);
     } finally {
       setLoadingShock(false);
     }
   }, []);
 
-  const fetchNear = useCallback(async (lat?: number, lon?: number) => {
+  const fetchNear = useCallback(async (lat: number, lon: number) => {
     setLoadingNear(true);
     try {
-      const { latitude, longitude } = await getCurrentCoordinates();
-      const arr = await ProductService.nearby({ page: 0, size: 12, lat: latitude, lon: longitude });
+      const arr = await ProductService.nearby({ page: 0, size: 12, lat, lon });
       setNearRaw(arr || []);
     } catch (e: any) {
-      setErr(e.message || "Failed to fetch");
+      setErr(e.message || "Failed to fetch nearby items");
       setNearRaw([]);
     } finally {
       setLoadingNear(false);
@@ -150,20 +141,32 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (USE_API) {
-      fetchHot();
-      fetchShock();
-      // Fix cứng lat lon là 0.99
-      fetchNear(0.99, 0.99);
-    } else {
-      // No mock data fallback - show empty state
-      setHotRaw([]);
-      setShockRaw([]);
-      setNearRaw([]);
-      setLoadingHot(false);
-      setLoadingShock(false);
-      setLoadingNear(false);
-    }
+    let cancelled = false;
+
+    const loadData = async () => {
+      try {
+        const { latitude, longitude } = await getCurrentCoordinates();
+        const lat = latitude ?? 0.99;
+        const lon = longitude ?? 0.99;
+
+        if (cancelled) return;
+
+        // Gọi 3 API song song (không chờ tất cả để render)
+        fetchHot(lat, lon);
+        fetchShock(lat, lon);
+        fetchNear(lat, lon);
+      } catch (error: any) {
+        console.error("Lỗi khi lấy vị trí:", error);
+        setErr("Không thể xác định vị trí của bạn");
+      } finally {
+        if (!cancelled) setIsInitialLoad(false);
+      }
+    };
+
+    loadData();
+    return () => {
+      cancelled = true;
+    };
   }, [fetchHot, fetchShock, fetchNear]);
 
   const hot = useMemo(() => hotRaw.map(toCard), [hotRaw]);
@@ -171,19 +174,29 @@ export default function HomePage() {
   const near = useMemo(() => nearRaw.map(toCard), [nearRaw]);
 
   return (
-    <div className={styles.wrap}>
-      <div className="container pt-3 pb-2">
-        {/* Thanh search */}
-        <div style={{marginBottom: 12}}>
-          <SearchBar />
-        </div>
-        {err && <div className="alert alert-danger">{err}</div>}
+      <div className={styles.wrap}>
+        <div className="container pt-3 pb-2">
+          <div style={{ marginBottom: 12 }}>
+            <SearchBar />
+          </div>
 
-        <Section title="Mua nhiều" items={hot} loading={loadingHot} seeMoreHref="/search?sort=ordersDesc" />
-        <Section title="Giảm sốc" items={shock} loading={loadingShock} seeMoreHref="/search?flashDeal=30" />
-        <Section title="Gần bạn" items={near} loading={loadingNear} seeMoreHref="/search?distance=10" />
+          {err && <div className="alert alert-danger">{err}</div>}
+
+          {isInitialLoad && (
+              <div className="text-center py-4">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Đang tải...</span>
+                </div>
+                <p className="mt-2 text-muted">Đang tải dữ liệu...</p>
+              </div>
+          )}
+
+          <Section title="Mua nhiều" items={hot} loading={loadingHot} seeMoreHref="/search?sort=ordersDesc" />
+          <Section title="Giảm sốc" items={shock} loading={loadingShock} seeMoreHref="/search?flashDeal=30" />
+          <Section title="Gần bạn" items={near} loading={loadingNear} seeMoreHref="/search?distance=10" />
+        </div>
+
+        <FloatMenu />
       </div>
-      <FloatMenu />
-    </div>
   );
 }
