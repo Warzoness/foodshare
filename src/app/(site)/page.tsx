@@ -145,9 +145,9 @@ export default function HomePage() {
 
     const loadData = async () => {
       try {
-        const { latitude, longitude } = await getCurrentCoordinates();
-        const lat = latitude ?? 0.99;
-        const lon = longitude ?? 0.99;
+        // const { latitude, longitude } = await getCurrentCoordinates();
+        const lat =  0.99;
+        const lon =  0.99;
 
         if (cancelled) return;
 
