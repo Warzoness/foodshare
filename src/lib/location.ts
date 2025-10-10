@@ -25,22 +25,22 @@ export async function getCurrentCoordinates(options?: PositionOptions): Promise<
 
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-        });
-      },
-      (err) => {
-        reject(new Error(err.message || "Không thể lấy vị trí hiện tại"));
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 15000,
-        maximumAge: 0,
-        ...options,
-      }
+        (pos) => {
+          resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+          });
+        },
+        (err) => {
+          reject(new Error(err.message || "Không thể lấy vị trí hiện tại"));
+        },
+        {
+          enableHighAccuracy: false, // ⚡ dùng Wi-Fi / mạng di động — nhanh hơn GPS nhiều
+          timeout: 5000,             // ⏱ chỉ chờ tối đa 5 giây
+          maximumAge: 60000,         // 💾 dùng lại dữ liệu trong vòng 1 phút nếu có
+          ...options,
+        }
     );
   });
 }
