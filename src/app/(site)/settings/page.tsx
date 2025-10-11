@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
 import AuthGuard from "@/components/share/AuthGuard";
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 import { AuthService } from "@/services/site/auth.service";
 import { User, UpdateUserRequest } from "@/types/auth";
 import styles from "./settings.module.css";
@@ -249,14 +250,7 @@ export default function SettingsPage() {
   if (!user && !error) {
     return (
       <main className={`container py-3 ${styles.settingsContainer}`} style={{ maxWidth: 560 }}>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
-          <div className="text-center">
-            <div className="spinner-border" role="status" style={{ color: '#54A65C' }}>
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <div className="mt-2">Đang tải thông tin...</div>
-          </div>
-        </div>
+        <LoadingSpinner message="Đang tải thông tin..." />
       </main>
     );
   }

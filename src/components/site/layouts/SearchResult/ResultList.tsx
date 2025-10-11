@@ -7,7 +7,7 @@ export type { FoodResult } from "./ResultItem";
 export default function ResultsList({ items }: { items: FoodResult[] }) {
   return (
     <ul className={styles.list}>
-      {items.map((i, index) => <ResultItem key={i.id && i.id !== 0 ? i.id : `item-${index}`} item={i} />)}
+      {items.map((i, index) => <ResultItem key={`${i.id || 'unknown'}-${index}`} item={i} />)}
     </ul>
   );
 }

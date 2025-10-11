@@ -30,7 +30,7 @@ export default function FilterBar({
 }:{
   value: FilterValues;
   onApply: (v: FilterValues)=>void;
-  onRemoveTag: (k: keyof FilterValues)=>void;
+  onRemoveTag?: (k: keyof FilterValues)=>void;
   onClearAll: ()=>void;
 }) {
   const [draft, setDraft] = useState<FilterValues>(value);
@@ -134,7 +134,9 @@ export default function FilterBar({
           {tags.map(t => (
             <span key={t.key as string} className={styles.chip}>
               {t.label}
-              <button onClick={()=>onRemoveTag(t.key)} aria-label={`Xoá ${t.label}`} className={styles.chipX}>×</button>
+              {onRemoveTag && (
+                <button onClick={()=>onRemoveTag(t.key)} aria-label={`Xoá ${t.label}`} className={styles.chipX}>×</button>
+              )}
             </span>
           ))}
         </div>

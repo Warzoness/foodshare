@@ -8,6 +8,7 @@ import { OrderService } from "@/services/site/order.service";
 import { Order as ApiOrder } from "@/types/order";
 import { AuthService } from "@/services/site/auth.service";
 import AuthGuard from "@/components/share/AuthGuard";
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
 
 /** ===== Types ===== */
@@ -424,12 +425,7 @@ export default function OrdersPage() {
             {/* List */}
             <div className="bg-white rounded-3 border p-2 p-sm-3">
                 {loading ? (
-                    <div className="text-center text-body-secondary py-5">
-                        <div className="spinner-border spinner-border-sm me-2" role="status" style={{ color: '#54A65C' }}>
-                            <span className="visually-hidden">Loading...</span>
-                        </div>
-                        Đang tải đơn hàng...
-                    </div>
+                    <LoadingSpinner message="Đang tải đơn hàng..." size="small" className="py-5" />
                 ) : error ? (
                     <div className="text-center text-danger py-5">
                         <div className="mb-2">⚠️</div>

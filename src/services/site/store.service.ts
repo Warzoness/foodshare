@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { Store, StoreApiResponse, StoreSearchParams } from "@/types/store";
+import { Store, StoreApiResponse, StoreSearchParams, ProductApiResponse } from "@/types/store";
 
 const STORE_ENDPOINT = "/shops";
 const STORE_DETAIL_ENDPOINT = "/shops";
@@ -66,6 +66,22 @@ export const StoreService = {
     
     return apiClient.get<StoreApiResponse>(`${STORE_ENDPOINT}/category/${categoryId}`, {
       query: { page, size },
+    });
+  },
+
+  /**
+   * Get products by shop ID with pagination
+   */
+  async getShopProducts(shopId: number, params: {
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+  } = {}) {
+    const { page = 0, size = 20, sortBy = 'createdAt', sortDirection = 'desc' } = params;
+    
+    return apiClient.get<ProductApiResponse>(`${STORE_ENDPOINT}/${shopId}/products`, {
+      query: { page, size, sortBy, sortDirection },
     });
   },
 };

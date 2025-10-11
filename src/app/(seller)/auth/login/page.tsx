@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./Login.module.css";
 import Link from "next/link";
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 import { AuthService } from "@/services/site/auth.service";
 import { SocialLoginRequest } from "@/types/auth";
 
@@ -265,12 +266,11 @@ function LoginPageContent() {
           <span className={styles.brand}>FoodShare</span>
         </div>
         <div className={styles.loginCard}>
-          <div className={styles.loadingSDK}>
-            <div className="spinner-border spinner-border-sm me-2" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            Đang kiểm tra trạng thái đăng nhập...
-          </div>
+          <LoadingSpinner 
+            message="Đang kiểm tra trạng thái đăng nhập..." 
+            size="small"
+            className={styles.loadingSDK}
+          />
         </div>
         <div className={styles.frame} />
       </div>

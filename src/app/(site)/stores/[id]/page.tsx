@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 import { StoreService } from "@/services/site/store.service";
-import { Store } from "@/types/store";
+import { Store, StoreProduct, ProductPaginationResponse } from "@/types/store";
 import styles from "./StoreDetail.module.css";
 
 function vnd(n: number) {
@@ -17,9 +18,17 @@ export default function StoreDetailPage() {
   const params = useParams();
   const storeId = parseInt(params.id as string);
   const [store, setStore] = useState<Store | null>(null);
+  const [products, setProducts] = useState<StoreProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
+  // Fetch store details
   useEffect(() => {
     const fetchStore = async () => {
       try {
@@ -37,6 +46,68 @@ export default function StoreDetailPage() {
       fetchStore();
     }
   }, [storeId]);
+
+  // Fetch products with pagination
+  const fetchProducts = useCallback(async (page = 0, append = false) => {
+    if (!storeId) return;
+    
+    try {
+      if (page === 0) {
+        setLoadingProducts(true);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const response = await StoreService.getShopProducts(storeId, {
+        page,
+        size: 20,
+        sortBy: 'createdAt',
+        sortDirection: 'desc'
+      });
+
+      if (response.success && response.data) {
+        const { content, totalPages, totalElements, last } = response.data;
+        
+        if (append) {
+          // Đảm bảo không có duplicate products dựa trên ID
+          setProducts(prev => {
+            const existingIds = new Set(prev.map(product => product.id));
+            const newProducts = content.filter(product => !existingIds.has(product.id));
+            return [...prev, ...newProducts];
+          });
+        } else {
+          setProducts(content);
+        }
+        
+        setCurrentPage(page);
+        setTotalPages(totalPages);
+        setTotalElements(totalElements);
+        setHasMore(!last);
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      if (!append) {
+        setError(err instanceof Error ? err.message : "Failed to load products");
+      }
+    } finally {
+      setLoadingProducts(false);
+      setLoadingMore(false);
+    }
+  }, [storeId]);
+
+  // Load initial products
+  useEffect(() => {
+    if (store && storeId) {
+      fetchProducts(0, false);
+    }
+  }, [store, storeId, fetchProducts]);
+
+  // Load more products
+  const loadMore = useCallback(() => {
+    if (hasMore && !loadingMore && !loadingProducts) {
+      fetchProducts(currentPage + 1, true);
+    }
+  }, [hasMore, loadingMore, loadingProducts, currentPage, fetchProducts]);
 
   if (loading) {
     return (
@@ -81,8 +152,8 @@ export default function StoreDetailPage() {
             </button>
           </div>
         </section>
-        <div className="container" style={{ padding: "2rem", textAlign: "center" }}>
-          <div>Đang tải thông tin cửa hàng...</div>
+        <div className="container" style={{ padding: "2rem" }}>
+          <LoadingSpinner message="Đang tải thông tin cửa hàng..." />
         </div>
       </main>
     );
@@ -219,43 +290,82 @@ export default function StoreDetailPage() {
 
       {/* Product list */}
       <section className="container">
-        <h6 className={styles.sectionTitle}>Sản phẩm ({store.products.length})</h6>
-        {store.products.length > 0 ? (
-          <div className={styles.gridProducts}>
-            {store.products.map((product) => (
-              <Link
-                key={product.id}
-                href={`/items/${product.id}`}
-                className={styles.card}
-              >
-                <div className={styles.cardThumb}>
-                  <Image 
-                    src={product.imageUrl || "/images/food1.jpg"} 
-                    alt={product.name} 
-                    fill 
-                    className={styles.cardImg} 
-                  />
-                  {product.quantityAvailable === 0 && (
-                    <div className={styles.outOfStock}>Hết hàng</div>
+        <h6 className={styles.sectionTitle}>
+          Sản phẩm ({totalElements > 0 ? totalElements : (loadingProducts ? '...' : '0')})
+        </h6>
+        
+        {loadingProducts ? (
+          <LoadingSpinner message="Đang tải sản phẩm..." />
+        ) : products.length > 0 ? (
+          <>
+            <div className={styles.gridProducts}>
+              {products.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/items/${product.id}`}
+                  className={styles.card}
+                >
+                  <div className={styles.cardThumb}>
+                    <Image 
+                      src={product.imageUrl || "/images/food1.jpg"} 
+                      alt={product.name} 
+                      fill 
+                      className={styles.cardImg} 
+                    />
+                    {product.quantityAvailable === 0 && (
+                      <div className={styles.outOfStock}>Hết hàng</div>
+                    )}
+                  </div>
+                  <div className={styles.cardBody}>
+                    <div className={styles.cardTitle}>{product.name}</div>
+                    <div className={styles.cardDescription}>{product.description}</div>
+                    <div className={styles.cardPrice}>
+                      {vnd(product.price)}
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <span style={{ 
+                          textDecoration: 'line-through', 
+                          color: '#999', 
+                          fontSize: '0.9em',
+                          marginLeft: '8px'
+                        }}>
+                          {vnd(product.originalPrice)}
+                        </span>
+                      )}
+                    </div>
+                    <div className={styles.cardStock}>
+                      Còn lại: {product.quantityAvailable} | Đang chờ: {product.quantityPending}
+                    </div>
+                    <div className={styles.cardStatus} style={{
+                      color: product.status === '1' ? '#22c55e' : '#ef4444',
+                      fontWeight: '600'
+                    }}>
+                      {product.status === '1' ? '🟢 Đang bán' : '🔴 Ngừng bán'}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            
+            {/* Load more button */}
+            {hasMore && (
+              <div className={styles.paginationContainer}>
+                <button
+                  className={styles.loadMoreBtn}
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? (
+                    <>
+                      <div className={styles.loadingSpinnerSmall}></div>
+                      Đang tải...
+                    </>
+                  ) : (
+                    'Tải thêm sản phẩm'
                   )}
-                </div>
-                <div className={styles.cardBody}>
-                  <div className={styles.cardTitle}>{product.name}</div>
-                  <div className={styles.cardDescription}>{product.description}</div>
-                  <div className={styles.cardPrice}>{vnd(product.price)}</div>
-                  <div className={styles.cardStock}>
-                    Còn lại: {product.quantityAvailable} | Đang chờ: {product.quantityPending}
-                  </div>
-                  <div className={styles.cardStatus} style={{
-                    color: product.status === '1' ? '#22c55e' : '#ef4444',
-                    fontWeight: '600'
-                  }}>
-                    {product.status === '1' ? '🟢 Đang bán' : '🔴 Ngừng bán'}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className={styles.noProducts}>
             <p>Cửa hàng chưa có sản phẩm nào</p>
