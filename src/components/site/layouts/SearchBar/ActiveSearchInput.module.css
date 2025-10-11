@@ -37,7 +37,8 @@
 
 .wrap:focus-within .icon {
     opacity: 0.8;
-    color: #54a65c;
+    color: #6b7280; /* giữ màu gốc */
+    text-shadow: 0 0 0 2px #54a65c; /* chỉ khung xanh */
     transform: scale(1.05);
 }
 
