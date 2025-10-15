@@ -8,6 +8,7 @@ export type FoodResult = {
   id: number | string;
   name: string;
   price?: number;         // đ
+  originalPrice?: number; // đ
   distanceKm?: number;    // km
   flashDealPercent?: number; // %
   totalOrders?: number;  // số đơn đã bán
@@ -50,11 +51,22 @@ export default function ResultItem({ item }: { item: FoodResult }) {
           </div>
         )}
         <div className={styles.meta}>
-          {safeMetaParts.map((t, idx) => (
-            <span key={idx} className={idx === 0 ? styles.price : styles.metaPart}>
-              {idx > 0 && <span className={styles.dot} aria-hidden>•</span>}{t}
+          <div className={styles.priceContainer}>
+            <span className={styles.price}>
+              {item.price && item.price > 0 ? `${item.price.toLocaleString()}đ` : null}
             </span>
-          ))}
+            {item.originalPrice && item.originalPrice > 0 && (
+              <span className={styles.originalPrice}>
+                {item.originalPrice.toLocaleString()}đ
+              </span>
+            )}
+          </div>
+          {item.distanceKm && item.distanceKm > 0 && (
+            <span className={styles.metaPart}>
+              <span className={styles.dot} aria-hidden>•</span>
+              {item.distanceKm} km
+            </span>
+          )}
         </div>
       </div>
       {/*<button */}

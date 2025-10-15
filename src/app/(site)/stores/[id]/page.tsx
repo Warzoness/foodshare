@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import FloatMenu from "@/components/site/layouts/FloatMenu/FloatMenu";
 import LoadingSpinner from "@/components/share/LoadingSpinner";
 import { StoreService } from "@/services/site/store.service";
-import { Store, StoreProduct, ProductPaginationResponse } from "@/types/store";
+import { Store, StoreProduct } from "@/types/store";
 import styles from "./StoreDetail.module.css";
 
 function vnd(n: number) {
@@ -72,7 +72,7 @@ export default function StoreDetailPage() {
           // Đảm bảo không có duplicate products dựa trên ID
           setProducts(prev => {
             const existingIds = new Set(prev.map(product => product.id));
-            const newProducts = content.filter(product => !existingIds.has(product.id));
+            const newProducts = content.filter((product: StoreProduct) => !existingIds.has(product.id));
             return [...prev, ...newProducts];
           });
         } else {

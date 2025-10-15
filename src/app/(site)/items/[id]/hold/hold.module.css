@@ -18,4 +18,20 @@
   margin: 8px auto 0;
   box-shadow: 0 6px 18px rgba(84,166,92,.28);
 }
+
+/* Clickable time input */
+.clickableTimeInput {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.clickableTimeInput:hover {
+  background-color: rgba(84, 166, 92, 0.05) !important;
+  border-color: #4a9452 !important;
+}
+
+.clickableTimeInput:active {
+  transform: scale(0.98);
+}
     

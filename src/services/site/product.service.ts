@@ -5,6 +5,7 @@ export type SearchProduct = {
   productId: number;
   name: string;
   price: number;
+  originalPrice?: number;
   imageUrl: string;
   shopId: number;
   shopName: string;
@@ -55,6 +56,7 @@ export type Product = {
   id: number;
   name: string;
   price: number;
+  originalPrice?: number;
   imageUrl?: string;
   distanceKm?: number;
   discountPercent?: number;
@@ -206,6 +208,7 @@ function mapApiProductToProduct(p: ApiProduct): Product {
     id: p.productId,
     name: p.name,
     price: p.price,
+    originalPrice: p.originalPrice,
     imageUrl: p.imageUrl,
     distanceKm: p.distanceKm,
     discountPercent: p.discountPercentage,

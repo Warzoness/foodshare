@@ -12,19 +12,20 @@ const SearchBar = dynamic(() => import("@/components/site/layouts/SearchBar/Sear
 
 const USE_API = true; // Always use real API data
 
-type CardItem = { id: number; name: string; price: string; img: string; discountPct?: number; totalOrders?: number; distanceKm?: number };
+type CardItem = { id: number; name: string; price: string; originalPrice?: string; img: string; discountPct?: number; totalOrders?: number; distanceKm?: number };
 
 
 
 function priceToLabel(v?: number) {
   if (typeof v !== "number") return "—";
-  if (v >= 1000 && v % 1000 === 0) return `${Math.round(v / 1000)}.000`;
+  if (v >= 1000 && v % 1000 === 0) return `${Math.round(v / 1000)}.000 đ`;
   return v.toLocaleString("vi-VN") + " đ";
 }
 const toCard = (p: Product): CardItem => ({
   id: p.id,
   name: p.name,
   price: priceToLabel(p.price),
+  originalPrice: (p.originalPrice && p.originalPrice > p.price) ? priceToLabel(p.originalPrice) : undefined,
   img: p.imageUrl || "/images/chicken-fried.jpg",
   discountPct: p.discountPercent ?? undefined,
   totalOrders: p.totalOrders,
@@ -72,7 +73,12 @@ function Section({
                 </div>
                 <div className={styles.cardMeta}>
                   <div className={styles.itemName} title={it.name}>{it.name}</div>
-                  <div className={styles.price}>{it.price}</div>
+                  <div className={styles.priceContainer}>
+                    <div className={styles.price}>{it.price}</div>
+                    {it.originalPrice && (
+                      <div className={styles.originalPrice}>{it.originalPrice}</div>
+                    )}
+                  </div>
                   {((it.totalOrders && it.totalOrders > 0) || it.distanceKm) && (
                     <div className={styles.metaInfo}>
                       {/*{it.totalOrders && it.totalOrders > 0 && <span className={styles.orders}>đã bán {it.totalOrders}</span>}*/}

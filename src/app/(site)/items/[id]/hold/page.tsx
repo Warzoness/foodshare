@@ -8,6 +8,7 @@ import { OrderService } from "@/services/site/order.service";
 import { CreateOrderRequest, CreateOrderResponse } from "@/types/order";
 import { AuthService } from "@/services/site/auth.service";
 import Link from "next/link";
+import TimePicker from "@/components/share/TimePicker/TimePicker";
 
 /* ========= Utils ========= */
 const VN_TZ = "Asia/Ho_Chi_Minh";
@@ -82,10 +83,102 @@ export default function HoldPage() {
     searchParams: Object.fromEntries(sp.entries())
   });
 
-  const [dateISO] = useState<string>(todayISO());
-  const [timeHM] = useState<string>(nowHM()); // mặc định giờ hiện tại (24h)
+  const [dateISO, setDateISO] = useState<string>(todayISO());
+  const [timeHM, setTimeHM] = useState<string>(nowHM()); // mặc định giờ hiện tại (24h)
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [qty, setQty] = useState<number>(1);
+  const [timeAlert, setTimeAlert] = useState<string | null>(null);
   const total = useMemo(() => qty * unitPrice, [qty, unitPrice]);
+
+  // Check if time is valid (within 2 hours from now, considering day overflow)
+  const isValidTime = (timeStr: string): boolean => {
+    const [hour, minute] = timeStr.split(":").map(Number);
+    const currentTime = new Date();
+    const currentHour = currentTime.getHours();
+    const currentMinute = currentTime.getMinutes();
+    
+    const currentMinutes = currentHour * 60 + currentMinute;
+    const selectedMinutes = hour * 60 + minute;
+    const maxMinutes = currentMinutes + 120; // +2 hours
+    
+    // If max time goes to next day (e.g., 23:55 + 2h = 01:55 next day)
+    if (maxMinutes >= 1440) {
+      const nextDayMaxMinutes = maxMinutes - 1440;
+      // Valid if: current time <= selected time <= max time (same day) OR selected time <= next day max time
+      return selectedMinutes >= currentMinutes || selectedMinutes <= nextDayMaxMinutes;
+    } else {
+      // Normal case: all within same day
+      return selectedMinutes >= currentMinutes && selectedMinutes <= maxMinutes;
+    }
+  };
+
+  // Handle time change and update date if needed
+  const handleTimeChange = (newTime: string) => {
+    setTimeHM(newTime);
+    
+    // Validate time and show alert if invalid
+    if (!isValidTime(newTime)) {
+      const [hour, minute] = newTime.split(":").map(Number);
+      const currentTime = new Date();
+      const currentHour = currentTime.getHours();
+      const currentMinute = currentTime.getMinutes();
+      
+      const currentMinutes = currentHour * 60 + currentMinute;
+      const maxMinutes = currentMinutes + 120;
+      
+      // Format current time
+      const currentTimeStr = `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}`;
+      
+      // Format max time (handle day overflow)
+      let maxTimeStr;
+      if (maxMinutes >= 1440) { // Next day (24 * 60 = 1440 minutes)
+        const nextDayHour = Math.floor((maxMinutes - 1440) / 60);
+        const nextDayMinute = (maxMinutes - 1440) % 60;
+        maxTimeStr = `${nextDayHour.toString().padStart(2, "0")}:${nextDayMinute.toString().padStart(2, "0")} (ngày mai)`;
+      } else {
+        const maxHour24 = Math.floor(maxMinutes / 60) % 24;
+        const maxMinute = maxMinutes % 60;
+        maxTimeStr = `${maxHour24.toString().padStart(2, "0")}:${maxMinute.toString().padStart(2, "0")}`;
+      }
+      
+      setTimeAlert(`Chỉ có thể đặt chỗ từ ${currentTimeStr} đến ${maxTimeStr}`);
+    } else {
+      setTimeAlert(null);
+      
+      // Check if the selected time is for next day
+      const [hour, minute] = newTime.split(":").map(Number);
+      const currentTime = new Date();
+      const currentHour = currentTime.getHours();
+      const currentMinute = currentTime.getMinutes();
+      
+      const currentMinutes = currentHour * 60 + currentMinute;
+      const selectedMinutes = hour * 60 + minute;
+      const maxMinutes = currentMinutes + 120; // +2 hours
+      
+      // Determine if selected time is for next day
+      let isNextDay = false;
+      
+      if (maxMinutes >= 1440) {
+        // We're in a situation where +2 hours goes to next day
+        const nextDayMaxMinutes = maxMinutes - 1440;
+        // If selected time is earlier than current time, it means next day
+        if (selectedMinutes < currentMinutes) {
+          isNextDay = true;
+        }
+      }
+      
+      if (isNextDay) {
+        // Update to next day
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowISO = tomorrow.toISOString().split('T')[0];
+        setDateISO(tomorrowISO);
+      } else {
+        // Reset to today if it's not next day
+        setDateISO(todayISO());
+      }
+    }
+  };
 
   const [success, setSuccess] = useState<SuccessData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -302,45 +395,34 @@ export default function HoldPage() {
         <div className="text-body-secondary mb-3">Bạn đang giữ chỗ {itemName.toLowerCase()}</div>
 
         <div className="w-100" style={{ maxWidth: 520 }}>
-          {/* Ngày đặt (mặc định thời gian hiện tại) */}
+          {/* Ngày đặt (có thể chỉnh sửa) */}
           <label className="form-label text-start w-100">Ngày đặt</label>
           <div className="input-group mb-3">
             <span className="input-group-text">📅</span>
-            {/* ĐÃ ẨN PHẦN CHỌN NGÀY: giữ cố định theo thời gian hiện tại */}
-            {/*
-            <input
-              type="date"
-              className="form-control"
-              style={{ borderColor: "#54A65C" }}
-              value={dateISO}
-              onChange={(e) => setDateISO(e.target.value)}
-              lang="vi"
-              pattern="\\d{4}-\\d{2}-\\d{2}"
-              required
-            />
-            */}
-            <div className="form-control bg-light" style={{ borderColor: "#54A65C" }}>{formatDateVN(dateISO)}</div>
+            <div className="form-control bg-light" style={{ borderColor: "#54A65C" }}>
+              {formatDateVN(dateISO)}
+            </div>
           </div>
 
-          {/* Giờ đặt (24h, mặc định thời gian hiện tại) */}
+          {/* Giờ đặt (24h, có thể chỉnh sửa) */}
           <label className="form-label text-start w-100">Giờ đặt</label>
           <div className="input-group mb-3">
             <span className="input-group-text">🕑</span>
-            {/* ĐÃ ẨN PHẦN CHỌN GIỜ: giữ cố định theo thời gian hiện tại */}
-            {/*
-            <input
-              type="time"
-              className="form-control"
-              value={timeHM}
-              onChange={(e) => setTimeHM(e.target.value)}
-              step={60}
-              lang="vi"
-              pattern="[0-9]{2}:[0-9]{2}"
-              required
-            />
-            */}
-            <div className="form-control bg-light">{formatTimeVN24(timeHM)}</div>
+            <div 
+              className={`form-control ${styles.clickableTimeInput}`}
+              style={{ borderColor: "#54A65C" }}
+              onClick={() => setShowTimePicker(true)}
+            >
+              {formatTimeVN24(timeHM)}
+            </div>
           </div>
+
+          {/* Time Alert Banner */}
+          {timeAlert && (
+            <div className="alert alert-danger mb-3" role="alert" style={{ fontSize: '14px', padding: '8px 12px' }}>
+              {timeAlert}
+            </div>
+          )}
 
           {/* Số lượng */}
           <div className="d-flex justify-content-between align-items-center mb-2">
@@ -387,12 +469,21 @@ export default function HoldPage() {
             type="submit" 
             className="btn w-100 py-2 fw-bold" 
             style={{ background: "#54A65C", color: "#fff" }}
-            disabled={isLoading || !isLoggedIn}
+            disabled={isLoading || !isLoggedIn || !isValidTime(timeHM)}
           >
             {isLoading ? 'Đang đặt chỗ...' : 'Giữ chỗ'}
           </button>
         </div>
       </form>
+
+      {/* TimePicker Modal */}
+      {showTimePicker && (
+        <TimePicker
+          value={timeHM}
+          onChange={handleTimeChange}
+          onClose={() => setShowTimePicker(false)}
+        />
+      )}
     </main>
   );
 }

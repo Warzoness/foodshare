@@ -1,0 +1,197 @@
+/* iOS-style Modal Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* iOS-style Container */
+.container {
+  background: #f2f2f7;
+  border-radius: 16px 16px 0 0;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* iOS-style Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  background: #f2f2f7;
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.cancelButton {
+  background: none;
+  border: none;
+  color: #007AFF;
+  font-size: 17px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+}
+
+.doneButton {
+  background: none;
+  border: none;
+  color: #007AFF;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* iOS-style Time Picker */
+.timePicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: white;
+  position: relative;
+}
+
+/* iOS-style Selection Highlight */
+.timePicker::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  right: 20px;
+  height: 40px;
+  background: rgba(0, 122, 255, 0.1);
+  border-radius: 8px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.timePicker::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  right: 20px;
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.1);
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* iOS-style Column */
+.column {
+  flex: 1;
+  position: relative;
+  z-index: 3;
+}
+
+/* iOS-style Scroll Container */
+.scrollContainer {
+  height: 200px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  padding: 80px 0; /* Add padding to center items */
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* iOS-style Item */
+.item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  font-weight: 400;
+  color: #000;
+  transition: none;
+  cursor: pointer;
+  position: relative;
+}
+
+/* iOS-style Selected Item */
+.item.selected {
+  color: #000;
+  font-weight: 500;
+}
+
+/* iOS-style Fade Effect */
+.item:not(.selected) {
+  opacity: 0.4;
+}
+
+/* iOS-style Separator */
+.separator {
+  font-size: 21px;
+  font-weight: 400;
+  color: #000;
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  z-index: 3;
+  position: relative;
+}
+
+/* iOS-style Bottom Safe Area */
+.bottomSafeArea {
+  height: 34px;
+  background: #f2f2f7;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .timePicker {
+    padding: 16px;
+  }
+  
+  .timePicker::before,
+  .timePicker::after {
+    left: 16px;
+    right: 16px;
+  }
+  
+  .separator {
+    font-size: 19px;
+    margin: 0 6px;
+  }
+  
+  .item {
+    font-size: 19px;
+  }
+}

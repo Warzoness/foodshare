@@ -50,7 +50,20 @@
 
 .meta { display:flex; align-items:center; gap:6px; font-size:13px; color:#111827; }
 
+.priceContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .price { color: #54a65c; font-weight: 600; }
+
+.originalPrice {
+  color: #9ca3af;
+  font-weight: 500;
+  font-size: 11px;
+  text-decoration: line-through;
+}
 
 .more {
   width: 36px; height: 36px; border-radius: 999px;

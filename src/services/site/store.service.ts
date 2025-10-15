@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { Store, StoreApiResponse, StoreSearchParams, ProductPaginationResponse } from "@/types/store";
+import { Store, StoreApiResponse, StoreSearchParams, ProductApiResponse } from "@/types/store";
 
 const STORE_ENDPOINT = "/shops";
 const STORE_DETAIL_ENDPOINT = "/shops";
@@ -80,7 +80,7 @@ export const StoreService = {
   } = {}) {
     const { page = 0, size = 20, sortBy = 'createdAt', sortDirection = 'desc' } = params;
     
-    return apiClient.get<ProductPaginationResponse>(`${STORE_ENDPOINT}/${shopId}/products`, {
+    return apiClient.get<ProductApiResponse>(`${STORE_ENDPOINT}/${shopId}/products`, {
       query: { page, size, sortBy, sortDirection },
     });
   },

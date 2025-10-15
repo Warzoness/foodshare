@@ -34,7 +34,7 @@ function LoginPageContent() {
           console.log('🔐 User already logged in, redirecting to home');
           // Get returnUrl if available, otherwise go to home
           const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
-          router.push(returnUrl);
+          router.replace(returnUrl);
           return;
         }
         setCheckingAuth(false);
@@ -68,11 +68,11 @@ function LoginPageContent() {
 
   // Auto-render Google button when SDK is loaded
   useEffect(() => {
-    if (sdkLoaded && window.google) {
+    if (sdkLoaded && window.google && !checkingAuth) {
       console.log('🔄 Auto-rendering Google Sign-In Button...');
       renderGoogleButton();
     }
-  }, [sdkLoaded]);
+  }, [sdkLoaded, checkingAuth]);
 
   const loadSDKs = async () => {
     try {
@@ -116,8 +116,12 @@ function LoginPageContent() {
   };
 
   const renderGoogleButton = () => {
-    if (!sdkLoaded || !window.google) {
-      console.error('❌ Google SDK not loaded:', { sdkLoaded, google: !!window.google });
+    if (!sdkLoaded || !window.google || checkingAuth) {
+      console.error('❌ Google SDK not loaded or component is redirecting:', { 
+        sdkLoaded, 
+        google: !!window.google, 
+        checkingAuth 
+      });
       return;
     }
 
@@ -168,7 +172,7 @@ function LoginPageContent() {
 
       // Render Google Sign-In Button with mobile-optimized settings
       const buttonContainer = document.getElementById('google-login-button');
-      if (buttonContainer) {
+      if (buttonContainer && !checkingAuth) {
         const buttonConfig: any = {
           theme: 'outline',
           size: 'large',
@@ -192,8 +196,10 @@ function LoginPageContent() {
         (window.google as any).accounts.id.renderButton(buttonContainer, buttonConfig);
         console.log('✅ Google Sign-In Button rendered');
       } else {
-        console.error('❌ Google login button container not found');
-        setError('Không thể tạo nút đăng nhập Google');
+        console.error('❌ Google login button container not found or component is redirecting');
+        if (!checkingAuth) {
+          setError('Không thể tạo nút đăng nhập Google');
+        }
       }
       
     } catch (error: unknown) {
@@ -242,7 +248,7 @@ function LoginPageContent() {
       // Redirect to intended page or home
       const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
       console.log('🔄 Redirecting to:', returnUrl);
-      router.push(returnUrl);
+      router.replace(returnUrl);
       
     } catch (error: any) {
       console.error('❌ Google login processing error:', error);

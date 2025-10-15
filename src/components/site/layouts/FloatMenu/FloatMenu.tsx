@@ -1,27 +1,17 @@
 "use client";
 
-import {usePathname, useRouter} from "next/navigation";
+import {usePathname} from "next/navigation";
 import Link from "next/link";
 import {AuthService} from "@/services/site/auth.service";
 import styles from "./FloatMenu.module.css";
 
 export default function FloatMenu() {
   const pathname = usePathname();
-  const router = useRouter();
 
-  const handleAccountClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-
-    // Check if user is logged in
+  // Determine account link href based on login status
+  const getAccountHref = () => {
     const isLoggedIn = AuthService.isLoggedIn();
-
-    if (isLoggedIn) {
-      // User is logged in, go to settings
-      router.push('/settings');
-    } else {
-      // User is not logged in, redirect to login
-      router.push('/auth/login');
-    }
+    return isLoggedIn ? '/settings' : '/auth/login';
   };
 
   return (
@@ -75,19 +65,19 @@ export default function FloatMenu() {
       </Link>
 
       {/* Account */}
-      <button
-        onClick={handleAccountClick}
-        className={`${styles.navItem} ${styles.accountButton} ${pathname === "/settings" ? styles.active : ""}`}
+      <Link 
+        href={getAccountHref()} 
+        className={`${styles.navItem} ${pathname === "/settings" || pathname === "/auth/login" ? styles.active : ""}`}
       >
         <i
           className={
-            pathname === "/settings"
+            pathname === "/settings" || pathname === "/auth/login"
               ? "fi fi-sr-user" // icon đậm
               : "fi fi-rr-user" // icon thường
           }
         ></i>
         <span>Tài khoản</span>
-      </button>
+      </Link>
     </nav>
   );
 }

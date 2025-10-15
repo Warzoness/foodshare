@@ -247,6 +247,7 @@ function SearchPageContent() {
     id: p.productId && p.productId > 0 ? p.productId : "unknown",
     name: p.name?.trim() || "Sản phẩm",
     price: p.price && p.price > 0 ? p.price : undefined,
+    originalPrice: (p.originalPrice && p.originalPrice > 0 && p.originalPrice > p.price) ? p.originalPrice : undefined,
     imgUrl: p.imageUrl?.trim() || "/food/placeholder.jpg",
     distanceKm: p.distanceKm && p.distanceKm > 0 ? p.distanceKm : undefined,
     vendor: p.shopName?.trim() || "Cửa hàng",
