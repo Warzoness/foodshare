@@ -40,9 +40,8 @@
 
 /* Active (đang ở route đó) → icon đậm và text highlight */
 .navItem i[class*="fi-sr-"] {
-  color: #7c8a97; /* icon giữ màu gốc */
+  color: #54A65C; /* icon màu xanh hệ thống */
   font-weight: 700;
-  text-shadow: 0 0 0 2px #54A65C; /* chỉ khung xanh */
 }
 
 /* Active text color */
