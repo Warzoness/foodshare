@@ -1,7 +1,16 @@
-.page {
-  min-height: 100vh;
+/* Wrapper for FloatMenu */
+.wrap {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  padding-bottom: 80px; /* Space for bottom nav */
+  min-height: 100vh;
+  padding-bottom: 76px; /* chừa chỗ cho FloatMenu cố định */
+  display: flex;
+  flex-direction: column;
+}
+
+.page {
+  flex: 1;
+  padding: 0;
+  margin: 0;
 }
 
 .container {
@@ -23,26 +32,6 @@
   z-index: 10;
 }
 
-.backButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: #ffffff;
-  border-radius: 12px;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.backButton:hover {
-  background: #f3f4f6;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
 
 .title {
   font-size: 24px;
