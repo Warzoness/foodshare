@@ -50,7 +50,7 @@ export default function FloatMenu() {
         <span>Tìm kiếm</span>
       </Link>
 
-      {/* Favorites */}
+      {/* Orders */}
       <Link href="/orders" className={`${styles.navItem} ${pathname === "/orders" ? styles.active : ""}`}>
         <i
           className={
@@ -62,32 +62,32 @@ export default function FloatMenu() {
         <span>Giữ chỗ</span>
       </Link>
 
+      {/* Become Seller */}
+      <Link href="/become-seller" className={`${styles.navItem} ${pathname === "/become-seller" ? styles.active : ""}`}>
+        <i
+          className={
+            pathname === "/become-seller"
+              ? "fi fi-sr-shop" // icon đậm - shop
+              : "fi fi-rr-shop" // icon thường - shop
+          }
+        ></i>
+        <span>Bán hàng</span>
+      </Link>
 
-        {/* Search */}
-        <Link href="/settings" className={`${styles.navItem} ${pathname === "/settings" ? styles.active : ""}`}>
-            <i
-                className={
-                    pathname === "/settings"
-                        ? "fi fi-sr-user" // thay bằng icon
-                        : "i fi-rr-user" // thay bằng icon
-                }
-            ></i>
-            <span>Tài khoản</span>
-        </Link>
       {/* Account */}
-      {/*<button */}
-      {/*  onClick={handleAccountClick}*/}
-      {/*  className={`${styles.navItem} ${styles.accountButton} ${pathname === "/settings" ? styles.active : ""}`}*/}
-      {/*>*/}
-      {/*  <i*/}
-      {/*    className={*/}
-      {/*      pathname === "/settings"*/}
-      {/*        ? "fi fi-sr-user" // icon đậm*/}
-      {/*        : "fi fi-rr-user" // icon thường*/}
-      {/*    }*/}
-      {/*  ></i>*/}
-      {/*  <span>Tài khoản</span>*/}
-      {/*</button>*/}
+      <button
+        onClick={handleAccountClick}
+        className={`${styles.navItem} ${styles.accountButton} ${pathname === "/settings" ? styles.active : ""}`}
+      >
+        <i
+          className={
+            pathname === "/settings"
+              ? "fi fi-sr-user" // icon đậm
+              : "fi fi-rr-user" // icon thường
+          }
+        ></i>
+        <span>Tài khoản</span>
+      </button>
     </nav>
   );
 }
