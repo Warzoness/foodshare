@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/services/site/auth.service';
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -68,7 +69,8 @@ export default function AuthGuard({
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
         <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Đang kiểm tra đăng nhập...</span>
+          {/*<span className="visually-hidden">Đang kiểm tra đăng nhập...</span>*/}
+          <LoadingSpinner message="Đang kiểm tra đăng nhập..." />
         </div>
       </div>
     );

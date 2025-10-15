@@ -234,16 +234,17 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <main className={`container py-3 ${styles.settingsContainer}`} style={{ maxWidth: 560 }}>
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
-          <div className="text-center">
-            <div className="spinner-border" role="status" style={{ color: '#54A65C' }}>
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <div className="mt-2">Đang kiểm tra đăng nhập...</div>
-          </div>
-        </div>
-      </main>
+      // <main className={`container py-3 ${styles.settingsContainer}`} style={{ maxWidth: 560 }}>
+      //   <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '50vh' }}>
+      //     <div className="text-center">
+      //       <div className="spinner-border" role="status" style={{ color: '#54A65C' }}>
+      //         <span className="visually-hidden">Loading...</span>
+      //       </div>
+      //       <div className="mt-2">Đang kiểm tra đăng nhập...</div>
+            <LoadingSpinner message="Đang kiểm tra đăng nhập..." />
+          // </div>
+        // </div>
+      // </main>
     );
   }
 

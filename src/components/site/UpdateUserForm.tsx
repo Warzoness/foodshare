@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { AuthService } from '@/services/site/auth.service';
 import { UpdateUserRequest, UpdateUserResponse } from '@/types/auth';
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 
 interface UpdateUserFormProps {
   onUpdateSuccess?: (user: UpdateUserResponse) => void;
@@ -112,12 +113,13 @@ export default function UpdateUserForm({
 
   if (!user) {
     return (
-      <div className="text-center">
-        <div className="spinner-border" role="status">
-          <span className="visually-hidden">Đang tải...</span>
-        </div>
-        <p className="mt-2">Đang tải thông tin người dùng...</p>
-      </div>
+      // <div className="text-center">
+      //   <div className="spinner-border" role="status">
+      //     <span className="visually-hidden">Đang tải...</span>
+      //   </div>
+        <LoadingSpinner message="Đang tải thông tin người dùng..." />
+        // {/*<p className="mt-2">Đang tải thông tin người dùng...</p>*/}
+      // </div>
     );
   }
 

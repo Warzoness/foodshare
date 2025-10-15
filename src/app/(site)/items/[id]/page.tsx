@@ -11,6 +11,7 @@ import { ProductService, ProductDetail } from "@/services/site/product.service";
 import { StoreService } from "@/services/site/store.service";
 import { useParams, useRouter } from "next/navigation";
 import { AuthService } from "@/services/site/auth.service";
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 
 // Lazy-load heavy modal (no SSR) only when opened
 const MapModal = dynamic(() => import("@/components/site/modals/MapModal/MapModal"), {
@@ -242,16 +243,7 @@ export default function ItemDetailPage() {
 
   if (loading) {
     return (
-      <div className={styles.wrap}>
-        <div className="container pt-3">
-          <div className="text-center">
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="mt-2">Đang tải thông tin sản phẩm...</p>
-          </div>
-        </div>
-      </div>
+            <LoadingSpinner message="Đang tải thông tin sản phẩm..."/>
     );
   }
 
