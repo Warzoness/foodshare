@@ -24,9 +24,17 @@ function LoginPageContent() {
   const [sdkLoaded, setSdkLoaded] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure component is mounted before doing anything
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Check if user is already logged in
   useEffect(() => {
+    if (!mounted) return;
+    
     const checkExistingAuth = () => {
       try {
         const isLoggedIn = AuthService.isLoggedIn();
@@ -45,10 +53,12 @@ function LoginPageContent() {
     };
 
     checkExistingAuth();
-  }, [router, searchParams]);
+  }, [router, searchParams, mounted]);
 
   // Detect mobile device
   useEffect(() => {
+    if (!mounted) return;
+    
     const checkMobile = () => {
       const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
       const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
@@ -59,12 +69,13 @@ function LoginPageContent() {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [mounted]);
 
   // Load SDKs when component mounts
   useEffect(() => {
+    if (!mounted) return;
     loadSDKs();
-  }, []);
+  }, [mounted]);
 
   const loadSDKs = async () => {
     try {
@@ -284,7 +295,7 @@ function LoginPageContent() {
   }
 
   return (
-    <div className={styles.screen}>
+    <div className={styles.screen} suppressHydrationWarning={true}>
       <div className={styles.brandWrap}>
         <span className={styles.brand}>FoodShare</span>
       </div>

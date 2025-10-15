@@ -5,8 +5,14 @@ import { PropsWithChildren, useCallback, useEffect, useMemo, useState } from "re
 type PermissionState = "unknown" | "checking" | "granted" | "prompt" | "denied" | "unsupported" | "insecure";
 
 export default function LocationGate({ children }: PropsWithChildren) {
+  const [mounted, setMounted] = useState(false);
   const [state, setState] = useState<PermissionState>("unknown");
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // Ensure component is mounted before checking permissions
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const checkPermission = useCallback(async () => {
     if (typeof window === "undefined") return;
@@ -69,8 +75,10 @@ export default function LocationGate({ children }: PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    checkPermission();
-  }, [checkPermission]);
+    if (mounted) {
+      checkPermission();
+    }
+  }, [mounted, checkPermission]);
 
   const content = useMemo(() => {
     if (state === "granted") return null;
@@ -129,7 +137,7 @@ export default function LocationGate({ children }: PropsWithChildren) {
   return (
     <>
       {children}
-      {content}
+      {mounted && content}
     </>
   );
 }
