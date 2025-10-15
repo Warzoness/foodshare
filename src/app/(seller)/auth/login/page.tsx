@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./Login.module.css";
 import Link from "next/link";
@@ -66,14 +66,6 @@ function LoginPageContent() {
     loadSDKs();
   }, []);
 
-  // Auto-render Google button when SDK is loaded
-  useEffect(() => {
-    if (sdkLoaded && window.google && !checkingAuth) {
-      console.log('🔄 Auto-rendering Google Sign-In Button...');
-      renderGoogleButton();
-    }
-  }, [sdkLoaded, checkingAuth]);
-
   const loadSDKs = async () => {
     try {
       console.log('🔄 Loading Google SDK...');
@@ -115,7 +107,7 @@ function LoginPageContent() {
     }
   };
 
-  const renderGoogleButton = () => {
+  const renderGoogleButton = useCallback(() => {
     if (!sdkLoaded || !window.google || checkingAuth) {
       console.error('❌ Google SDK not loaded or component is redirecting:', { 
         sdkLoaded, 
@@ -219,10 +211,18 @@ function LoginPageContent() {
         setError(errorMessage || 'Không thể tạo nút đăng nhập Google');
       }
     }
-  };
+  }, [sdkLoaded, checkingAuth, isMobile]);
+
+  // Auto-render Google button when SDK is loaded
+  useEffect(() => {
+    if (sdkLoaded && window.google && !checkingAuth) {
+      console.log('🔄 Auto-rendering Google Sign-In Button...');
+      renderGoogleButton();
+    }
+  }, [sdkLoaded, checkingAuth, renderGoogleButton]);
 
 
-  const processGoogleLogin = async (credential: unknown) => {
+  const processGoogleLogin = useCallback(async (credential: unknown) => {
     setLoading(true);
     setError(null);
     
@@ -261,7 +261,7 @@ function LoginPageContent() {
       console.log('🏁 Google login process finished');
       setLoading(false);
     }
-  };
+  }, [searchParams, router]);
 
 
   // Show loading screen while checking authentication

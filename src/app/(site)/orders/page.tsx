@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./orders.module.css";
 import { OrderService } from "@/services/site/order.service";

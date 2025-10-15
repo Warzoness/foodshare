@@ -1,9 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-<<<<<<< HEAD
 import { Store, StoreApiResponse, StoreSearchParams, ProductApiResponse } from "@/types/store";
-=======
-import { Store, StoreApiResponse, StoreSearchParams, ProductPaginationResponse, ProductApiResponse } from "@/types/store";
->>>>>>> 8828e930c322150c767421572c44ee91556b130d
 
 const STORE_ENDPOINT = "/shops";
 const STORE_DETAIL_ENDPOINT = "/shops";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import styles from "./SearchPage.module.css";
 import FilterBar, { FilterValues } from "@/components/site/layouts/FilterBar/FilterBar";
