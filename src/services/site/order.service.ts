@@ -304,5 +304,98 @@ export const OrderService = {
       console.error('❌ Error deleting order:', error);
       throw error;
     }
+  },
+
+  /**
+   * Get user's order statistics
+   * @returns Promise<OrderStats>
+   */
+  async getOrderStats(): Promise<{
+    total: number;
+    completed: number;
+    pending: number;
+    cancelled: number;
+  }> {
+    try {
+      const token = this.getAuthToken();
+
+      // Get all orders with a large page size to get complete stats
+      const response = await apiClient.get<ApiResponse<Order[]>>(ORDER_ENDPOINT, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        query: { page: 0, size: 1000 } // Get all orders
+      });
+
+      console.log('📊 Order stats API Response:', JSON.stringify(response, null, 2));
+
+      if (!response.success) {
+        console.log('❌ Order stats API returned success: false');
+        console.log('📝 Response message:', response.message);
+        
+        // Check if it's an authentication error
+        const message = (response.message || '').toLowerCase();
+        
+        if (message.includes('unauthorized') || 
+            message.includes('token') || 
+            message.includes('authentication')) {
+          throw new Error('Xác thực thất bại. Vui lòng đăng nhập lại.');
+        }
+        
+        const errorMessage = response.message || 'Không thể tải thống kê đơn hàng';
+        const translatedMessage = this.translateErrorMessage(errorMessage);
+        throw new Error(translatedMessage);
+      }
+
+      const orders = response.data || [];
+      
+      // Calculate statistics based on new status mapping
+      const stats = {
+        total: orders.length,
+        completed: orders.filter(order => order.status === '4').length, // Hoàn thành
+        pending: orders.filter(order => 
+          order.status === '1' || order.status === '2' // Chờ xác nhận + Đã xác nhận
+        ).length,
+        cancelled: orders.filter(order => order.status === '3').length // Đã hủy
+      };
+
+      console.log('📊 Calculated order stats:', stats);
+      return stats;
+    } catch (error) {
+      console.error('❌ Error fetching order stats:', error);
+      
+      // If it's a network error or authentication error, provide more context
+      if (error instanceof Error) {
+        const errorMessage = error.message.toLowerCase();
+        
+        // HTTP 401 Unauthorized
+        if (errorMessage.includes('401') || 
+            errorMessage.includes('unauthorized')) {
+          throw new Error('Xác thực thất bại. Vui lòng đăng nhập lại.');
+        }
+        
+        // Network errors
+        if (errorMessage.includes('fetch') || 
+            errorMessage.includes('network') ||
+            errorMessage.includes('connection')) {
+          throw new Error('Lỗi mạng. Vui lòng kiểm tra kết nối và thử lại.');
+        }
+        
+        // Authentication errors from API response
+        if (errorMessage.includes('authentication') ||
+            errorMessage.includes('token')) {
+          throw new Error('Xác thực thất bại. Vui lòng đăng nhập lại.');
+        }
+        
+        // If it's already our custom error, re-throw it
+        if (errorMessage.includes('xác thực thất bại') || 
+            errorMessage.includes('lỗi mạng')) {
+          throw error;
+        }
+      }
+      
+      // For any other errors, provide a generic message
+      throw new Error('Không thể tải thống kê đơn hàng. Vui lòng thử lại.');
+    }
   }
 };

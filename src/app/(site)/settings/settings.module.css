@@ -2,7 +2,179 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.settingsContainer {
+  padding-bottom: 80px !important;
+  max-width: 1200px !important;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .settingsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .settingsGrid {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+.settingsCard {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e6ebef;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.settingsCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardIcon {
+  width: 20px;
+  height: 20px;
+  color: #54a65c;
+}
+
+.profileSection {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+  .profileSection {
+    grid-column: 1 / 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profileSection {
+    grid-column: 1 / 3;
+  }
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.statItem {
+  text-align: center;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e6ebef;
+}
+
+.statNumber {
+  font-size: 24px;
+  font-weight: 700;
+  color: #54a65c;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #54a65c;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.actionButton:hover {
+  background: #4a9452;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(84, 166, 92, 0.3);
+}
+
+.actionButton.secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.actionButton.secondary:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.actionButton.danger {
+  background: #ef4444;
+}
+
+.actionButton.danger:hover {
+  background: #dc2626;
+}
+
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.emptyStateIcon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  color: #d1d5db;
+}
+
+.emptyStateTitle {
+  font-size: 16px;
+  font-weight: 600;
   margin-bottom: 8px;
+  color: #374151;
+}
+
+.emptyStateText {
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .backBtn,
@@ -52,7 +224,6 @@
   font-weight: 700;
   padding: 10px 16px;
   margin-top: 16px;
-  /*box-shadow: 0 3px 0 rgba(0,0,0,0.18), 0 10px 16px rgba(0,0,0,0.08);*/
   transition: transform 0.06s ease, box-shadow 0.18s ease;
 }
 
@@ -98,11 +269,6 @@
 .input::placeholder {
   color: #9ca3af;
   font-size: 14px;
-}
-
-/* Tạo không gian cho FloatMenu ở cuối trang */
-.settingsContainer {
-  padding-bottom: 80px !important;
 }
 
 
