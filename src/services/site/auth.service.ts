@@ -434,8 +434,24 @@ export const AuthService = {
     const userData = this.getStoredUserData();
     if (!userData) return null;
     
+    // Ensure userId is a number
+    let userId: number;
+    if (typeof userData.userId === 'string') {
+      userId = parseInt(userData.userId, 10);
+    } else if (typeof userData.userId === 'number') {
+      userId = userData.userId;
+    } else {
+      console.error('❌ Invalid userId in stored data:', userData.userId, 'type:', typeof userData.userId);
+      return null;
+    }
+    
+    if (isNaN(userId) || userId <= 0) {
+      console.error('❌ Invalid userId after parsing:', userId);
+      return null;
+    }
+    
     return {
-      userId: userData.userId,
+      userId: userId,
       name: userData.name,
       email: userData.email,
       phoneNumber: (userData as any).phoneNumber || undefined,

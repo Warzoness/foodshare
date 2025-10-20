@@ -10,7 +10,7 @@ export type RequestOptions = {
   skipAuthRedirect?: boolean; // mặc định false - có tự động redirect khi 401 không
 };
 
-const BASE_URL = "https://foodshare-production-98da.up.railway.app"; // <-- hardcode
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://foodshare-production-98da.up.railway.app";
 
 export class ApiClient {
   constructor(
@@ -55,7 +55,6 @@ export class ApiClient {
     }
 
     // Log gọn cho dev
-    console.log(`[API][REQ] ${method} ${url}`);
 
     try {
       const res = await fetch(url, {
@@ -73,12 +72,10 @@ export class ApiClient {
       const ctype = res.headers.get("content-type") || "";
       const data = ctype.includes("application/json") ? await res.json().catch(() => null) : null;
 
-      console.log(`[API][RES] ${method} ${url}`, res.status);
 
       if (!res.ok) {
         // Handle 401 Unauthorized - redirect to login
         if (res.status === 401 && !opt.skipAuthRedirect) {
-          console.log('🔒 401 Unauthorized detected, triggering auth redirect...');
           
           // Import auth redirect service dynamically to avoid circular dependencies
           const { authRedirectService } = await import('@/services/site/auth-redirect.service');

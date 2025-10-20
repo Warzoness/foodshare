@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/services/site/auth.service';
 import { authRedirectService } from '@/services/site/auth-redirect.service';
+import { User } from '@/types/auth';
 
 export interface UseAuthOptions {
   redirectOnUnauthorized?: boolean;
@@ -15,7 +16,7 @@ export interface UseAuthOptions {
 export interface UseAuthReturn {
   isAuthenticated: boolean | null;
   isLoading: boolean;
-  user: any | null;
+  user: User | null;
   checkAuth: () => Promise<boolean>;
   logout: () => void;
 }
@@ -36,7 +37,7 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const checkAuth = async (): Promise<boolean> => {
     try {
@@ -46,13 +47,7 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
       const userData = AuthService.getStoredUserData();
       const isLoggedIn = AuthService.isLoggedIn();
       
-      console.log('🔍 useAuth: Checking authentication...');
-      console.log('  - Token exists:', !!token);
-      console.log('  - UserData exists:', !!userData);
-      console.log('  - isLoggedIn():', isLoggedIn);
-      
       if (!isLoggedIn) {
-        console.log('🔒 User not authenticated');
         setIsAuthenticated(false);
         setUser(null);
         
@@ -75,8 +70,19 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
       }
       
       setIsAuthenticated(true);
-      setUser(userData);
-      console.log('✅ User authenticated');
+      
+      // Convert SocialLoginResponse to User type
+      const user: User = {
+        userId: userData.userId,
+        name: userData.name,
+        email: userData.email,
+        phoneNumber: (userData as any).phoneNumber || undefined,
+        provider: userData.provider,
+        providerId: userData.providerId,
+        profilePictureUrl: userData.profilePictureUrl
+      };
+      
+      setUser(user);
       return true;
     } catch (error) {
       console.error('❌ Auth check error:', error);
@@ -104,7 +110,6 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
   };
 
   const logout = () => {
-    console.log('🚪 Logging out user...');
     AuthService.logout();
     setIsAuthenticated(false);
     setUser(null);
@@ -132,7 +137,7 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
  */
 export function useAuthState() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -141,7 +146,22 @@ export function useAuthState() {
         const userData = AuthService.getStoredUserData();
         
         setIsAuthenticated(isLoggedIn);
-        setUser(userData);
+        
+        if (userData) {
+          // Convert SocialLoginResponse to User type
+          const user: User = {
+            userId: userData.userId,
+            name: userData.name,
+            email: userData.email,
+            phoneNumber: (userData as any).phoneNumber || undefined,
+            provider: userData.provider,
+            providerId: userData.providerId,
+            profilePictureUrl: userData.profilePictureUrl
+          };
+          setUser(user);
+        } else {
+          setUser(null);
+        }
       } catch (error) {
         console.error('❌ Auth state check error:', error);
         setIsAuthenticated(false);

@@ -14,7 +14,6 @@ function GoogleCallbackContent() {
   useEffect(() => {
     const handleGoogleCallback = async () => {
       try {
-        console.log('🔄 Processing Google OAuth callback...');
         
         // Get the credential from URL parameters
         const credential = searchParams.get('credential');
@@ -34,7 +33,6 @@ function GoogleCallbackContent() {
           return;
         }
         
-        console.log('✅ Google credential received:', credential.substring(0, 50) + '...');
         
         // Process the login
         const loginRequest: SocialLoginRequest = {
@@ -42,14 +40,11 @@ function GoogleCallbackContent() {
           token: credential
         };
         
-        console.log('🔄 Calling AuthService.socialLogin...');
         const response = await AuthService.socialLogin(loginRequest);
         
-        console.log('✅ Login successful! Backend response:', response);
         
         // Redirect to intended page or home
         const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
-        console.log('🔄 Redirecting to:', returnUrl);
         router.push(returnUrl);
         
       } catch (error: any) {

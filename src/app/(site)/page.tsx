@@ -81,9 +81,9 @@ function Section({
                   </div>
                   {((it.totalOrders && it.totalOrders > 0) || it.distanceKm) && (
                     <div className={styles.metaInfo}>
-                      {/*{it.totalOrders && it.totalOrders > 0 && <span className={styles.orders}>đã bán {it.totalOrders}</span>}*/}
+                      {/*{it.totalOrders && it.totalOrders > 0 && <span className={styles.orders}>Đã bán {it.totalOrders}</span>}*/}
                       {/*{it.totalOrders && it.totalOrders > 0 && it.distanceKm && <span className={styles.separator}>.</span>}*/}
-                      {it.distanceKm && <span className={styles.distance}>đã bán {it.totalOrders} | {it.distanceKm} km</span>}
+                      {it.distanceKm && <span className={styles.distance}>Đã bán {it.totalOrders} | {it.distanceKm} km</span>}
                     </div>
                   )}
                 </div>

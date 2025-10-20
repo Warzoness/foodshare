@@ -32,7 +32,6 @@ export class AuthRedirectService {
       customMessage = "Bạn phải đăng nhập để tiếp tục"
     } = options;
 
-    console.log('🔒 Handling unauthorized access (401)');
 
     // Clear any existing user data
     AuthService.clearUserData();
@@ -144,7 +143,6 @@ export class AuthRedirectService {
         }
       });
 
-      console.log('📢 Toast notification shown:', message);
     } catch (error) {
       console.error('❌ Error showing toast notification:', error);
     }
@@ -181,7 +179,6 @@ export class AuthRedirectService {
    */
   private redirectToLogin(): void {
     try {
-      console.log('🔄 Redirecting to login page...');
       
       // Check if we're in a Next.js environment
       if (typeof window !== 'undefined') {

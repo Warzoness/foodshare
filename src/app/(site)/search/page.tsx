@@ -132,7 +132,6 @@ function SearchPageContent() {
         sortDirection: sortBy.sortBy === "relevance" ? undefined : sortBy.sortDirection,
       };
 
-      console.log('🔍 Search params:', searchParams);
 
       const res = await ProductService.search(searchParams);
 
@@ -203,7 +202,6 @@ function SearchPageContent() {
         sortDirection: sortBy.sortBy === "relevance" ? undefined : sortBy.sortDirection,
       };
 
-      console.log('🔍 Search all params:', searchParams);
 
       const res = await ProductService.search(searchParams);
 

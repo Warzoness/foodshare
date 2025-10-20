@@ -69,7 +69,6 @@ export default function UpdateUserForm({
     setSuccess(null);
 
     try {
-      console.log('🔄 Updating user info:', formData);
 
       // Ensure userId is a number
       const userId = typeof user.userId === 'string' ? parseInt(user.userId, 10) : user.userId;
@@ -80,7 +79,6 @@ export default function UpdateUserForm({
 
       const result = await AuthService.updateUserInfo(userId, formData);
 
-      console.log('✅ User updated successfully:', result);
       
       setSuccess('Cập nhật thông tin thành công!');
       

@@ -76,7 +76,6 @@ export const OrderService = {
     try {
       const token = this.getAuthToken();
 
-      console.log('🛒 Creating order with data:', JSON.stringify(orderData, null, 2));
 
       const response = await apiClient.post<ApiResponse<CreateOrderResponse>>(ORDER_ENDPOINT, {
         headers: {
@@ -86,7 +85,6 @@ export const OrderService = {
         body: orderData
       });
 
-      console.log('📦 Order creation response:', JSON.stringify(response, null, 2));
 
       // Check if response exists and has the expected structure
       if (!response) {
@@ -230,12 +228,8 @@ export const OrderService = {
         query: queryParams
       });
 
-      console.log('🔍 Orders API Response:', JSON.stringify(response, null, 2));
 
       if (!response.success) {
-        console.log('❌ API returned success: false');
-        console.log('📝 Response message:', response.message);
-        console.log('📝 Response code:', response.code);
         
         // Check if it's an authentication error
         const message = (response.message || '').toLowerCase();
@@ -262,14 +256,10 @@ export const OrderService = {
       if (error instanceof Error) {
         const errorMessage = error.message.toLowerCase();
         
-        console.log('🔍 Error message:', errorMessage);
-        console.log('🔍 Error type:', typeof error);
-        console.log('🔍 Full error object:', error);
         
         // HTTP 401 Unauthorized
         if (errorMessage.includes('401') || 
             errorMessage.includes('unauthorized')) {
-          console.log('🚨 HTTP 401 detected, throwing authentication error');
           throw new Error('Xác thực thất bại. Vui lòng đăng nhập lại.');
         }
         
@@ -405,11 +395,8 @@ export const OrderService = {
         query: { page: 0, size: 1000 } // Get all orders
       });
 
-      console.log('📊 Order stats API Response:', JSON.stringify(response, null, 2));
 
       if (!response.success) {
-        console.log('❌ Order stats API returned success: false');
-        console.log('📝 Response message:', response.message);
         
         // Check if it's an authentication error
         const message = (response.message || '').toLowerCase();
@@ -437,7 +424,6 @@ export const OrderService = {
         cancelled: orders.filter(order => order.status === '3').length // Đã hủy
       };
 
-      console.log('📊 Calculated order stats:', stats);
       return stats;
     } catch (error) {
       console.error('❌ Error fetching order stats:', error);

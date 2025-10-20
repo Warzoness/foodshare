@@ -25,15 +25,7 @@ export default function AuthGuard({
         const userData = AuthService.getStoredUserData();
         const isLoggedIn = AuthService.isLoggedIn();
         
-        console.log('🔍 AuthGuard Debug:');
-        console.log('  - Token exists:', !!token);
-        console.log('  - UserData exists:', !!userData);
-        console.log('  - isLoggedIn():', isLoggedIn);
-        console.log('  - Token preview:', token?.substring(0, 20) + '...');
-        console.log('  - UserData keys:', userData ? Object.keys(userData) : 'null');
-        
         if (!isLoggedIn) {
-          console.log('🔒 User not authenticated, showing login prompt');
           setIsAuthenticated(false);
           return;
         }
@@ -64,7 +56,6 @@ export default function AuthGuard({
     const handleLoginClick = () => {
       const currentPath = window.location.pathname;
       const loginUrl = `${redirectTo}?returnUrl=${encodeURIComponent(currentPath)}`;
-      console.log('🔄 Redirecting to login:', loginUrl);
       window.location.href = loginUrl;
     };
 

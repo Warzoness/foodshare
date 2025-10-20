@@ -149,7 +149,6 @@ export const ProductService = {
     if (params.page !== undefined) cleanParams.page = params.page;
     if (params.size !== undefined) cleanParams.size = params.size;
 
-    console.log('🔍 ProductService.search called with params:', cleanParams);
     
     return apiClient.get<ApiResponse<PageEnvelope<SearchProduct>>>(SEARCH_ENDPOINT, {
       query: cleanParams,

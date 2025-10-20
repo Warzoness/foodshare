@@ -81,7 +81,7 @@ function LoginPageContent() {
     try {
       console.log('🔄 Loading Google SDK...');
       console.log('📋 Configuration:');
-      console.log('  - Google Client ID: 62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com');
+      console.log('  - Google Client ID:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com');
       
       // Load Google SDK
       if (!window.google) {
@@ -130,7 +130,7 @@ function LoginPageContent() {
 
     try {
       console.log('🔄 Rendering Google Sign-In Button...');
-      const clientId = '62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com';
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '62641073672-3rjbtjt32kkng905ebr2nfebq3i18cl3.apps.googleusercontent.com';
       
       // Initialize Google Identity Services with mobile-optimized settings
       const googleConfig: any = {

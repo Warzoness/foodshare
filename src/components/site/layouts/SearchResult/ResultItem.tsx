@@ -11,7 +11,7 @@ export type FoodResult = {
   originalPrice?: number; // đ
   distanceKm?: number;    // km
   flashDealPercent?: number; // %
-  totalOrders?: number;  // số đơn đã bán
+  totalOrders?: number;  // số đơn Đã bán
   imgUrl?: string;
   vendor?: string;
   category?: string;
@@ -45,9 +45,12 @@ export default function ResultItem({ item }: { item: FoodResult }) {
       </div>
       <div className={styles.mid}>
         <div className={styles.title} title={item.name}>{item.name || "Sản phẩm"}</div>
-        {(item.vendor || item.category) && (
+        {(item.vendor || item.category || item.distanceKm) && (
           <div className={styles.sub}>
-            {item.vendor && item.vendor.trim() ? item.vendor : "Quán"}{item.totalOrders && item.totalOrders > 0 ? ` (đã bán ${item.totalOrders})` : ""}{item.category && item.category.trim() ? ` · ${item.category}` : ""}
+            {item.vendor && item.vendor.trim() ? item.vendor : "Quán"}
+            {item.distanceKm && item.distanceKm > 0 ? ` · K/c: ${item.distanceKm} km` : ""}
+            {item.totalOrders && item.totalOrders > 0 ? ` (Đã bán ${item.totalOrders})` : ""}
+            {item.category && item.category.trim() ? ` · ${item.category}` : ""}
           </div>
         )}
         <div className={styles.meta}>
@@ -61,12 +64,6 @@ export default function ResultItem({ item }: { item: FoodResult }) {
               </span>
             )}
           </div>
-          {item.distanceKm && item.distanceKm > 0 && (
-            <span className={styles.metaPart}>
-              <span className={styles.dot} aria-hidden>•</span>
-              {item.distanceKm} km
-            </span>
-          )}
         </div>
       </div>
       {/*<button */}

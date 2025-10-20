@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./hold.module.css";
@@ -73,23 +73,29 @@ export default function HoldPage() {
   const imgSrc = sp.get("img") ?? "/images/chicken-fried.jpg";
   const shopId = parseInt(sp.get("shopId") ?? "1", 10);
 
-  // Debug logging
-  console.log('🔍 Hold page params:', { 
-    productId, 
-    itemName, 
-    unitPrice, 
-    imgSrc, 
-    shopId,
-    urlParams: params,
-    searchParams: Object.fromEntries(sp.entries())
-  });
 
   const [dateISO, setDateISO] = useState<string>(todayISO());
   const [timeHM, setTimeHM] = useState<string>(nowHM()); // mặc định giờ hiện tại (24h)
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [qty, setQty] = useState<number>(1);
   const [timeAlert, setTimeAlert] = useState<string | null>(null);
-  const total = useMemo(() => qty * unitPrice, [qty, unitPrice]);
+  const [productDetails, setProductDetails] = useState<{ quantityAvailable?: number } | null>(null);
+  const total = qty * unitPrice;
+
+  // Memoized quantity handlers to prevent unnecessary re-renders
+  const handleDecreaseQuantity = useCallback(() => {
+    setQty((prevQty) => Math.max(1, prevQty - 1));
+  }, []);
+
+  const handleIncreaseQuantity = useCallback(() => {
+    setQty((prevQty) => {
+      // Không cho phép tăng nếu đã đạt giới hạn số lượng có sẵn
+      if (productDetails?.quantityAvailable !== undefined && prevQty >= productDetails.quantityAvailable) {
+        return prevQty; // Giữ nguyên số lượng hiện tại
+      }
+      return prevQty + 1;
+    });
+  }, [productDetails?.quantityAvailable]);
 
   // Check if time is valid (within 2 hours from now, considering day overflow)
   const isValidTime = (timeStr: string): boolean => {
@@ -186,10 +192,9 @@ export default function HoldPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
-  const [productDetails, setProductDetails] = useState<{ quantityAvailable?: number } | null>(null);
   const [isLoadingProduct, setIsLoadingProduct] = useState(false);
 
-  // Fetch product details to check stock availability
+  // Fetch product details only once when component mounts
   useEffect(() => {
     const fetchProductDetails = async () => {
       if (!productId) return;
@@ -198,11 +203,10 @@ export default function HoldPage() {
       try {
         const details = await ProductService.getDetail(productId);
         setProductDetails(details);
-        console.log('📦 Product details:', details);
         
-        // Check if requested quantity exceeds available stock
+        // Đảm bảo số lượng ban đầu không vượt quá số lượng có sẵn
         if (details.quantityAvailable !== undefined && qty > details.quantityAvailable) {
-          setError(`Chỉ còn ${details.quantityAvailable} sản phẩm trong kho. Vui lòng giảm số lượng.`);
+          setQty(details.quantityAvailable);
         }
       } catch (error) {
         console.error('❌ Error fetching product details:', error);
@@ -213,7 +217,21 @@ export default function HoldPage() {
     };
 
     fetchProductDetails();
-  }, [productId, qty]);
+  }, [productId]); // Removed qty dependency
+
+  // Check quantity validation on frontend when qty or productDetails change
+  useEffect(() => {
+    if (productDetails?.quantityAvailable !== undefined) {
+      if (qty > productDetails.quantityAvailable) {
+        setError(`Chỉ còn ${productDetails.quantityAvailable} sản phẩm trong kho. Vui lòng giảm số lượng.`);
+        // Tự động điều chỉnh số lượng về giới hạn tối đa
+        setQty(productDetails.quantityAvailable);
+      } else if (error && error.includes('không đủ số lượng')) {
+        // Clear error if quantity is now valid
+        setError(null);
+      }
+    }
+  }, [qty, productDetails?.quantityAvailable, error]);
 
   // Check authentication status
   useEffect(() => {
@@ -222,7 +240,6 @@ export default function HoldPage() {
         const loggedIn = AuthService.isLoggedIn();
         setIsLoggedIn(loggedIn);
         setAuthChecked(true);
-        console.log("🔐 Authentication status:", loggedIn);
         
         // Only redirect to login if not logged in and not coming from login page
         if (!loggedIn) {
@@ -233,10 +250,7 @@ export default function HoldPage() {
           if (!isFromLogin) {
             const currentUrl = window.location.pathname + window.location.search;
             const loginUrl = `/auth/login?returnUrl=${encodeURIComponent(currentUrl)}`;
-            console.log("🔄 Redirecting to login:", loginUrl);
             router.replace(loginUrl);
-          } else {
-            console.log("🔄 Coming from login page, not redirecting to avoid loop");
           }
         }
       } catch (error) {
@@ -293,11 +307,9 @@ export default function HoldPage() {
         totalPrice: total
       };
 
-      console.log('🛒 Creating order with data:', orderData);
 
       const order = await OrderService.createOrder(orderData);
 
-      console.log('✅ Order created successfully:', order);
 
       // Generate a simple order code for display
       const code = String(Math.floor(2_000_000 + Math.random() * 8_000_000));
@@ -497,7 +509,7 @@ export default function HoldPage() {
               <button 
                 type="button" 
                 className="btn btn-outline-secondary" 
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                onClick={handleDecreaseQuantity}
                 disabled={qty <= 1}
               >
                 −
@@ -506,7 +518,7 @@ export default function HoldPage() {
               <button 
                 type="button" 
                 className="btn btn-outline-secondary" 
-                onClick={() => setQty((q) => q + 1)}
+                onClick={handleIncreaseQuantity}
                 disabled={productDetails?.quantityAvailable !== undefined && qty >= productDetails.quantityAvailable}
               >
                 +
@@ -550,7 +562,7 @@ export default function HoldPage() {
                     <button 
                       type="button" 
                       className="btn btn-sm btn-outline-danger mt-2"
-                      onClick={() => setQty(qty - 1)}
+                      onClick={handleDecreaseQuantity}
                     >
                       Thử với {qty - 1} sản phẩm
                     </button>

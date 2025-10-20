@@ -45,13 +45,10 @@ export default function SettingsPage() {
       try {
         // useAuth hook đã xử lý authentication, chỉ cần load data
         if (!isAuthenticated || !authUser) {
-          console.log('❌ User not authenticated or no user data');
           setError('Không thể tải thông tin người dùng');
           setLoading(false);
           return;
         }
-
-        console.log('👤 Loading user data for:', authUser);
         
         // Sử dụng user data từ useAuth hook
         setUser(authUser);
@@ -59,14 +56,31 @@ export default function SettingsPage() {
         setEmail(authUser.email || '');
         setPhone(authUser.phoneNumber || '');
 
+        // Validate authUser has userId
+        if (!authUser.userId) {
+          console.error('❌ authUser missing userId:', authUser);
+          throw new Error('User data missing userId field');
+        }
+        
         // Call API to get fresh user data
         console.log('🔄 Fetching fresh user data from API for userId:', authUser.userId);
+        console.log('🔍 userId type:', typeof authUser.userId);
+        console.log('🔍 userId value:', authUser.userId);
         
         // Ensure userId is a number
-        const userId = typeof authUser.userId === 'string' ? parseInt(authUser.userId, 10) : authUser.userId;
+        let userId: number;
+        if (typeof authUser.userId === 'string') {
+          userId = parseInt(authUser.userId, 10);
+        } else if (typeof authUser.userId === 'number') {
+          userId = authUser.userId;
+        } else {
+          console.error('❌ Invalid userId type:', typeof authUser.userId, 'value:', authUser.userId);
+          throw new Error(`Invalid user ID type: ${typeof authUser.userId}, value: ${authUser.userId}`);
+        }
         
-        if (isNaN(userId)) {
-          throw new Error('Invalid user ID');
+        if (isNaN(userId) || userId <= 0) {
+          console.error('❌ Invalid userId after parsing:', userId);
+          throw new Error(`Invalid user ID: ${authUser.userId} (parsed as: ${userId})`);
         }
         
         const freshUserData = await AuthService.getUserInfo(userId);
@@ -210,13 +224,21 @@ export default function SettingsPage() {
       });
       
       // Ensure userId is a number
-      const userId = typeof user.userId === 'string' ? parseInt(user.userId, 10) : user.userId;
+      let userId: number;
+      if (typeof user.userId === 'string') {
+        userId = parseInt(user.userId, 10);
+      } else if (typeof user.userId === 'number') {
+        userId = user.userId;
+      } else {
+        console.error('❌ Invalid userId type:', typeof user.userId, 'value:', user.userId);
+        throw new Error(`Invalid user ID type: ${typeof user.userId}, value: ${user.userId}`);
+      }
       
       console.log('🔍 Parsed userId:', userId, 'isNaN:', isNaN(userId));
       
-      if (isNaN(userId)) {
-        console.error('❌ Invalid user ID:', user.userId, 'Type:', typeof user.userId);
-        throw new Error(`Invalid user ID: ${user.userId} (type: ${typeof user.userId})`);
+      if (isNaN(userId) || userId <= 0) {
+        console.error('❌ Invalid user ID:', user.userId, 'Type:', typeof user.userId, 'Parsed:', userId);
+        throw new Error(`Invalid user ID: ${user.userId} (type: ${typeof user.userId}, parsed as: ${userId})`);
       }
       
       const updatedUserResponse = await AuthService.updateUserInfo(userId, updateData);

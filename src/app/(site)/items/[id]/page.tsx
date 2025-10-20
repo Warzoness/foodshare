@@ -78,14 +78,10 @@ export default function ItemDetailPage() {
 
   // Handle reserve button click
   const handleReserveClick = () => {
-    console.log('🛒 Reserve button clicked');
-    console.log('📋 Product data:', { productId, product, data });
-    
     if (isLoggedIn) {
       // User is logged in, proceed to hold page
       // Use the real productId from URL params, not data.id (which might be fallback)
       const holdUrl = `/items/${productId}/hold?name=${encodeURIComponent(data.title)}&price=${data.priceNow}&shopId=${product?.shopId || 1}&img=${encodeURIComponent(data.images[0])}`;
-      console.log('🔗 Hold URL:', holdUrl);
       router.push(holdUrl);
     } else {
       // User not logged in, redirect to login with return URL
@@ -109,9 +105,7 @@ export default function ItemDetailPage() {
   // Fetch store details by shopId
   const fetchStoreDetail = async (shopId: number) => {
     try {
-      console.log('🏪 Fetching store details for shopId:', shopId);
       const storeData = await StoreService.getStoreDetail(shopId);
-      console.log('✅ Store data from API:', storeData);
       setStore(storeData);
       return storeData;
     } catch (error) {
@@ -133,7 +127,6 @@ export default function ItemDetailPage() {
         setLoading(true);
         const product = await ProductService.getDetail(productId);
         
-        console.log("Product data from API:", product);
         
         // Store the product data for later use
         setProduct(product);
@@ -195,7 +188,6 @@ export default function ItemDetailPage() {
   // Update data when store information is available
   useEffect(() => {
     if (store && data) {
-      console.log('🔄 Updating data with store information:', store);
       setData(prevData => ({
         ...prevData,
         storeName: store.name || prevData.storeName,
@@ -214,7 +206,6 @@ export default function ItemDetailPage() {
       try {
         const loggedIn = AuthService.isLoggedIn();
         setIsLoggedIn(loggedIn);
-        console.log("🔐 Authentication status:", loggedIn);
       } catch (error) {
         console.error("❌ Error checking auth status:", error);
         setIsLoggedIn(false);
@@ -229,7 +220,6 @@ export default function ItemDetailPage() {
     (async () => {
       try {
         const coords = await getCurrentCoordinates();
-        console.log("[Location] lat:", coords.latitude, "lng:", coords.longitude, "accuracy(m):", coords.accuracy);
       } catch (e: any) {
         console.warn("[Location] Failed to get coordinates:", e?.message || e);
       }

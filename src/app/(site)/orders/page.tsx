@@ -158,9 +158,7 @@ function OrderItem({ order }: { order: Order }) {
     const handleDelete = async () => {
         setIsDeleting(true);
         try {
-            console.log('🗑️ Deleting order:', order.id);
             await OrderService.deleteOrder(order.id);
-            console.log('✅ Order deleted successfully');
             setShowConfirmModal(false);
             // TODO: Refresh orders list or remove from UI
             window.location.reload(); // Temporary solution
@@ -322,21 +320,17 @@ export default function OrdersPage() {
             
             // Check authentication status
             if (!AuthService.isLoggedIn()) {
-                console.log('🔒 User not authenticated, will show login prompt');
                 setError('Vui lòng đăng nhập để xem đơn hàng');
                 setOrders([]);
                 return;
             }
             
-            console.log('🔄 Fetching orders from API...');
             const apiOrders = await OrderService.getUserOrders({
                 page: 0,
                 size: 50, // Get more orders for better UX
             });
             
-            console.log('✅ API Response received:', apiOrders);
             const uiOrders = apiOrders.map(convertApiOrderToUIOrder);
-            console.log('🎨 Converted UI Orders:', uiOrders);
             setOrders(uiOrders);
         } catch (err) {
             console.error('❌ Error fetching orders:', err);
@@ -348,7 +342,6 @@ export default function OrdersPage() {
                 errorMessage.includes('unauthorized') ||
                 errorMessage.includes('please log in again') ||
                 errorMessage.includes('authentication failed. please log in again.')) {
-                console.log('🔒 Authentication error detected, showing error message');
                 setError('Oops, có lỗi xảy ra!');
                 // Don't clear token immediately - let user decide
                 // AuthService.logout();

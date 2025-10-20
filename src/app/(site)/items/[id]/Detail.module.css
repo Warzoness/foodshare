@@ -108,7 +108,7 @@
 .priceNow {
   font-size: 20px;
   font-weight: 500;
-  color: #111;
+  color: #54A65C;
 }
 
 .discount {
@@ -117,7 +117,7 @@
 }
 
 .priceOld {
-  color: #54A65C;
+  color: #999;
   text-decoration: line-through;
   font-weight: 500;
 }

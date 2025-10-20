@@ -25,7 +25,6 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
   useEffect(() => {
     // Only load Google Identity Services on desktop
     if (isMobile()) {
-      console.log('Mobile device detected, skipping Google Identity Services');
       return;
     }
 
@@ -67,7 +66,6 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
   const handleCredentialResponse = async (response: any) => {
     try {
       setIsLoading(true);
-      console.log('Google credential response received');
 
       // Call your backend to verify the token
       const result = await AuthService.socialLogin({
@@ -75,7 +73,6 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
         token: response.credential
       });
 
-      console.log('Login successful:', result);
       onSuccess?.();
       
       // Redirect to orders page or reload
@@ -92,17 +89,14 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
     try {
       if (isMobile()) {
         // On mobile, try popup first, fallback to redirect
-        console.log('Mobile device detected, trying popup with fallback');
         
         if (window.google) {
           try {
             (window.google as any).accounts.id.prompt();
           } catch {
-            console.log('Popup failed on mobile, redirecting to login page');
             window.location.href = '/auth/login';
           }
         } else {
-          console.log('Google SDK not loaded, redirecting to login page');
           window.location.href = '/auth/login';
         }
         return;
