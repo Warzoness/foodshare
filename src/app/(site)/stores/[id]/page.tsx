@@ -211,56 +211,57 @@ export default function StoreDetailPage() {
 
   return (
     <main className={styles.page}>
-      {/* Cover + name */}
-      <section className={styles.coverSection}>
-        <div className={styles.coverWrap}>
-          <Image 
-            src={store.imageUrl || "/images/food2.jpg"} 
-            alt={store.name} 
-            fill 
-            className={styles.coverImg} 
-            priority 
-          />
-          <div className={styles.coverMask} />
-          
-          {/* Back button inside the image */}
-          <button 
-            onClick={() => history.back()} 
-            aria-label="Quay lại"
-            style={{ 
-              position: "absolute", 
-              top: 10, 
-              left: 10,
-              appearance: "none",
-              border: "none",
-              background: "rgba(0, 0, 0, 0.3)",
-              color: "#fff",
-              width: "38px",
-              height: "38px",
-              borderRadius: "999px",
-              display: "inline-grid",
-              placeItems: "center",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-              transition: "box-shadow .18s ease, transform .06s ease",
-              cursor: "pointer"
-            }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: "middle" }}>
-              <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="visually-hidden">Quay lại</span>
-          </button>
-        </div>
-        <div className={styles.storeName}>{store.name}</div>
-        {store.rating > 0 && (
-          <div className={styles.rating}>
-            ⭐ {store.rating.toFixed(1)}
+      <div className="page-container">
+        {/* Cover + name */}
+        <section className={styles.coverSection}>
+          <div className={styles.coverWrap}>
+            <Image 
+              src={store.imageUrl || "/images/food2.jpg"} 
+              alt={store.name} 
+              fill 
+              className={styles.coverImg} 
+              priority 
+            />
+            <div className={styles.coverMask} />
+            
+            {/* Back button inside the image */}
+            <button 
+              onClick={() => history.back()} 
+              aria-label="Quay lại"
+              style={{ 
+                position: "absolute", 
+                top: 10, 
+                left: 10,
+                appearance: "none",
+                border: "none",
+                background: "rgba(0, 0, 0, 0.3)",
+                color: "#fff",
+                width: "38px",
+                height: "38px",
+                borderRadius: "999px",
+                display: "inline-grid",
+                placeItems: "center",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                transition: "box-shadow .18s ease, transform .06s ease",
+                cursor: "pointer"
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: "middle" }}>
+                <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="visually-hidden">Quay lại</span>
+            </button>
           </div>
-        )}
-      </section>
+          <div className={styles.storeName}>{store.name}</div>
+          {store.rating > 0 && (
+            <div className={styles.rating}>
+              ⭐ {store.rating.toFixed(1)}
+            </div>
+          )}
+        </section>
 
-      {/* Contact info */}
-      <section className="container">
+        {/* Contact info */}
+        <section>
         <div className={styles.contactCard}>
           <div className={styles.rowLine}>
             <span className={styles.rowLabel}>Số điện thoại</span>
@@ -288,8 +289,8 @@ export default function StoreDetailPage() {
         </div>
       </section>
 
-      {/* Product list */}
-      <section className="container">
+        {/* Product list */}
+        <section>
         <h6 className={styles.sectionTitle}>
           Sản phẩm ({totalElements > 0 ? totalElements : (loadingProducts ? '...' : '0')})
         </h6>
@@ -371,8 +372,9 @@ export default function StoreDetailPage() {
             <p>Cửa hàng chưa có sản phẩm nào</p>
           </div>
         )}
-      </section>
-
+        </section>
+      </div>
+      
       <FloatMenu />
     </main>
   );

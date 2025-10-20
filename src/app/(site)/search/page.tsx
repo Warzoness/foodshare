@@ -7,12 +7,12 @@ import FilterBar, { FilterValues } from "@/components/site/layouts/FilterBar/Fil
 import ResultsList from "@/components/site/layouts/SearchResult/ResultList";
 import { FoodResult } from "@/components/site/layouts/SearchResult/ResultItem";
 import LoadingSpinner from "@/components/share/LoadingSpinner";
-import { ProductService, type SearchProduct } from "@/services/site/product.service";
+import { ProductService, type SearchProduct, type ProductSearchParams } from "@/services/site/product.service";
 import { getCurrentCoordinates } from "@/lib/location";
 import dynamic from "next/dynamic";
 const FloatMenu = dynamic(() => import("@/components/site/layouts/FloatMenu/FloatMenu"), { ssr: false });
 const ActiveSearchInput = dynamic(() => import("@/components/site/layouts/SearchBar/ActiveSearchInput"), { ssr: false });
-import SortBar, { SortKey } from "@/components/site/layouts/SortBar/SortBar";
+import SortBar, { SortOption } from "@/components/site/layouts/SortBar/SortBar";
 
 const TRENDING = ["bánh mì", "phở bò", "cơm sườn", "trà sữa", "bún chả"];
 const LS_KEY = "recentSearches_food_v1";
@@ -25,12 +25,17 @@ function SearchPageContent() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [filters, setFilters] = useState<FilterValues>({
-    distanceKm: undefined,
-    flashDealPercent: undefined,
-    priceTo: "",
+    maxDistanceKm: undefined,
+    minDiscount: undefined,
+    minPrice: undefined,
+    maxPrice: undefined,
   });
 
-  const [sortBy, setSortBy] = useState<SortKey>("relevance");
+  const [sortBy, setSortBy] = useState<SortOption>({
+    sortBy: "relevance",
+    sortDirection: "desc",
+    label: "Phù hợp nhất"
+  });
 
   const [loading, setLoading] = useState(false);
   const [isAppending, setIsAppending] = useState(false);
@@ -50,21 +55,25 @@ function SearchPageContent() {
   // Xử lý URL params (xem thêm)
   useEffect(() => {
     const sort = searchParams.get("sort");
-    const flashDeal = searchParams.get("flashDeal");
+    const discount = searchParams.get("discount");
     const distance = searchParams.get("distance");
 
     if (sort === "ordersDesc") {
-      setSortBy("ordersDesc");
+      setSortBy({
+        sortBy: "relevance",
+        sortDirection: "desc",
+        label: "Phù hợp nhất"
+      });
       setQ("");
       doSearchAll(0, false);
-    } else if (flashDeal) {
-      const percent = parseInt(flashDeal);
-      setFilters((prev) => ({ ...prev, flashDealPercent: percent }));
+    } else if (discount) {
+      const percent = parseInt(discount);
+      setFilters((prev) => ({ ...prev, minDiscount: percent }));
       setQ("");
       doSearchAll(0, false);
     } else if (distance) {
       const km = parseInt(distance);
-      setFilters((prev) => ({ ...prev, distanceKm: km }));
+      setFilters((prev) => ({ ...prev, maxDistanceKm: km }));
       setQ("");
       doSearchAll(0, false);
     }
@@ -108,13 +117,24 @@ function SearchPageContent() {
         console.warn("Location access failed:", error);
       }
 
-      const res = await ProductService.search({
+      // Build search parameters with filters and sorting
+      const searchParams: ProductSearchParams = {
         q: t,
         page,
         size: 20,
-        latitude: currentLat,
-        longitude: currentLon,
-      });
+        lat: currentLat,
+        lon: currentLon,
+        maxDistanceKm: filters.maxDistanceKm,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        minDiscount: filters.minDiscount,
+        sortBy: sortBy.sortBy === "relevance" ? undefined : sortBy.sortBy,
+        sortDirection: sortBy.sortBy === "relevance" ? undefined : sortBy.sortDirection,
+      };
+
+      console.log('🔍 Search params:', searchParams);
+
+      const res = await ProductService.search(searchParams);
 
       const apiData = res.data;
       setCurrentPage(apiData.page || 0);
@@ -168,13 +188,24 @@ function SearchPageContent() {
         console.warn("Location access failed:", error);
       }
 
-      const res = await ProductService.search({
+      // Build search parameters with filters and sorting
+      const searchParams: ProductSearchParams = {
         q: "",
         page,
         size: 20,
-        latitude: currentLat,
-        longitude: currentLon,
-      });
+        lat: currentLat,
+        lon: currentLon,
+        maxDistanceKm: filters.maxDistanceKm,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        minDiscount: filters.minDiscount,
+        sortBy: sortBy.sortBy === "relevance" ? undefined : sortBy.sortBy,
+        sortDirection: sortBy.sortBy === "relevance" ? undefined : sortBy.sortDirection,
+      };
+
+      console.log('🔍 Search all params:', searchParams);
+
+      const res = await ProductService.search(searchParams);
 
       const apiData = res.data;
       setCurrentPage(apiData.page || 0);
@@ -260,121 +291,123 @@ function SearchPageContent() {
   // --- render ---
   return (
       <div className={styles.page}>
-        <div className={styles.header}>
-          <button
-              aria-label="Quay lại"
-              onClick={() => (history.length > 1 ? history.back() : (location.href = "/"))}
-              className="btn-back"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                  d="M15 19l-7-7 7-7"
-                  stroke="#2b2b2b"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <div className={styles.searchWrap}>
-             <ActiveSearchInput
-                 value={q}
-                 onChange={(v) => {
-                   setQ(v);
-                   if (!v) setSubmitted(false);
-                 }}
-                 onSubmit={doSearch}
-                 placeholder="Tìm món / quán gần bạn"
-             />
+        <div className="page-container">
+          <div className={styles.header}>
+            <button
+                aria-label="Quay lại"
+                onClick={() => (history.length > 1 ? history.back() : (location.href = "/"))}
+                className="btn-back"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                    d="M15 19l-7-7 7-7"
+                    stroke="#2b2b2b"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <div className={styles.searchWrap}>
+               <ActiveSearchInput
+                   value={q}
+                   onChange={(v) => {
+                     setQ(v);
+                     if (!v) setSubmitted(false);
+                   }}
+                   onSubmit={doSearch}
+                   placeholder="Tìm món / quán gần bạn"
+               />
+            </div>
+          </div>
+
+          <div className={styles.body}>
+            {!submitted ? (
+                <>
+                  <section className={styles.section}>
+                    <h3 className={styles.sectionTitle}>Xu hướng</h3>
+                    <div className={styles.chipRow}>
+                      {TRENDING.map((t) => (
+                          <button key={t} className={styles.chip} onClick={() => doSearch(t)}>
+                            {t}
+                          </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  {recent.length > 0 && (
+                      <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>Tìm kiếm gần đây</h3>
+                        <ul className={styles.suggestList}>
+                          {recent.map((r) => (
+                              <li key={r}>
+                                <button className={styles.suggestRow} onClick={() => doSearch(r)}>
+                                  <span>🕘</span>
+                                  <span>{r}</span>
+                                </button>
+                              </li>
+                          ))}
+                        </ul>
+                        <div className={styles.right}>
+                          <button
+                              className={styles.textBtn}
+                              onClick={() => {
+                                setRecent([]);
+                                localStorage.removeItem(LS_KEY);
+                              }}
+                          >
+                            Xoá lịch sử
+                          </button>
+                        </div>
+                      </section>
+                  )}
+                </>
+            ) : (
+                <>
+                  <FilterBar
+                      value={filters}
+                      onApply={setFilters}
+                      onClearAll={() =>
+                          setFilters({ maxDistanceKm: undefined, minDiscount: undefined, minPrice: undefined, maxPrice: undefined })
+                      }
+                  />
+                  <SortBar value={sortBy} onChange={setSortBy} />
+
+                  {loading && !isAppending ? (
+                      <LoadingSpinner message="Đang tìm kiếm…" />
+                  ) : items.length === 0 ? (
+                      <div className={styles.emptyState}>
+                        <div className={styles.emptyIcon}>🔍</div>
+                        <div className={styles.notice}>Không tìm thấy kết quả phù hợp</div>
+                      </div>
+                  ) : (
+                      <>
+                        <ResultsList items={items} />
+                        {currentPage < totalPages - 1 && (
+                            <div className={styles.paginationContainer}>
+                              <button
+                                  className={styles.loadMoreBtn}
+                                  onClick={loadMore}
+                                  disabled={loading || isAppending}
+                              >
+                                {isAppending ? (
+                                    <>
+                                      <div className={styles.loadingSpinnerSmall}></div>
+                                      Đang tải...
+                                    </>
+                                ) : (
+                                    "Tải thêm"
+                                )}
+                              </button>
+                            </div>
+                        )}
+                      </>
+                  )}
+                </>
+            )}
           </div>
         </div>
-
-        <div className={styles.body}>
-          {!submitted ? (
-              <>
-                <section className={styles.section}>
-                  <h3 className={styles.sectionTitle}>Xu hướng</h3>
-                  <div className={styles.chipRow}>
-                    {TRENDING.map((t) => (
-                        <button key={t} className={styles.chip} onClick={() => doSearch(t)}>
-                          {t}
-                        </button>
-                    ))}
-                  </div>
-                </section>
-
-                {recent.length > 0 && (
-                    <section className={styles.section}>
-                      <h3 className={styles.sectionTitle}>Tìm kiếm gần đây</h3>
-                      <ul className={styles.suggestList}>
-                        {recent.map((r) => (
-                            <li key={r}>
-                              <button className={styles.suggestRow} onClick={() => doSearch(r)}>
-                                <span>🕘</span>
-                                <span>{r}</span>
-                              </button>
-                            </li>
-                        ))}
-                      </ul>
-                      <div className={styles.right}>
-                        <button
-                            className={styles.textBtn}
-                            onClick={() => {
-                              setRecent([]);
-                              localStorage.removeItem(LS_KEY);
-                            }}
-                        >
-                          Xoá lịch sử
-                        </button>
-                      </div>
-                    </section>
-                )}
-              </>
-          ) : (
-              <>
-                <FilterBar
-                    value={filters}
-                    onApply={setFilters}
-                    onClearAll={() =>
-                        setFilters({ distanceKm: undefined, flashDealPercent: undefined, priceTo: "" })
-                    }
-                />
-                <SortBar value={sortBy} onChange={setSortBy} />
-
-                {loading && !isAppending ? (
-                    <LoadingSpinner message="Đang tìm kiếm…" />
-                ) : items.length === 0 ? (
-                    <div className={styles.emptyState}>
-                      <div className={styles.emptyIcon}>🔍</div>
-                      <div className={styles.notice}>Không tìm thấy kết quả phù hợp</div>
-                    </div>
-                ) : (
-                    <>
-                      <ResultsList items={items} />
-                      {currentPage < totalPages - 1 && (
-                          <div className={styles.paginationContainer}>
-                            <button
-                                className={styles.loadMoreBtn}
-                                onClick={loadMore}
-                                disabled={loading || isAppending}
-                            >
-                              {isAppending ? (
-                                  <>
-                                    <div className={styles.loadingSpinnerSmall}></div>
-                                    Đang tải...
-                                  </>
-                              ) : (
-                                  "Tải thêm"
-                              )}
-                            </button>
-                          </div>
-                      )}
-                    </>
-                )}
-              </>
-          )}
-        </div>
-
+        
         <FloatMenu />
       </div>
   );

@@ -7,6 +7,7 @@ import styles from "./hold.module.css";
 import { OrderService } from "@/services/site/order.service";
 import { CreateOrderRequest, CreateOrderResponse } from "@/types/order";
 import { AuthService } from "@/services/site/auth.service";
+import { ProductService } from "@/services/site/product.service";
 import Link from "next/link";
 import TimePicker from "@/components/share/TimePicker/TimePicker";
 
@@ -185,6 +186,34 @@ export default function HoldPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [productDetails, setProductDetails] = useState<{ quantityAvailable?: number } | null>(null);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+
+  // Fetch product details to check stock availability
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      if (!productId) return;
+      
+      setIsLoadingProduct(true);
+      try {
+        const details = await ProductService.getDetail(productId);
+        setProductDetails(details);
+        console.log('📦 Product details:', details);
+        
+        // Check if requested quantity exceeds available stock
+        if (details.quantityAvailable !== undefined && qty > details.quantityAvailable) {
+          setError(`Chỉ còn ${details.quantityAvailable} sản phẩm trong kho. Vui lòng giảm số lượng.`);
+        }
+      } catch (error) {
+        console.error('❌ Error fetching product details:', error);
+        setError('Không thể tải thông tin sản phẩm. Vui lòng thử lại.');
+      } finally {
+        setIsLoadingProduct(false);
+      }
+    };
+
+    fetchProductDetails();
+  }, [productId, qty]);
 
   // Check authentication status
   useEffect(() => {
@@ -225,6 +254,12 @@ export default function HoldPage() {
     
     if (!isLoggedIn) {
       setError("Vui lòng đăng nhập để đặt chỗ");
+      return;
+    }
+
+    // Validate stock before submitting
+    if (productDetails?.quantityAvailable !== undefined && qty > productDetails.quantityAvailable) {
+      setError(`Chỉ còn ${productDetails.quantityAvailable} sản phẩm trong kho. Vui lòng giảm số lượng.`);
       return;
     }
 
@@ -276,7 +311,27 @@ export default function HoldPage() {
       console.error('❌ Failed to create order:', error);
       
       const errorMessage = error instanceof Error ? error.message : 'Không thể đặt chỗ. Vui lòng thử lại.';
-      setError(errorMessage);
+      
+      // Handle specific error cases
+      if (errorMessage.includes('Không đủ hàng trong kho') || errorMessage.includes('Xung đột dữ liệu')) {
+        setError('Sản phẩm hiện tại không đủ số lượng. Vui lòng giảm số lượng hoặc chọn sản phẩm khác.');
+      } else if (errorMessage.includes('Không tìm thấy sản phẩm') || errorMessage.includes('Không tìm thấy')) {
+        setError('Sản phẩm không còn tồn tại. Vui lòng quay lại trang chủ để chọn sản phẩm khác.');
+      } else if (errorMessage.includes('Xác thực thất bại') || errorMessage.includes('401')) {
+        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 2000);
+      } else if (errorMessage.includes('Yêu cầu không hợp lệ') || errorMessage.includes('Dữ liệu không hợp lệ')) {
+        setError('Thông tin đơn hàng không hợp lệ. Vui lòng kiểm tra lại và thử lại.');
+      } else if (errorMessage.includes('Lỗi máy chủ') || errorMessage.includes('500')) {
+        setError('Máy chủ đang gặp sự cố. Vui lòng thử lại sau vài phút.');
+      } else if (errorMessage.includes('Lỗi mạng') || errorMessage.includes('timeout')) {
+        setError('Lỗi kết nối mạng. Vui lòng kiểm tra kết nối và thử lại.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -363,15 +418,19 @@ export default function HoldPage() {
     );
   }
 
-  // Show loading while checking authentication
-  if (!authChecked) {
+  // Show loading while checking authentication or loading product details
+  if (!authChecked || isLoadingProduct) {
     return (
       <main className="container py-3" style={{ maxWidth: 560 }}>
         <div className="text-center">
           <div className="spinner-border" role="status">
-            <span className="visually-hidden">Đang kiểm tra đăng nhập...</span>
+            <span className="visually-hidden">
+              {!authChecked ? 'Đang kiểm tra đăng nhập...' : 'Đang tải thông tin sản phẩm...'}
+            </span>
           </div>
-          <p className="mt-2">Đang kiểm tra đăng nhập...</p>
+          <p className="mt-2">
+            {!authChecked ? 'Đang kiểm tra đăng nhập...' : 'Đang tải thông tin sản phẩm...'}
+          </p>
         </div>
       </main>
     );
@@ -426,11 +485,32 @@ export default function HoldPage() {
 
           {/* Số lượng */}
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <label className="form-label mb-0">Số lượng</label>
+            <label className="form-label mb-0">
+              Số lượng
+              {productDetails?.quantityAvailable !== undefined && (
+                <span className="text-muted small ms-1">
+                  (còn {productDetails.quantityAvailable})
+                </span>
+              )}
+            </label>
             <div className="btn-group" role="group" aria-label="Số lượng">
-              <button type="button" className="btn btn-outline-secondary" onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
+              <button 
+                type="button" 
+                className="btn btn-outline-secondary" 
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                disabled={qty <= 1}
+              >
+                −
+              </button>
               <span className="btn btn-outline-secondary disabled">{qty}</span>
-              <button type="button" className="btn btn-outline-secondary" onClick={() => setQty((q) => q + 1)}>+</button>
+              <button 
+                type="button" 
+                className="btn btn-outline-secondary" 
+                onClick={() => setQty((q) => q + 1)}
+                disabled={productDetails?.quantityAvailable !== undefined && qty >= productDetails.quantityAvailable}
+              >
+                +
+              </button>
             </div>
           </div>
 
@@ -457,7 +537,26 @@ export default function HoldPage() {
 
           {error && (
             <div className="alert alert-danger mb-3" role="alert">
-              {error}
+              <div className="d-flex align-items-start">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="me-2 mt-1" style={{ flexShrink: 0 }}>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+                <div className="flex-grow-1">
+                  <div className="fw-medium mb-1">Không thể đặt chỗ</div>
+                  <div className="small">{error}</div>
+                  {error.includes('không đủ số lượng') && qty > 1 && (
+                    <button 
+                      type="button" 
+                      className="btn btn-sm btn-outline-danger mt-2"
+                      onClick={() => setQty(qty - 1)}
+                    >
+                      Thử với {qty - 1} sản phẩm
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -469,9 +568,15 @@ export default function HoldPage() {
             type="submit" 
             className="btn w-100 py-2 fw-bold" 
             style={{ background: "#54A65C", color: "#fff" }}
-            disabled={isLoading || !isLoggedIn || !isValidTime(timeHM)}
+            disabled={
+              isLoading || 
+              !isLoggedIn || 
+              !isValidTime(timeHM) || 
+              isLoadingProduct ||
+              (productDetails?.quantityAvailable !== undefined && qty > productDetails.quantityAvailable)
+            }
           >
-            {isLoading ? 'Đang đặt chỗ...' : 'Giữ chỗ'}
+            {isLoading ? 'Đang đặt chỗ...' : isLoadingProduct ? 'Đang tải...' : 'Giữ chỗ'}
           </button>
         </div>
       </form>

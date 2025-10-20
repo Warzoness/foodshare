@@ -1,6 +1,5 @@
 /* Nền & khoảng trống cho bottom nav */
 .wrap {
-  background: #ffffff;
   min-height: 100vh; /* Đảm bảo chiều cao tối thiểu là toàn màn hình */
   padding-bottom: 76px; /* chừa chỗ cho FloatMenu cố định */
   display: flex;
@@ -53,7 +52,7 @@
   gap:12px;
   overflow-x:auto;
   -webkit-overflow-scrolling: touch;
-  padding: 2px 12px 6px;
+  padding: 2px 0 6px;
 }
 .rowScroll > a{
   flex:0 0 auto; /* không ép 3 item trên desktop */
@@ -100,7 +99,7 @@
   min-height: 0;
 }
 
-/* Card nhỏ như mock (3 thẻ vừa khung mobile) */
+/* Card nhỏ (3 thẻ vừa khung mobile) */
 .cardItem {
   min-width: 112px;          /* điều chỉnh theo ý */
   max-width: 116px;

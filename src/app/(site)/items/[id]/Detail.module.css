@@ -1,5 +1,4 @@
 .wrap {
-  background: #fff;
   min-height: auto;
   padding-bottom: 72px;
   /* chừa chỗ sticky bar */
@@ -72,7 +71,7 @@
 
 .active .thumb {
   border-color: #54A65C;
-  /* xanh như mock */
+  color: #54a65c;
 }
 
 /* Dots dưới thumbnail */
@@ -172,15 +171,14 @@
 
 /* Sticky bar */
 .stickyBar {
-  position: fixed;
-  left: 0;
-  right: 0;
+  position: sticky;
   bottom: 0;
   background: #fff;
   border-top: 1px solid #e6ebef;
-  padding: 10px 12px;
+  padding: 10px 0;
   display: flex;
   justify-content: center;
+  margin-top: 20px;
 }
 
 .reserveBtn {

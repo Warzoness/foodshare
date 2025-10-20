@@ -22,7 +22,7 @@ export default function BecomeSellerPage() {
   return (
     <div className={styles.wrap}>
       <main className={styles.page}>
-        <div className={styles.container}>
+        <div className="page-container">
           {/* Header */}
           <div className={styles.header}>
             <button 

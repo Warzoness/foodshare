@@ -61,7 +61,6 @@ function convertApiOrderToUIOrder(apiOrder: ApiOrder): Order {
     };
 }
 
-// Mock data đã được loại bỏ - chỉ sử dụng dữ liệu thật từ API
 
 /** ===== UI helpers ===== */
 type TabKey = "ALL" | "ACTIVE" | "COMPLETED" | "EXPIRED";
@@ -359,7 +358,7 @@ export default function OrdersPage() {
                 setError('Không thể tải danh sách đơn hàng từ server');
             }
             
-            // Don't use mock data - show empty state instead
+            // Show empty state
             setOrders([]);
         } finally {
             setLoading(false);
@@ -388,77 +387,77 @@ export default function OrdersPage() {
 
     return (
         <AuthGuard>
-            <main className={`container py-3 ${styles.mainContainer}`}>
-            {/* Header */}
-            <div className="d-flex align-items-center gap-2 mb-2">
-                <button 
-                    className="btn-back" 
-                    onClick={() => history.back()} 
-                    aria-label="Quay lại"
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
-                <h5 className="mb-0 fw-bold">Đơn hàng của tôi</h5>
-            </div>
-
-            {/* Tabs – underline style */}
-            <div className={styles.tabBar} role="tablist" aria-label="Trạng thái đơn hàng">
-                {(Object.keys(TAB_LABELS) as TabKey[]).map((key) => (
-                    <button
-                        key={key}
-                        type="button"
-                        role="tab"
-                        aria-selected={active === key}
-                        className={`${styles.tab} ${active === key ? styles.active : ""}`}
-                        onClick={() => setActive(key)}
+            <main className={`py-3 ${styles.mainContainer}`}>
+            <div className="page-container">
+                {/* Header */}
+                <div className="d-flex align-items-center gap-2 mb-2">
+                    <button 
+                        className="btn-back" 
+                        onClick={() => history.back()} 
+                        aria-label="Quay lại"
                     >
-                        {TAB_LABELS[key]}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
                     </button>
-                ))}
-            </div>
+                    <h5 className="mb-0 fw-bold">Đơn hàng của tôi</h5>
+                </div>
 
+                {/* Tabs – underline style */}
+                <div className={styles.tabBar} role="tablist" aria-label="Trạng thái đơn hàng">
+                    {(Object.keys(TAB_LABELS) as TabKey[]).map((key) => (
+                        <button
+                            key={key}
+                            type="button"
+                            role="tab"
+                            aria-selected={active === key}
+                            className={`${styles.tab} ${active === key ? styles.active : ""}`}
+                            onClick={() => setActive(key)}
+                        >
+                            {TAB_LABELS[key]}
+                        </button>
+                    ))}
+                </div>
 
-
-            {/* List */}
-            <div className="bg-white rounded-3 border p-2 p-sm-3">
-                {loading ? (
-                    <LoadingSpinner message="Đang tải đơn hàng..." size="small" className="py-5" />
-                ) : error ? (
-                    <div className="text-center text-danger py-5">
-                        <div className="mb-2">⚠️</div>
-                        <div className="mb-3">{error}</div>
-                        <div className="d-flex gap-2 justify-content-center">
-                            <button 
-                                className="btn btn-outline-success btn-sm"
-                                onClick={() => fetchOrders()}
-                            >
-                                Thử lại
-                            </button>
-                            <button 
-                                className="btn btn-success btn-sm"
-                                onClick={() => {
-                                    AuthService.logout();
-                                    window.location.href = '/auth/login';
-                                }}
-                            >
-                                Đăng nhập lại
-                            </button>
+                {/* List */}
+                <div className="bg-white rounded-3 border p-2 p-sm-3">
+                    {loading ? (
+                        <LoadingSpinner message="Đang tải đơn hàng..." size="small" className="py-5" />
+                    ) : error ? (
+                        <div className="text-center text-danger py-5">
+                            <div className="mb-2">⚠️</div>
+                            <div className="mb-3">{error}</div>
+                            <div className="d-flex gap-2 justify-content-center">
+                                <button 
+                                    className="btn btn-outline-success btn-sm"
+                                    onClick={() => fetchOrders()}
+                                >
+                                    Thử lại
+                                </button>
+                                <button 
+                                    className="btn btn-success btn-sm"
+                                    onClick={() => {
+                                        AuthService.logout();
+                                        window.location.href = '/auth/login';
+                                    }}
+                                >
+                                    Đăng nhập lại
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ) : filtered.length === 0 ? (
-                    <div className="text-center text-body-secondary py-5">
-                        <div className="mb-2">📦</div>
-                        {active === "ALL" ? "Bạn chưa có đơn hàng nào" : "Không có đơn hàng trong danh mục này"}
-                    </div>
-                ) : (
-                    filtered.map((o) => <OrderItem key={o.id} order={o} />)
-                )}
+                    ) : filtered.length === 0 ? (
+                        <div className="text-center text-body-secondary py-5">
+                            <div className="mb-2">📦</div>
+                            {active === "ALL" ? "Bạn chưa có đơn hàng nào" : "Không có đơn hàng trong danh mục này"}
+                        </div>
+                    ) : (
+                        filtered.map((o) => <OrderItem key={o.id} order={o} />)
+                    )}
+                </div>
             </div>
-
-            <FloatMenu />
         </main>
+        
+        <FloatMenu />
         </AuthGuard>
     );
 }

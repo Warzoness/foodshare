@@ -12,13 +12,13 @@ interface AuthGuardProps {
 
 export default function AuthGuard({ 
   children, 
-  redirectTo = '/auth/login' 
+  redirectTo = '/auth/login'
 }: AuthGuardProps) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
         // Debug: Check individual components
         const token = AuthService.getStoredToken();
@@ -33,7 +33,7 @@ export default function AuthGuard({
         console.log('  - UserData keys:', userData ? Object.keys(userData) : 'null');
         
         if (!isLoggedIn) {
-          console.log('🔒 User not authenticated');
+          console.log('🔒 User not authenticated, showing login prompt');
           setIsAuthenticated(false);
           return;
         }
@@ -45,24 +45,7 @@ export default function AuthGuard({
     };
 
     checkAuth();
-  }, []);
-
-  // const handleLogin = () => {
-  //   // Check if on mobile device
-  //   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-  //                    window.innerWidth <= 768;
-    
-  //   if (isMobile) {
-  //     // On mobile, always use redirect flow for better compatibility
-  //     console.log('📱 Mobile device detected, using redirect flow');
-  //     const loginUrl = redirectTo;
-  //     window.location.href = loginUrl;
-  //   } else {
-  //     // On desktop, use normal navigation
-  //     console.log('🖥️ Desktop device detected, using navigation');
-  //     router.push(redirectTo);
-  //   }
-  // };
+  }, [redirectTo]);
 
   // Show loading while checking authentication
   if (isAuthenticated === null) {
@@ -78,6 +61,13 @@ export default function AuthGuard({
 
   // Show login prompt if not authenticated
   if (!isAuthenticated) {
+    const handleLoginClick = () => {
+      const currentPath = window.location.pathname;
+      const loginUrl = `${redirectTo}?returnUrl=${encodeURIComponent(currentPath)}`;
+      console.log('🔄 Redirecting to login:', loginUrl);
+      window.location.href = loginUrl;
+    };
+
     return (
       <div style={{
         minHeight: '100vh',
@@ -86,7 +76,8 @@ export default function AuthGuard({
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        padding: '20px'
       }}>
         {/* Brand */}
         <div style={{
@@ -114,85 +105,113 @@ export default function AuthGuard({
 
         {/* Login Card */}
         <div style={{
-          background: 'transparent',
+          background: 'rgba(255, 255, 255, 0.95)',
           borderRadius: '20px',
-          padding: '2rem',
+          padding: '2.5rem',
           width: '100%',
-          maxWidth: '400px',
+          maxWidth: '420px',
           margin: '0 auto',
           position: 'relative',
-          zIndex: 2
+          zIndex: 2,
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+          backdropFilter: 'blur(10px)'
         }}>
-          {/* Social Login Buttons */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              color: 'white',
-              marginBottom: '1.5rem',
-              textAlign: 'center',
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
-            }}>
-              Đăng nhập
-            </h3>
-            
-            <div style={{
-              width: '100%',
-              marginBottom: '1rem',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: '40px',
-              position: 'relative',
-              borderRadius: '4px',
-              overflow: 'hidden'
-            }}>
-              <button 
-                className="btn btn-light btn-lg w-100"
-                onClick={() => router.push('/auth/login')}
-                style={{
-                  borderRadius: '16px',
-                  padding: '12px 24px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  height: '56px',
-                  border: '2px solid #e5e7eb',
-                  background: '#ffffff',
-                  color: '#3c4043',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1)',
-                  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px'
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Đăng nhập với Google
-              </button>
-            </div>
-          </div>
-
-          {/* Skip Button */}
+          {/* Login Content */}
           <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              backgroundColor: '#3ea25a',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem',
+              boxShadow: '0 8px 20px rgba(62, 162, 90, 0.3)'
+            }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="white">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: '#2d3748',
+              marginBottom: '0.5rem'
+            }}>
+              Đăng nhập để tiếp tục
+            </h2>
+            
+            <p style={{
+              fontSize: '1rem',
+              color: '#718096',
+              marginBottom: '2rem',
+              lineHeight: '1.5'
+            }}>
+              Bạn cần đăng nhập để xem đơn hàng và sử dụng các tính năng khác
+            </p>
+            
+            {/* Login Button */}
             <button 
-              className="btn btn-outline-light"
-              onClick={() => router.push('/')}
+              onClick={handleLoginClick}
               style={{
+                width: '100%',
+                padding: '14px 24px',
+                fontSize: '16px',
+                fontWeight: '500',
+                borderRadius: '12px',
+                border: 'none',
+                background: 'linear-gradient(135deg, #3ea25a 0%, #2d7a47 100%)',
                 color: 'white',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(62, 162, 90, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                marginBottom: '1.5rem'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(62, 162, 90, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(62, 162, 90, 0.3)';
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Đăng nhập với Google
+            </button>
+
+            {/* Skip Button */}
+            <button 
+              onClick={() => window.location.href = '/'}
+              style={{
+                color: '#718096',
                 textDecoration: 'none',
                 fontSize: '0.9rem',
                 padding: '0.75rem 1.5rem',
                 borderRadius: '8px',
-                transition: 'all 0.3s ease',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)'
+                border: '1px solid #e2e8f0',
+                background: 'transparent',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#f7fafc';
+                e.currentTarget.style.borderColor = '#cbd5e0';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = '#e2e8f0';
               }}
             >
               Bỏ qua đăng nhập

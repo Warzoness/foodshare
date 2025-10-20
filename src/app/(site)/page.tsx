@@ -162,7 +162,7 @@ export default function HomePage() {
       // Fix cứng lat lon là 0.99
       fetchNear(0.99, 0.99);
     } else {
-      // No mock data fallback - show empty state
+      // Show empty state
       setHotRaw([]);
       setShockRaw([]);
       setNearRaw([]);
@@ -178,7 +178,7 @@ export default function HomePage() {
 
   return (
     <div className={styles.wrap}>
-      <div className="container pt-3 pb-2">
+      <div className="page-container pt-3 pb-2">
         {/* Thanh search */}
         <div style={{marginBottom: 12}}>
           <SearchBar />

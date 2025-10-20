@@ -108,11 +108,17 @@ export type ApiResponse<T> = {
 
 // ---------- Query Params ----------
 export type ProductSearchParams = {
-  q?: string;
-  page?: number; // 0-based
-  size?: number;
-  latitude?: number;
-  longitude?: number;
+  q?: string;                    // Product name search query
+  lat?: number;                  // Customer latitude
+  lon?: number;                  // Customer longitude
+  maxDistanceKm?: number;        // Maximum distance in kilometers
+  minPrice?: number;             // Minimum price filter
+  maxPrice?: number;             // Maximum price filter
+  minDiscount?: number;          // Minimum discount percentage
+  sortBy?: string;               // Sorting field: 'name', 'price', 'discount', 'distance'
+  sortDirection?: 'asc' | 'desc'; // Sorting direction: 'asc' or 'desc'
+  page?: number;                 // Page number (0-based)
+  size?: number;                 // Page size (max: 100)
 };
 
 const SEARCH_ENDPOINT = "/products"; // Adjust easily if backend path differs
@@ -122,9 +128,31 @@ const NEARBY_ENDPOINT = "/products/nearby";
 const PRODUCT_DETAIL_ENDPOINT = "/products";
 
 export const ProductService = {
-  search(params: { q: string; size: number; longitude: number | undefined; page: number; latitude: number | undefined }) {
+  /**
+   * Search products with advanced filtering and sorting
+   * @param params - Search parameters including filters and sorting
+   * @returns Promise<ApiResponse<PageEnvelope<SearchProduct>>>
+   */
+  search(params: ProductSearchParams) {
+    // Clean up undefined values to avoid sending them to API
+    const cleanParams: Record<string, any> = {};
+    
+    if (params.q !== undefined && params.q !== '') cleanParams.q = params.q;
+    if (params.lat !== undefined) cleanParams.lat = params.lat;
+    if (params.lon !== undefined) cleanParams.lon = params.lon;
+    if (params.maxDistanceKm !== undefined) cleanParams.maxDistanceKm = params.maxDistanceKm;
+    if (params.minPrice !== undefined) cleanParams.minPrice = params.minPrice;
+    if (params.maxPrice !== undefined) cleanParams.maxPrice = params.maxPrice;
+    if (params.minDiscount !== undefined) cleanParams.minDiscount = params.minDiscount;
+    if (params.sortBy !== undefined) cleanParams.sortBy = params.sortBy;
+    if (params.sortDirection !== undefined) cleanParams.sortDirection = params.sortDirection;
+    if (params.page !== undefined) cleanParams.page = params.page;
+    if (params.size !== undefined) cleanParams.size = params.size;
+
+    console.log('🔍 ProductService.search called with params:', cleanParams);
+    
     return apiClient.get<ApiResponse<PageEnvelope<SearchProduct>>>(SEARCH_ENDPOINT, {
-      query: params as Record<string, any>,
+      query: cleanParams,
     });
   },
   async topDiscounts(params: { page?: number; size?: number; lat?: number; lon?: number } = {}) {
@@ -168,19 +196,29 @@ export const ProductService = {
   async list(params: {
     page?: number;
     size?: number;
-    priceSort?: "asc" | "desc"; // currently unused by API
+    priceSort?: "asc" | "desc";
     lat?: number;
     lon?: number;
-    maxDistanceKm?: number; // currently unused by API
+    maxDistanceKm?: number;
   } = {}): Promise<PageResult<Product>> {
-    const { page = 0, size = 12, lat, lon } = params;
-    const res = await this.search({
+    const { page = 0, size = 12, lat, lon, maxDistanceKm, priceSort } = params;
+    
+    const searchParams: ProductSearchParams = {
       q: "", // Empty query for listing all products
       page,
       size,
-      latitude: lat,
-      longitude: lon,
-    });
+      lat,
+      lon,
+      maxDistanceKm,
+    };
+
+    // Add sorting if specified
+    if (priceSort) {
+      searchParams.sortBy = 'price';
+      searchParams.sortDirection = priceSort;
+    }
+
+    const res = await this.search(searchParams);
     const pg = res.data; // PageEnvelope<SearchProduct>
     return {
       content: (pg.content || []).map(mapSearchToProduct),

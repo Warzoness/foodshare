@@ -7,6 +7,7 @@ export type RequestOptions = {
   body?: any;            // object sẽ tự JSON.stringify
   timeoutMs?: number;    // mặc định 8000
   retries?: number;      // mặc định 1 (thử lại 1 lần)
+  skipAuthRedirect?: boolean; // mặc định false - có tự động redirect khi 401 không
 };
 
 const BASE_URL = "https://foodshare-production-98da.up.railway.app"; // <-- hardcode
@@ -75,8 +76,40 @@ export class ApiClient {
       console.log(`[API][RES] ${method} ${url}`, res.status);
 
       if (!res.ok) {
-        const msg = (data && (data.message || data.error)) || `HTTP ${res.status}`;
-        throw new Error(msg);
+        // Handle 401 Unauthorized - redirect to login
+        if (res.status === 401 && !opt.skipAuthRedirect) {
+          console.log('🔒 401 Unauthorized detected, triggering auth redirect...');
+          
+          // Import auth redirect service dynamically to avoid circular dependencies
+          const { authRedirectService } = await import('@/services/site/auth-redirect.service');
+          await authRedirectService.handleUnauthorized({
+            showNotification: true,
+            redirectDelay: 2000,
+            customMessage: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục."
+          });
+        }
+
+        // Try to extract error message from response body
+        let errorMessage = `HTTP ${res.status}`;
+        
+        if (data) {
+          // Check various possible error message fields
+          errorMessage = data.message || data.error || data.errorMessage || data.detail || errorMessage;
+          
+          // If it's a structured error response, try to get more details
+          if (data.errors && Array.isArray(data.errors)) {
+            errorMessage = data.errors.join(', ');
+          }
+        }
+        
+        console.error(`[API][ERR] ${method} ${url}`, {
+          status: res.status,
+          statusText: res.statusText,
+          errorMessage,
+          responseData: data
+        });
+        
+        throw new Error(errorMessage);
       }
 
       // nếu là JSON, trả JSON; nếu không, trả Response gốc

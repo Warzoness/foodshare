@@ -19,8 +19,9 @@ body {
 }
 
 body {
-  background: #fff;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   color: #111;
+  min-height: 100vh;
 }
 
 /* Avoid showing scrollbars while preserving scroll; prevent horizontal overflow */
@@ -119,3 +120,22 @@ select:focus,
 }
 .btn-back:hover { box-shadow: 0 4px 14px rgba(84,166,92,0.25); }
 .btn-back:focus, .btn-back:focus-visible { outline:none; box-shadow: 0 0 0 3px rgba(84,166,92,0.35), 0 4px 14px rgba(84,166,92,0.2); }
+
+/* Unified page container for consistent layout */
+.page-container {
+  width: 100%;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin: 0 auto;
+  background: #ffffff;
+  min-height: calc(100vh - 76px);
+}
+
+@media (min-width: 768px) {
+  .page-container {
+    width: 75%;
+    max-width: 1400px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}

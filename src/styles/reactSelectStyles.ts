@@ -1,6 +1,6 @@
 import { StylesConfig } from 'react-select';
 
-export const customSelectStyles: StylesConfig = {
+export const customSelectStyles: StylesConfig<any, boolean, any> = {
   control: (provided, state) => ({
     ...provided,
     minHeight: '40px',

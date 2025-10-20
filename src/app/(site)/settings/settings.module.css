@@ -7,26 +7,27 @@
 
 .settingsContainer {
   padding-bottom: 80px !important;
-  max-width: 1200px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
 
 .settingsGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 @media (min-width: 768px) {
   .settingsGrid {
     grid-template-columns: 1fr 1fr;
-    gap: 32px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .settingsGrid {
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 40px;
+    gap: 24px;
+    max-width: 800px;
   }
 }
 
@@ -67,12 +68,6 @@
 @media (min-width: 768px) {
   .profileSection {
     grid-column: 1 / 2;
-  }
-}
-
-@media (min-width: 1024px) {
-  .profileSection {
-    grid-column: 1 / 3;
   }
 }
 

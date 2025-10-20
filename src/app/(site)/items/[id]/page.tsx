@@ -143,13 +143,29 @@ export default function ItemDetailPage() {
           await fetchStoreDetail(product.shopId);
         }
         
+        // Parse detailImageUrl into array of images
+        const parseDetailImages = (detailImageUrl?: string): string[] => {
+          if (!detailImageUrl || detailImageUrl.trim() === "") {
+            return [];
+          }
+          return detailImageUrl.split(',').map(url => url.trim()).filter(Boolean);
+        };
+
+        const detailImages = parseDetailImages(product?.detailImageUrl);
+        const mainImage = product?.imageUrl || "/images/chicken-fried.jpg";
+        
+        // If detailImageUrl is empty, only show main image
+        const allImages = detailImages.length > 0 
+          ? [mainImage, ...detailImages] 
+          : [mainImage];
+
         // Convert API data to ItemDetail format with safe handling
         const itemDetail: ItemDetail = {
           id: (product?.id || 0).toString(),
           title: product?.name || "Sản phẩm",
           subtitle: product?.description || "Món ăn ngon",
           priceNow: product?.price || 0,
-          // Tạo dữ liệu giả để test nếu API không có originalPrice
+          // Set originalPrice if not available
           priceOld: product?.originalPrice || (product?.discountPercent ? Math.round(product.price / (1 - product.discountPercent / 100)) : product?.price ? Math.round(product.price * 1.5) : undefined),
           discount: product?.discountPercent ? `-${product.discountPercent}%` : (product?.price ? "-30%" : undefined),
           storeName: store?.name || product?.shopName || "Cửa hàng",
@@ -158,10 +174,7 @@ export default function ItemDetailPage() {
             lat: store?.latitude || product?.shopLatitude || 0.99, 
             lng: store?.longitude || product?.shopLongitude || 0.99 
           },
-          images: [
-            product?.imageUrl || "/images/chicken-fried.jpg", 
-            product?.detailImageUrl || "/images/food1.jpg"
-          ].filter(Boolean),
+          images: allImages,
           discountPct: product?.discountPercent || (product?.price ? 30 : undefined),
         };
         
@@ -265,30 +278,29 @@ export default function ItemDetailPage() {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.hero}>
-        <Image
-          src={data.images[curr]}
-          alt={data.title}
-          fill
-          className={styles.heroImg}
-          priority
-          onClick={() => openLb(curr)}
-        />
+      <div className="page-container">
+        <div className={styles.hero}>
+          <Image
+            src={data.images[curr]}
+            alt={data.title}
+            fill
+            className={styles.heroImg}
+            priority
+            onClick={() => openLb(curr)}
+          />
 
-        {/* Tag ôm sát góc trên-phải */}
-        {typeof data.discountPct === "number" && (
-          <FlashDealTag discountPercentage={data.discountPct ?? 0} size="lg" />
-        )}
+          {/* Tag ôm sát góc trên-phải */}
+          {typeof data.discountPct === "number" && (
+            <FlashDealTag discountPercentage={data.discountPct ?? 0} size="lg" />
+          )}
 
-        <button className="btn-back" onClick={() => window.history.back()} aria-label="Quay lại" style={{ position: "absolute", top: 10, left: 10 }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: "middle" }}>
-            <path d="M15 19l-7-7 7-7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="visually-hidden">Quay lại</span>
-        </button>
-      </div>
-
-      <div className="container">
+          <button className="btn-back" onClick={() => window.history.back()} aria-label="Quay lại" style={{ position: "absolute", top: 10, left: 10 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ verticalAlign: "middle" }}>
+              <path d="M15 19l-7-7 7-7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="visually-hidden">Quay lại</span>
+          </button>
+        </div>
         {/* THUMBS */}
         <div ref={thumbRowRef} className={styles.thumbRow}>
           {data.images.map((src, i) => (
@@ -382,17 +394,17 @@ export default function ItemDetailPage() {
 
           </div>
         </section>
-      </div>
 
-      {/* STICKY ACTION */}
-      <div className={styles.stickyBar}>
-        <button 
-          className={`${styles.reserveBtn} ${!isLoggedIn ? styles.reserveBtnDisabled : ''}`}
-          onClick={handleReserveClick}
-          disabled={loading}
-        >
-          {isLoggedIn ? 'Đặt chỗ' : 'Đăng nhập để đặt chỗ'}
-        </button>
+        {/* STICKY ACTION */}
+        <div className={styles.stickyBar}>
+          <button 
+            className={`${styles.reserveBtn} ${!isLoggedIn ? styles.reserveBtnDisabled : ''}`}
+            onClick={handleReserveClick}
+            disabled={loading}
+          >
+            {isLoggedIn ? 'Đặt chỗ' : 'Đăng nhập để đặt chỗ'}
+          </button>
+        </div>
       </div>
 
       {/* MAP MODAL (render only when opened) */}

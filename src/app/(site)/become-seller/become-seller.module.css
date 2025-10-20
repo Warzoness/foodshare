@@ -1,6 +1,5 @@
 /* Wrapper for FloatMenu */
 .wrap {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   min-height: 100vh;
   padding-bottom: 76px; /* chừa chỗ cho FloatMenu cố định */
   display: flex;
@@ -13,11 +12,7 @@
   margin: 0;
 }
 
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
+/* Container styles removed - using global .page-container */
 
 /* Header */
 .header {
@@ -27,7 +22,7 @@
   padding: 20px 0;
   position: sticky;
   top: 0;
-  background: rgba(248, 250, 252, 0.95);
+  background: rgba(248, 250, 252, 0.8);
   backdrop-filter: blur(10px);
   z-index: 10;
 }
