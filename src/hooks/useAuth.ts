@@ -72,17 +72,20 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
       setIsAuthenticated(true);
       
       // Convert SocialLoginResponse to User type
-      const user: User = {
-        userId: userData.userId,
-        name: userData.name,
-        email: userData.email,
-        phoneNumber: (userData as any).phoneNumber || undefined,
-        provider: userData.provider,
-        providerId: userData.providerId,
-        profilePictureUrl: userData.profilePictureUrl
-      };
+      if (userData) {
+        const user: User = {
+          userId: userData.userId,
+          name: userData.name,
+          email: userData.email,
+          phoneNumber: (userData as any).phoneNumber || undefined,
+          provider: userData.provider,
+          providerId: userData.providerId,
+          profilePictureUrl: userData.profilePictureUrl
+        };
+        
+        setUser(user);
+      }
       
-      setUser(user);
       return true;
     } catch (error) {
       console.error('❌ Auth check error:', error);
