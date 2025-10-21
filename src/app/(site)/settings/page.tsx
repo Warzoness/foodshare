@@ -381,15 +381,21 @@ export default function SettingsPage() {
     <main className={styles.settingsContainer}>
       <div className="page-container">
         <div className="d-flex flex-column align-items-center" style={{ minHeight: '100vh', paddingTop: '40px', paddingBottom: '40px' }}>
-            <header className={styles.header} style={{ width: '100%', maxWidth: '500px', marginBottom: '32px' }}>
-              <button className={styles.backBtn} onClick={() => history.back()} aria-label="Quay lại">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-              <h1 className="h4 mb-0 fw-bold text-center">Cài đặt tài khoản</h1>
-              <div></div>
-            </header>
+            {/* Header similar to orders page */}
+            {/* <div className={styles['title-order']} style={{ width: '100%', maxWidth: '500px', marginBottom: '32px' }}>
+              <div className="d-flex align-items-center gap-2 mb-2">
+                <button 
+                  className="btn-back" 
+                  onClick={() => history.back()} 
+                  aria-label="Quay lại"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <h5 className="mb-0 fw-bold">Cài đặt</h5>
+              </div>
+            </div> */}
 
              <div className={styles.settingsGrid}>
            {/* Cài đặt tài khoản - Cột 1 */}

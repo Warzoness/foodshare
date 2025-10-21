@@ -8,13 +8,12 @@
 }
 
 .loadingSpinner {
-  border: 3px solid #f3f4f6;
-  border-top: 3px solid #54a65c;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
 
+/* Size variants */
 .loadingSpinner.small {
   width: 20px;
   height: 20px;
@@ -36,11 +35,108 @@
   margin-bottom: 24px;
 }
 
+.loadingSpinner.inline {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+  margin-bottom: 0;
+  margin-right: 8px;
+}
+
+/* Color variants */
+.loadingSpinner.default {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #54a65c;
+}
+
+.loadingSpinner.default.small {
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #54a65c;
+}
+
+.loadingSpinner.default.medium {
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #54a65c;
+}
+
+.loadingSpinner.default.large {
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #54a65c;
+}
+
+.loadingSpinner.default.inline {
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #54a65c;
+}
+
+.loadingSpinner.white {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+}
+
+.loadingSpinner.white.small {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+}
+
+.loadingSpinner.white.medium {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+}
+
+.loadingSpinner.white.large {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+}
+
+.loadingSpinner.white.inline {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+}
+
+.loadingSpinner.dark {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #374151;
+}
+
+.loadingSpinner.dark.small {
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top: 2px solid #374151;
+}
+
+.loadingSpinner.dark.medium {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top: 3px solid #374151;
+}
+
+.loadingSpinner.dark.large {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #374151;
+}
+
+.loadingSpinner.dark.inline {
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top: 2px solid #374151;
+}
+
 .notice {
   color: #6b7280;
   font-size: 14px;
   font-weight: 500;
   text-align: center;
+}
+
+/* Inline container for button usage */
+.inlineContainer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inlineMessage {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 @keyframes spin {

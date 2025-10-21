@@ -383,17 +383,19 @@ export default function OrdersPage() {
             <main className={`py-3 ${styles.mainContainer}`}>
             <div className="page-container">
                 {/* Header */}
-                <div className="d-flex align-items-center gap-2 mb-2">
-                    <button 
-                        className="btn-back" 
-                        onClick={() => history.back()} 
-                        aria-label="Quay lại"
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                    </button>
-                    <h5 className="mb-0 fw-bold">Đơn hàng của tôi</h5>
+                <div className={styles['title-order']}>
+                    <div className="d-flex align-items-center gap-2 mb-2">
+                        <button 
+                            className="btn-back" 
+                            onClick={() => history.back()} 
+                            aria-label="Quay lại"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M15 19l-7-7 7-7" stroke="#2b2b2b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                        <h5 className="mb-0 fw-bold">Đơn hàng của tôi</h5>
+                    </div>
                 </div>
 
                 {/* Tabs – underline style */}

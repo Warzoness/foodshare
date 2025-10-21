@@ -47,54 +47,134 @@
 /* Thumbs */
 .thumbRow {
   display: flex;
-  justify-content: center;
-  gap: 10px;
+  gap: 8px;
   overflow-x: auto;
-  padding: 10px 2px 0;
+  padding: 12px 16px 8px;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  position: relative;
+}
+
+.thumbRow::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Scroll indicators */
+.thumbRow::before,
+.thumbRow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.thumbRow::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(255,255,255,0.9), transparent);
+}
+
+.thumbRow::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(255,255,255,0.9), transparent);
 }
 
 .thumbBtn {
   border: none;
   background: transparent;
   padding: 0;
-  border-radius: 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.thumbBtn:hover {
+  transform: scale(1.05);
+}
+
+.thumbBtn:active {
+  transform: scale(0.95);
 }
 
 .thumb {
-  width: 78px;
-  height: 64px;
-  border-radius: 10px;
+  width: 72px;
+  height: 60px;
+  border-radius: 12px;
   background-size: cover;
   background-position: center;
   border: 2px solid transparent;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .active .thumb {
   border-color: #54A65C;
-  color: #54a65c;
+  box-shadow: 0 4px 12px rgba(84, 166, 92, 0.3);
+  transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .thumbRow {
+    padding: 10px 12px 6px;
+    gap: 6px;
+  }
+  
+  .thumb {
+    width: 64px;
+    height: 52px;
+  }
+}
+
+@media (min-width: 768px) {
+  .thumbRow {
+    justify-content: center;
+    padding: 12px 20px 8px;
+  }
+  
+  .thumb {
+    width: 80px;
+    height: 68px;
+  }
 }
 
 /* Dots dưới thumbnail */
 .dotsRow {
   display: flex;
   justify-content: center;
-  gap: 16px;
-  padding: 10px 0 4px;
+  gap: 8px;
+  padding: 8px 0 4px;
+  flex-wrap: wrap;
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #cfd8dc;
-  /* xám nhạt */
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .04);
+  background: #e0e7ff;
   cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.dot:hover {
+  background: #c7d2fe;
+  transform: scale(1.2);
 }
 
 .dotActive {
   background: #54A65C;
-  /* xanh active */
+  transform: scale(1.3);
+  box-shadow: 0 2px 6px rgba(84, 166, 92, 0.4);
+}
+
+/* Hide dots if there are too many images (more than 8) */
+.dotsRow.hideDots {
+  display: none;
 }
 
 /* Price row */
@@ -282,22 +362,52 @@
 
 .lbThumbs {
   display: flex;
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 12px;
   background: #111;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #54A65C #333;
+}
+
+.lbThumbs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.lbThumbs::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 3px;
+}
+
+.lbThumbs::-webkit-scrollbar-thumb {
+  background: #54A65C;
+  border-radius: 3px;
+}
+
+.lbThumbs::-webkit-scrollbar-thumb:hover {
+  background: #4a9552;
 }
 
 .lbThumb {
-  width: 76px;
-  height: 60px;
+  width: 70px;
+  height: 56px;
   border-radius: 8px;
   background-size: cover;
   background-position: center;
   border: 2px solid transparent;
   flex: 0 0 auto;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.lbThumb:hover {
+  opacity: 1;
+  transform: scale(1.05);
 }
 
 .lbActive {
   border-color: #54A65C;
+  opacity: 1;
+  box-shadow: 0 0 0 1px #54A65C;
 }

@@ -344,10 +344,11 @@ function LoginPageContent() {
                 
                 {!sdkLoaded && (
                   <div className={styles.loadingSDK}>
-                    <div className="spinner-border spinner-border-sm me-2" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    Đang tải SDK đăng nhập...
+                    <LoadingSpinner 
+                      size="small" 
+                      message="Đang tải SDK đăng nhập..." 
+                      showMessage={true}
+                    />
                   </div>
                 )}
                 
@@ -355,8 +356,12 @@ function LoginPageContent() {
                 <div id="google-login-button" className={styles.googleButtonContainer}>
                   {loading && (
                     <div className={styles.loadingOverlay}>
-                      <div className={styles.spinner}></div>
-                      <span>Đang đăng nhập...</span>
+                      <LoadingSpinner 
+                        size="small" 
+                        variant="white" 
+                        message="Đang đăng nhập..." 
+                        showMessage={true}
+                      />
                     </div>
                   )}
                 </div>

@@ -356,10 +356,12 @@ export default function StoreDetailPage() {
                   disabled={loadingMore}
                 >
                   {loadingMore ? (
-                    <>
-                      <div className={styles.loadingSpinnerSmall}></div>
-                      Đang tải...
-                    </>
+                    <LoadingSpinner 
+                      size="inline" 
+                      variant="white" 
+                      message="Đang tải..." 
+                      showMessage={true}
+                    />
                   ) : (
                     'Tải thêm sản phẩm'
                   )}

@@ -226,16 +226,29 @@ export default function ItemDetailPage() {
     })();
   }, []);
 
-  // Scroll thumb vào giữa khi đổi ảnh (nhỏ gọn)
+  // Scroll thumb vào giữa khi đổi ảnh (cải tiến)
   const thumbRowRef = useRef<HTMLDivElement | null>(null);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  
   useEffect(() => {
     const el = thumbRefs.current[curr];
     const row = thumbRowRef.current;
     if (el && row) {
-      const { left: rl, width: rw } = row.getBoundingClientRect();
-      const { left: elL, width: ew } = el.getBoundingClientRect();
-      row.scrollBy({ left: (elL - rl) - (rw / 2 - ew / 2), behavior: "smooth" });
+      const rowRect = row.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      
+      // Calculate if element is visible in viewport
+      const isVisible = elRect.left >= rowRect.left && elRect.right <= rowRect.right;
+      
+      if (!isVisible) {
+        // Calculate scroll position to center the element
+        const scrollLeft = el.offsetLeft - (rowRect.width / 2) + (elRect.width / 2);
+        
+        row.scrollTo({
+          left: Math.max(0, scrollLeft),
+          behavior: "smooth"
+        });
+      }
     }
   }, [curr]);
 
@@ -313,8 +326,8 @@ export default function ItemDetailPage() {
         </div>
 
 
-        {/* DOTS dưới thumbnail */}
-        {data.images.length > 1 && (
+        {/* DOTS dưới thumbnail - chỉ hiện khi có ít hơn 8 ảnh */}
+        {data.images.length > 1 && data.images.length <= 8 && (
           <div className={styles.dotsRow}>
             {data.images.map((_, i) => (
               <span
@@ -324,6 +337,15 @@ export default function ItemDetailPage() {
                 aria-label={`Chọn ảnh ${i + 1}`}
               />
             ))}
+          </div>
+        )}
+        
+        {/* Image counter for many images */}
+        {data.images.length > 8 && (
+          <div className="text-center py-2">
+            <span className="badge bg-light text-dark border" style={{ fontSize: '12px' }}>
+              {curr + 1} / {data.images.length}
+            </span>
           </div>
         )}
 

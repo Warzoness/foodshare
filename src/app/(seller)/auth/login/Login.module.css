@@ -166,19 +166,6 @@
   line-height: 1;
   color: inherit;
 }
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-.googleButton .spinner {
-  border: 2px solid rgba(66, 133, 244, 0.2);
-  border-top: 2px solid #4285f4;
-}
 
 
 @keyframes spin {
@@ -305,11 +292,6 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.loadingSDK .spinner-border-sm {
-  width: 1.25rem;
-  height: 1.25rem;
-  border-width: 2px;
-}
 
 /* Google Button Container */
 .googleButtonContainer {
@@ -357,12 +339,5 @@
   border: 2px solid #e5e7eb;
 }
 
-.loadingOverlay .spinner {
-  margin-bottom: 0.5rem;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #e5e7eb;
-  border-top: 2px solid #4285f4;
-}
 
 

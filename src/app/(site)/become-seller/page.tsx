@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 import styles from "./become-seller.module.css";
 
 const FloatMenu = dynamic(() => import("@/components/site/layouts/FloatMenu/FloatMenu"), { ssr: false });
@@ -101,10 +102,12 @@ export default function BecomeSellerPage() {
                 disabled={isRedirecting}
               >
                 {isRedirecting ? (
-                  <>
-                    <div className={styles.spinner}></div>
-                    Đang chuyển hướng...
-                  </>
+                  <LoadingSpinner 
+                    size="inline" 
+                    variant="white" 
+                    message="Đang chuyển hướng..." 
+                    showMessage={true}
+                  />
                 ) : (
                   <>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">

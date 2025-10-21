@@ -5,6 +5,33 @@
   margin-bottom: 24px;
 }
 
+.title-order{
+  padding: 1rem 0 !important;
+}
+
+.btn-back {
+  appearance: none;
+  border: none;
+  background: #ffffff;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: box-shadow .18s ease, transform .06s ease;
+}
+
+.btn-back:hover {
+  box-shadow: 0 4px 14px rgba(84,166,92,0.25);
+}
+
+.btn-back:focus,
+.btn-back:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(84,166,92,0.35), 0 4px 14px rgba(84,166,92,0.2);
+}
+
 .settingsContainer {
   padding-bottom: 80px !important;
   display: flex;

@@ -389,10 +389,12 @@ function SearchPageContent() {
                                   disabled={loading || isAppending}
                               >
                                 {isAppending ? (
-                                    <>
-                                      <div className={styles.loadingSpinnerSmall}></div>
-                                      Đang tải...
-                                    </>
+                                    <LoadingSpinner 
+                                      size="inline" 
+                                      variant="white" 
+                                      message="Đang tải..." 
+                                      showMessage={true}
+                                    />
                                 ) : (
                                     "Tải thêm"
                                 )}
