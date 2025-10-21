@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./hold.module.css";
@@ -125,7 +125,6 @@ export default function HoldPage() {
     
     // Validate time and show alert if invalid
     if (!isValidTime(newTime)) {
-      const [hour, minute] = newTime.split(":").map(Number);
       const currentTime = new Date();
       const currentHour = currentTime.getHours();
       const currentMinute = currentTime.getMinutes();
@@ -167,7 +166,6 @@ export default function HoldPage() {
       
       if (maxMinutes >= 1440) {
         // We're in a situation where +2 hours goes to next day
-        const nextDayMaxMinutes = maxMinutes - 1440;
         // If selected time is earlier than current time, it means next day
         if (selectedMinutes < currentMinutes) {
           isNextDay = true;

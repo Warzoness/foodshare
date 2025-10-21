@@ -44,6 +44,7 @@ function SearchPageContent() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  console.log('📊 Total search results:', totalElements);
 
   useEffect(() => {
     inputRef.current?.focus();

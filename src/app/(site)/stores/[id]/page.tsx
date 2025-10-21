@@ -25,6 +25,7 @@ export default function StoreDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  console.log('📊 Total pages:', totalPages);
   const [totalElements, setTotalElements] = useState(0);
   const [hasMore, setHasMore] = useState(false);
 

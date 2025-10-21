@@ -41,6 +41,7 @@ function GoogleCallbackContent() {
         };
         
         const response = await AuthService.socialLogin(loginRequest);
+        console.log('✅ Login successful:', response);
         
         
         // Redirect to intended page or home

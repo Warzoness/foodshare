@@ -136,7 +136,52 @@ export const AuthService = {
         }
         
         console.log('🔄 Decoding JWT payload...');
-        const payload = JSON.parse(atob(parts[1]));
+        
+        // Safe base64 decoding with padding fix for mobile compatibility
+        let payload;
+        try {
+          // Fix base64 padding issues that can occur on mobile
+          let base64Payload = parts[1];
+          
+          // Add padding if needed
+          while (base64Payload.length % 4) {
+            base64Payload += '=';
+          }
+          
+          // Replace URL-safe base64 characters with standard base64
+          base64Payload = base64Payload.replace(/-/g, '+').replace(/_/g, '/');
+          
+          console.log('🔍 Base64 payload after padding fix:', base64Payload.substring(0, 50) + '...');
+          
+          const decodedPayload = atob(base64Payload);
+          payload = JSON.parse(decodedPayload);
+          
+        } catch (decodeError) {
+          console.error('❌ Base64 decoding failed:', decodeError);
+          console.error('❌ Original payload part:', parts[1]);
+          console.error('❌ Payload length:', parts[1].length);
+          
+          // Try alternative decoding methods
+          try {
+            // Method 2: Direct decode without padding fix
+            const directDecoded = atob(parts[1]);
+            payload = JSON.parse(directDecoded);
+            console.log('✅ Direct decoding succeeded');
+          } catch (directError) {
+            console.error('❌ Direct decoding also failed:', directError);
+            
+            // Method 3: Use browser's built-in URLSearchParams for URL-safe base64
+            try {
+              const urlSafeDecoded = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+              payload = JSON.parse(urlSafeDecoded);
+              console.log('✅ URL-safe decoding succeeded');
+            } catch (urlSafeError) {
+              console.error('❌ URL-safe decoding also failed:', urlSafeError);
+              throw new Error(`Invalid Google token: Failed to decode JWT payload. ${decodeError instanceof Error ? decodeError.message : 'Unknown error'}`);
+            }
+          }
+        }
+        
         console.log('🔍 Decoded Google JWT payload:', payload);
         console.log('🔍 Payload details:', {
           email: payload.email,
@@ -154,9 +199,27 @@ export const AuthService = {
             hasEmail: !!payload.email,
             hasName: !!payload.name,
             email: payload.email,
-            name: payload.name
+            name: payload.name,
+            fullPayload: payload
           });
           throw new Error('Missing required user information in token');
+        }
+        
+        // Additional mobile-specific validation
+        if (typeof window !== 'undefined' && /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+          console.log('📱 Mobile device detected, performing additional token validation...');
+          
+          // Check if token is expired
+          if (payload.exp && payload.exp < Date.now() / 1000) {
+            console.error('❌ Token expired on mobile device');
+            throw new Error('Google token has expired. Please try logging in again.');
+          }
+          
+          // Check token issuer
+          if (payload.iss && !payload.iss.includes('google')) {
+            console.error('❌ Invalid token issuer on mobile:', payload.iss);
+            throw new Error('Invalid Google token issuer');
+          }
         }
         
         const userInfo = {

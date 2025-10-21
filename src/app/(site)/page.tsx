@@ -141,10 +141,11 @@ export default function HomePage() {
     }
   }, []);
 
-  const fetchNear = useCallback(async (lat?: number, lon?: number) => {
+  const fetchNear = useCallback(async () => {
     setLoadingNear(true);
     try {
       const { latitude, longitude } = await getCurrentCoordinates();
+      console.log('📍 Fetching nearby products for:', { latitude, longitude });
       const arr = await ProductService.nearby({ page: 0, size: 12, lat: latitude, lon: longitude });
       setNearRaw(arr || []);
     } catch (e: any) {
@@ -160,7 +161,7 @@ export default function HomePage() {
       fetchHot();
       fetchShock();
       // Fix cứng lat lon là 0.99
-      fetchNear(0.99, 0.99);
+      fetchNear();
     } else {
       // Show empty state
       setHotRaw([]);

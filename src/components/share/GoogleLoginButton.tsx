@@ -15,11 +15,22 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Detect if device is mobile
+  // Detect if device is mobile with improved accuracy
   const isMobile = () => {
     if (typeof window === 'undefined') return false;
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-           window.innerWidth <= 768;
+    
+    // Check user agent
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    
+    // Check screen size
+    const isMobileScreen = window.innerWidth <= 768;
+    
+    // Check touch capability
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    // Mobile if any of these conditions are true
+    return isMobileUA || (isMobileScreen && isTouchDevice);
   };
 
   useEffect(() => {
@@ -68,7 +79,7 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
       setIsLoading(true);
 
       // Call your backend to verify the token
-      const result = await AuthService.socialLogin({
+      await AuthService.socialLogin({
         provider: 'GOOGLE',
         token: response.credential
       });
@@ -88,21 +99,29 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
   const handleGoogleLogin = () => {
     try {
       if (isMobile()) {
-        // On mobile, try popup first, fallback to redirect
+        console.log('📱 Mobile device detected, using mobile-optimized login flow');
         
+        // On mobile, try popup first, fallback to redirect
         if (window.google) {
           try {
+            console.log('🔄 Attempting Google popup on mobile...');
             (window.google as any).accounts.id.prompt();
-          } catch {
-            window.location.href = '/auth/login';
+          } catch (popupError) {
+            console.warn('⚠️ Popup failed on mobile, falling back to redirect:', popupError);
+            // Show user-friendly message before redirect
+            if (confirm('Popup có thể bị chặn trên mobile. Bạn có muốn chuyển đến trang đăng nhập không?')) {
+              window.location.href = '/auth/login';
+            }
           }
         } else {
+          console.log('🔄 Google SDK not loaded, redirecting to login page');
           window.location.href = '/auth/login';
         }
         return;
       }
 
       // On desktop, use Google Identity Services popup
+      console.log('🖥️ Desktop device detected, using popup login');
       if (window.google) {
         (window.google as any).accounts.id.prompt();
       } else {
@@ -110,7 +129,9 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
         router.push('/auth/login');
       }
     } catch (error) {
-      console.error('Google login failed:', error);
+      console.error('❌ Google login failed:', error);
+      onError?.(error instanceof Error ? error.message : 'Đăng nhập Google thất bại');
+      
       // Fallback to redirect
       if (isMobile()) {
         window.location.href = '/auth/login';

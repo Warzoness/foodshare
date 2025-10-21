@@ -267,7 +267,22 @@ function LoginPageContent() {
       console.error('❌ Error message:', error.message);
       console.error('❌ Error stack:', error.stack);
       
-      setError(error.message || 'Xử lý đăng nhập Google thất bại');
+      // Provide user-friendly error messages
+      let userMessage = 'Xử lý đăng nhập Google thất bại';
+      
+      if (error.message.includes('Invalid Google token')) {
+        userMessage = 'Token Google không hợp lệ. Vui lòng thử lại.';
+      } else if (error.message.includes('Failed to decode JWT')) {
+        userMessage = 'Lỗi xử lý thông tin từ Google. Vui lòng thử lại.';
+      } else if (error.message.includes('expired')) {
+        userMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+      } else if (error.message.includes('popup')) {
+        userMessage = 'Popup đăng nhập bị chặn. Vui lòng cho phép popup hoặc thử trình duyệt khác.';
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        userMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra internet và thử lại.';
+      }
+      
+      setError(userMessage);
     } finally {
       console.log('🏁 Google login process finished');
       setLoading(false);
