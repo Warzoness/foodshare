@@ -43,6 +43,37 @@ a {
   text-decoration: none;
 }
 
+/* Standardized heading font sizes */
+h1, .h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+h2, .h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+h3, .h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+h4, .h4 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+h5, .h5 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+h6, .h6 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
 /* Global interactive highlighting */
 button,
 .btn {
