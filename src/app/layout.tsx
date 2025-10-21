@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import ClientLocationGate from "@/components/share/ClientLocationGate";
 
 export const metadata: Metadata = {
   title: "FoodShare",
@@ -15,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body suppressHydrationWarning={true}>
-        {children}
+        <ClientLocationGate>{children}</ClientLocationGate>
       </body>
     </html>
   );
