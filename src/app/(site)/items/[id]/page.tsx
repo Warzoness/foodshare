@@ -256,6 +256,7 @@ export default function ItemDetailPage() {
   const delta = 0.005;
   const bbox = `${data.coords.lng - delta},${data.coords.lat - delta},${data.coords.lng + delta},${data.coords.lat + delta}`;
   const osmEmbed = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${data.coords.lat},${data.coords.lng}`;
+  const googleEmbed = `https://www.google.com/maps?q=${data.coords.lat},${data.coords.lng}&z=15&output=embed`;
 
   if (loading) {
     return (
@@ -392,8 +393,18 @@ export default function ItemDetailPage() {
           </Link>
 
           <div className={styles.mapCard}>
+            {/*<div className={styles.mapPreview}>*/}
+            {/*  <iframe className={styles.mapIframe} src={osmEmbed} title="Mini map preview" loading="lazy" />*/}
+            {/*</div>*/}
             <div className={styles.mapPreview}>
-              <iframe className={styles.mapIframe} src={osmEmbed} title="Mini map preview" loading="lazy" />
+              <iframe
+                  className={styles.mapIframe}
+                  src={googleEmbed}
+                  title="Google Map preview"
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+              />
             </div>
 
             <div className={styles.mapMini}>

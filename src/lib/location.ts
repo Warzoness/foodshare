@@ -32,10 +32,12 @@ export async function getCurrentCoordinates(): Promise<Coordinates> {
     }
   } catch (_) {}
 
-  // 2️⃣ Nếu không có cache, thử IP nhanh
+  // 2️⃣ Nếu không có cache, thử IP nhanh qua ipwho.is (miễn phí, không giới hạn)
   try {
-    const ipRes = await fetch("https://ipapi.co/json/");
+    const ipRes = await fetch("https://ipwho.is/");
     const ipData = await ipRes.json();
+    console.log("IP lookup:", ipData);
+
     if (ipData && ipData.latitude && ipData.longitude) {
       // Lưu cache
       localStorage.setItem("coords_cache", JSON.stringify({
@@ -44,6 +46,7 @@ export async function getCurrentCoordinates(): Promise<Coordinates> {
         accuracy: 5000,
         timestamp: Date.now(),
       }));
+
       return {
         latitude: ipData.latitude,
         longitude: ipData.longitude,
