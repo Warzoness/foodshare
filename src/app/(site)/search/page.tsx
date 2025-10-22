@@ -111,7 +111,7 @@ function SearchPageContent() {
       let currentLat: number | undefined;
       let currentLon: number | undefined;
       try {
-        const coords = await getCurrentCoordinates({ timeout: 5000 });
+        const coords = await getCurrentCoordinates();
         currentLat = coords.latitude;
         currentLon = coords.longitude;
       } catch (error) {
@@ -181,7 +181,7 @@ function SearchPageContent() {
       let currentLat: number | undefined;
       let currentLon: number | undefined;
       try {
-        const coords = await getCurrentCoordinates({ timeout: 5000 });
+        const coords = await getCurrentCoordinates();
         currentLat = coords.latitude;
         currentLon = coords.longitude;
       } catch (error) {

@@ -10,6 +10,7 @@ import { AuthService } from "@/services/site/auth.service";
 import { ProductService } from "@/services/site/product.service";
 import Link from "next/link";
 import TimePicker from "@/components/share/TimePicker/TimePicker";
+import LoadingSpinner from "@/components/share/LoadingSpinner";
 
 /* ========= Utils ========= */
 const VN_TZ = "Asia/Ho_Chi_Minh";
@@ -431,18 +432,7 @@ export default function HoldPage() {
   // Show loading while checking authentication or loading product details
   if (!authChecked || isLoadingProduct) {
     return (
-      <main className="container py-3" style={{ maxWidth: 560 }}>
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">
-              {!authChecked ? 'Đang kiểm tra đăng nhập...' : 'Đang tải thông tin sản phẩm...'}
-            </span>
-          </div>
-          <p className="mt-2">
-            {!authChecked ? 'Đang kiểm tra đăng nhập...' : 'Đang tải thông tin sản phẩm...'}
-          </p>
-        </div>
-      </main>
+        <LoadingSpinner message="Kiểm tra thông tin sản phẩm ..."/>
     );
   }
 

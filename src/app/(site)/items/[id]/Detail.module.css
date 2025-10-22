@@ -213,20 +213,34 @@
   background: #f6fbf7;
 }
 
-.mapPreview {
+/*.mapPreview {*/
+/*  width: 100%;*/
+/*  border: 1px solid #e6ebef;*/
+/*  background: #fff;*/
+/*  border-radius: 10px;*/
+/*  overflow: hidden;*/
+/*}*/
+
+.mapIframe {
   width: 100%;
+  border: 0;
+  display: block;
+
+  position: absolute;
+  inset: 0; /* top: 0; right: 0; bottom: 0; left: 0 */
+  height: 100%;
+}
+
+.mapPreview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 6; /* hoặc 4/3 nếu muốn cao hơn */
   border: 1px solid #e6ebef;
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
 }
 
-.mapIframe {
-  width: 100%;
-  height: 140px;
-  border: 0;
-  display: block;
-}
 
 .mapMini {
   display: flex;
