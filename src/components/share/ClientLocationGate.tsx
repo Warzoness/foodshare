@@ -13,5 +13,5 @@ interface ClientLocationGateProps {
 }
 
 export default function ClientLocationGate({ children }: ClientLocationGateProps) {
-  return <LocationGate>{children}</LocationGate>;
+  return children;
 }
