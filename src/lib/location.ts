@@ -16,8 +16,8 @@ export type ReverseGeocodeAddress = {
   country?: string;
 };
 
-// ✅ getCurrentCoordinates: tự động lấy nhanh trước, rồi update chính xác ngầm
-export async function getCurrentCoordinates(options?: PositionOptions): Promise<Coordinates> {
+// ✅ getCurrentCoordinates: chỉ dùng cache + IP (không cần quyền vị trí)
+export async function getCurrentCoordinates(): Promise<Coordinates> {
   if (typeof window === "undefined") throw new Error("Không chạy trên client");
   if (!window.isSecureContext) throw new Error("Yêu cầu kết nối bảo mật (HTTPS hoặc localhost)");
 
@@ -27,8 +27,6 @@ export async function getCurrentCoordinates(options?: PositionOptions): Promise<
     if (cached) {
       const data = JSON.parse(cached);
       if (Date.now() - data.timestamp < 1000 * 60 * 10) { // cache 10 phút
-        // chạy ngầm để cập nhật tọa độ chính xác hơn
-        updateAccurateCoordinates(options);
         return { latitude: data.lat, longitude: data.lon, accuracy: data.accuracy };
       }
     }
@@ -39,52 +37,27 @@ export async function getCurrentCoordinates(options?: PositionOptions): Promise<
     const ipRes = await fetch("https://ipapi.co/json/");
     const ipData = await ipRes.json();
     if (ipData && ipData.latitude && ipData.longitude) {
-      // chạy ngầm cập nhật chính xác
-      updateAccurateCoordinates(options);
+      // Lưu cache
+      localStorage.setItem("coords_cache", JSON.stringify({
+        lat: ipData.latitude,
+        lon: ipData.longitude,
+        accuracy: 5000,
+        timestamp: Date.now(),
+      }));
       return {
         latitude: ipData.latitude,
         longitude: ipData.longitude,
         accuracy: 5000,
       };
+    } else {
+      throw new Error("Không lấy được vị trí qua IP");
     }
-  } catch (_) {}
-
-  // 3️⃣ Cuối cùng fallback sang geolocation thật
-  return await updateAccurateCoordinates(options);
+  } catch (err) {
+    throw new Error("Không thể xác định vị trí hiện tại (qua IP)");
+  }
 }
 
-// 🎯 Hàm chạy ngầm để cập nhật cache + toạ độ chính xác
-async function updateAccurateCoordinates(options?: PositionOptions): Promise<Coordinates> {
-  if (!("geolocation" in navigator)) throw new Error("Thiết bị không hỗ trợ định vị địa lý");
-
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords = {
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-            accuracy: pos.coords.accuracy,
-          };
-          localStorage.setItem("coords_cache", JSON.stringify({
-            lat: coords.latitude,
-            lon: coords.longitude,
-            accuracy: coords.accuracy,
-            timestamp: Date.now(),
-          }));
-          resolve(coords);
-        },
-        (err) => reject(new Error(err.message || "Không thể lấy vị trí hiện tại")),
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0,
-          ...options,
-        }
-    );
-  });
-}
-
-// 🌍 Reverse geocode
+// 🌍 Reverse geocode (giữ nguyên)
 export async function reverseGeocodeOSM(coords: Coordinates, locale: string = "vi"): Promise<ReverseGeocodeAddress> {
   const { latitude, longitude } = coords;
   const url = new URL("https://nominatim.openstreetmap.org/reverse");
@@ -120,7 +93,7 @@ export async function reverseGeocodeOSM(coords: Coordinates, locale: string = "v
   };
 }
 
-// 📍 getCurrentAddress: giữ nguyên signature cũ, nhưng nhanh hơn
+// 📍 getCurrentAddress (giữ nguyên signature)
 export async function getCurrentAddress(locale: string = "vi") {
   const coords = await getCurrentCoordinates();
   const address = await reverseGeocodeOSM(coords, locale);
