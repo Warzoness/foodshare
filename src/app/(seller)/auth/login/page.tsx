@@ -182,7 +182,8 @@ function LoginPageContent() {
           type: 'standard',
           shape: 'circle',
           text: 'signin_with',
-          width: '250px'
+          width: '250px',
+          height: '50px'
         };
 
         // Configure button for mobile vs desktop
@@ -370,16 +371,16 @@ function LoginPageContent() {
                 
                 {/* Google Sign-In Button Container */}
                 <div id="google-login-button" className={styles.googleButtonContainer}>
-                  {loading && (
-                    <div className={styles.loadingOverlay}>
-                      <LoadingSpinner 
-                        size="small" 
-                        variant="white" 
-                        message="Đang đăng nhập..." 
-                        showMessage={true}
-                      />
-                    </div>
-                  )}
+                  {/*{loading && (*/}
+                  {/*  <div className={styles.loadingOverlay}>*/}
+                  {/*    <LoadingSpinner*/}
+                  {/*      size="small"*/}
+                  {/*      variant="white"*/}
+                  {/*      message="Đang đăng nhập..."*/}
+                  {/*      showMessage={true}*/}
+                  {/*    />*/}
+                  {/*  </div>*/}
+                  {/*)}*/}
                 </div>
               </div>
 
