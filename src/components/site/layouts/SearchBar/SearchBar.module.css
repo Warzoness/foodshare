@@ -1,4 +1,19 @@
 /* components/SearchBar/SearchBar.module.css */
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.brandTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #54A65C;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
 .searchBar{
   display:flex;align-items:center;gap:10px;
   background:transparent;border:none;border-radius:0;

@@ -180,9 +180,9 @@ function LoginPageContent() {
           theme: 'outline',
           size: 'large',
           type: 'standard',
-          shape: 'rectangular',
+          shape: 'circle',
           text: 'signin_with',
-          width: '100%'
+          width: '250px'
         };
 
         // Configure button for mobile vs desktop
@@ -312,7 +312,8 @@ function LoginPageContent() {
   return (
     <div className={styles.screen} suppressHydrationWarning={true}>
       <div className={styles.brandWrap}>
-        <span className={styles.brand}>FoodShare</span>
+        <span className={styles.brand}>FoodShare</span><br/>
+        <span className={styles.description}>Chia đồ ăn, gắn kết cộng đồng</span>
       </div>
 
       <div className={styles.loginCard}>
@@ -380,8 +381,6 @@ function LoginPageContent() {
                     </div>
                   )}
                 </div>
-                
-                
               </div>
 
               {/* Skip Button */}
