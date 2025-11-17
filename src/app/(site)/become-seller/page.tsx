@@ -15,7 +15,7 @@ export default function BecomeSellerPage() {
   const handleBecomeSeller = () => {
     setIsRedirecting(true);
     // Redirect to the manager website
-    window.open("https://foodshare-manager.vercel.app/", "_blank");
+    window.open("https://shop.miniapp-foodshare.com/", "_blank");
     // Reset loading state after a short delay
     setTimeout(() => setIsRedirecting(false), 1000);
   };
