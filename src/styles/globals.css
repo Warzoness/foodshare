@@ -1,0 +1,172 @@
+@import '@flaticon/flaticon-uicons/css/all/all.css';
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/FZPoppins-Regular.ttf");
+}
+
+
+:root {
+  --brand: #54A65C; /* primary brand green */
+  --brand-contrast: #ffffff;
+  --muted: #f6f8fa;
+}
+
+html,
+body {
+  font-family: "Poppins";
+  font-size: 1rem;
+}
+
+body {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  color: #111;
+  min-height: 100vh;
+}
+
+/* Avoid showing scrollbars while preserving scroll; prevent horizontal overflow */
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Hide scrollbar visuals (scroll still works) */
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Standardized heading font sizes */
+h1, .h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+h2, .h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+h3, .h3 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+h4, .h4 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+h5, .h5 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+h6, .h6 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Global interactive highlighting */
+button,
+.btn {
+  transition: box-shadow 0.2s ease, transform 0.05s ease;
+}
+
+button:hover,
+.btn:hover {
+  box-shadow: 0 6px 16px rgba(84, 166, 92, 0.24);
+}
+
+button:focus,
+button:focus-visible,
+.btn:focus,
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(84, 166, 92, 0.35), 0 6px 16px rgba(84, 166, 92, 0.24);
+}
+
+/* Soft radial fade from center on hover/focus for all buttons */
+button,
+.btn {
+  position: relative;
+  overflow: hidden; /* contain the overlay */
+}
+button::after,
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(84, 166, 92, 0.18) 0%, rgba(84, 166, 92, 0) 65%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+button:hover::after,
+button:focus::after,
+button:focus-visible::after,
+.btn:hover::after,
+.btn:focus::after,
+.btn:focus-visible::after {
+  opacity: 1;
+}
+
+/* Inputs: remove highlight effects */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+.form-control {
+  transition: none;
+  box-shadow: none;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus,
+.form-control:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Unified back button */
+.btn-back {
+  appearance: none;
+  border: none;
+  background: #ffffff;
+  color: #222;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: box-shadow .18s ease, transform .06s ease;
+}
+.btn-back:hover { box-shadow: 0 4px 14px rgba(84,166,92,0.25); }
+.btn-back:focus, .btn-back:focus-visible { outline:none; box-shadow: 0 0 0 3px rgba(84,166,92,0.35), 0 4px 14px rgba(84,166,92,0.2); }
+
+/* Unified page container for consistent layout */
+.page-container {
+  width: 100%;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin: 0 auto;
+  background: #ffffff;
+  min-height: calc(100vh - 76px);
+}
+
+@media (min-width: 768px) {
+  .page-container {
+    width: 75%;
+    max-width: 1400px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}

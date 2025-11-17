@@ -1,0 +1,27 @@
+/* components/SearchBar/SearchBar.module.css */
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.brandTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #54A65C;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.searchBar{
+  display:flex;align-items:center;gap:10px;
+  background:transparent;border:none;border-radius:0;
+  padding:0;cursor:text;transition:none;width:100%;
+}
+.searchBar:hover,.searchBar:focus-within{border-color:transparent;box-shadow:none}
+.inner{display:flex;align-items:center;gap:8px;position:relative;background:#ffffff;border:none;border-radius:999px;padding:10px 14px;width:100%;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.inner::after{content:"";position:absolute;inset:0;border-radius:999px;background:radial-gradient(circle at 50% 50%, rgba(84,166,92,.18) 0%, rgba(84,166,92,0) 65%);opacity:0;transition:opacity .25s ease}
+.inner:hover::after,.inner:focus-within::after{opacity:1}
+.searchIcon{opacity:.7}
+.searchInput{border:none;outline:none;flex:1;background:transparent;font:inherit;height:22px;width:100%}

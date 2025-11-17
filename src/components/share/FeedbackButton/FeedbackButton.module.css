@@ -1,0 +1,250 @@
+.feedbackContainer {
+  position: fixed;
+  bottom: 100px; /* Ngay trên FloatMenu */
+  right: calc(12.5% + 20px); /* 12.5% = (100% - 75%) / 2, để nằm trong vùng 75% */
+  z-index: 1000;
+}
+
+.feedbackButton {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #54A65C, #4a8c52);
+  border: none;
+  box-shadow: 0 4px 12px rgba(84, 166, 92, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+.feedbackButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(84, 166, 92, 0.4);
+}
+
+.feedbackButton:active {
+  transform: scale(0.95);
+}
+
+.closeButton {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid white;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.closeButton:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.closeButton:active {
+  transform: scale(0.9);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(84, 166, 92, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(84, 166, 92, 0.5);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(84, 166, 92, 0.3);
+  }
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modalBody {
+  padding: 24px;
+}
+
+.feedbackTextarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.feedbackTextarea:focus {
+  outline: none;
+  border-color: #54A65C;
+}
+
+.feedbackTextarea::placeholder {
+  color: #9ca3af;
+}
+
+.charCount {
+  text-align: right;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.cancelButton {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  padding: 10px 20px;
+  border: none;
+  background: #54A65C;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #4a8c52;
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .feedbackContainer {
+    right: 20px; /* Trên tablet và mobile, hiển thị ở góc phải bình thường */
+  }
+}
+
+@media (max-width: 640px) {
+  .feedbackContainer {
+    bottom: 90px;
+    right: 16px;
+  }
+  
+  .feedbackButton {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .closeButton {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    top: -6px;
+    right: -6px;
+  }
+  
+  .modal {
+    margin: 16px;
+    max-width: calc(100vw - 32px);
+  }
+  
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: 16px;
+  }
+}

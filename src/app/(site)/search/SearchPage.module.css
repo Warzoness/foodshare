@@ -1,0 +1,247 @@
+.page {
+  min-height: auto;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  margin-bottom: 16px;
+  background: #fff;
+}
+
+.iconBtn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px;
+  font-size: 20px;
+  line-height: 1;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.iconBtn:hover {
+  background: #f8fafc;
+  transform: scale(1.05);
+}
+
+.iconBtn:active {
+  transform: scale(0.95);
+}
+
+.searchWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  background: transparent;
+}
+
+/* Body */
+.body {
+  padding: 8px 0 76px; /* chừa chỗ cho FloatMenu cố định */
+}
+
+.notice {
+  color: #6b7280;
+  font-size: 14px;
+  padding: 16px 0;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 16px;
+}
+
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 12px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.suggestionText {
+  color: #9ca3af;
+  font-size: 13px;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+/* Suggestions */
+.suggestArea {
+  display: grid;
+  gap: 12px;
+}
+
+.section {
+  margin: 8px 0 12px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.chipRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 10px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: #f8fafc;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  background: #54a65c;
+  color: white;
+  border-color: #54a65c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(84, 166, 92, 0.2);
+}
+
+.suggestList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+}
+
+.suggestRow {
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  margin: 2px 0;
+  transition: all 0.2s ease;
+  font-size: 15px;
+  color: #374151;
+}
+
+.suggestRow:hover {
+  background: #f8fafc;
+  transform: translateX(4px);
+}
+
+.right {
+  text-align: right;
+}
+
+.textBtn {
+  border: none;
+  background: transparent;
+  color: #54A65C;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.textBtn:hover {
+  background: #f0f9f0;
+  transform: scale(1.05);
+}
+
+/* Pagination */
+.paginationContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+  margin-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.paginationInfo {
+  color: #6b7280;
+  font-size: 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filteredNote {
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.loadMoreBtn {
+  background: #54a65c;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loadMoreBtn:hover:not(:disabled) {
+  background: #4a9552;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(84, 166, 92, 0.3);
+}
+
+.loadMoreBtn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
