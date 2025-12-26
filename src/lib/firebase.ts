@@ -1,7 +1,7 @@
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getMessaging, getToken, Messaging, onMessage } from "firebase/messaging";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { getMessaging, getToken, isSupported } from "firebase/messaging";
 
-// Cấu hình Firebase từ service worker
+// Cấu hình Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDXHW6GC5CoumpCfTgRFidhd-9YeNnD1rs",
   authDomain: "foodshare-d68ca.firebaseapp.com",
@@ -12,66 +12,106 @@ const firebaseConfig = {
   measurementId: "G-40KBTB1VWB"
 };
 
-// Khởi tạo Firebase app
-let app: FirebaseApp;
-if (typeof window !== "undefined" && getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
-} else if (typeof window !== "undefined") {
-  app = getApps()[0];
-}
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// VAPID key cho web push notifications
-const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || "BK8xJ3K5LmNpQrStUvWxYz123456789";
-
-// Lấy messaging instance
-export const messaging = async (): Promise<Messaging | null> => {
-  if (typeof window === "undefined") return null;
-  
-  try {
-    return getMessaging(app);
-  } catch (error) {
-    console.error("Lỗi khi khởi tạo Firebase Messaging:", error);
-    return null;
-  }
+const messaging = async () => {
+  const supported = await isSupported();
+  return supported ? getMessaging(app) : null;
 };
 
-// Lấy FCM token
-export const fetchToken = async (): Promise<string | null> => {
-  if (typeof window === "undefined") return null;
-
+export const fetchToken = async () => {
   try {
-    const messagingInstance = await messaging();
-    if (!messagingInstance) {
-      console.error("Messaging instance không khả dụng");
-      return null;
-    }
-
-    // Kiểm tra service worker đã đăng ký chưa
-    if ("serviceWorker" in navigator) {
-      const registration = await navigator.serviceWorker.ready;
-      
-      const token = await getToken(messagingInstance, {
-        vapidKey: vapidKey,
-        serviceWorkerRegistration: registration,
+    const fcmMessaging = await messaging();
+    if (fcmMessaging) {
+      const token = await getToken(fcmMessaging, {
+        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY,
       });
-
-      if (token) {
-        console.log("✅ FCM Token đã được lấy thành công:", token);
-        return token;
-      } else {
-        console.warn("⚠️ Không thể lấy FCM token. Có thể do permission chưa được cấp.");
-        return null;
-      }
-    } else {
-      console.warn("⚠️ Service Worker không được hỗ trợ trên trình duyệt này");
-      return null;
+      return token;
     }
-  } catch (error) {
-    console.error("❌ Lỗi khi lấy FCM token:", error);
+    return null;
+  } catch (err) {
+    console.error("An error occurred while fetching the token:", err);
     return null;
   }
 };
 
-// Export onMessage để sử dụng trong components
-export { onMessage };
+// Hàm đơn giản để xử lý token sau khi đăng nhập thành công
+export const handleFirebaseTokenAfterLogin = async () => {
+  if (typeof window === "undefined") return;
+
+  const FIREBASE_TOKEN_KEY = "firebase_fcm_token";
+
+  try {
+    // Kiểm tra xem đã có token trong localStorage chưa
+    const storedToken = localStorage.getItem(FIREBASE_TOKEN_KEY);
+    if (storedToken) {
+      console.log("✅ Đã có token trong localStorage, không cần lấy token mới");
+      return;
+    }
+
+    // Kiểm tra notification permission
+    if (!("Notification" in window)) {
+      console.warn("⚠️ Trình duyệt không hỗ trợ notifications");
+      return;
+    }
+
+    // Nếu permission chưa được cấp, không làm gì
+    if (Notification.permission !== "granted") {
+      console.log("⚠️ Notification permission chưa được cấp");
+      return;
+    }
+
+    // Lấy token mới từ Firebase
+    const token = await fetchToken();
+    if (!token) {
+      console.warn("⚠️ Không thể lấy token từ Firebase");
+      return;
+    }
+
+    // Lưu token vào localStorage
+    localStorage.setItem(FIREBASE_TOKEN_KEY, token);
+    console.log("✅ Đã lấy và lưu token vào localStorage");
+
+    // Gửi token lên server
+    await sendTokenToServer(token);
+  } catch (error) {
+    console.error("❌ Lỗi khi xử lý Firebase token:", error);
+  }
+};
+
+// Hàm gửi token lên server
+const sendTokenToServer = async (token: string) => {
+  try {
+    // Lấy JWT token từ localStorage (được lưu bởi AuthService)
+    const jwtToken = localStorage.getItem("token");
+    if (!jwtToken) {
+      console.error("❌ Không tìm thấy JWT token để xác thực");
+      return;
+    }
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL || "https://foodshare-production-98da.up.railway.app"}/api/users/firebase-token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify({
+          firebaseToken: token,
+        }),
+      }
+    );
+
+    if (response.ok) {
+      console.log("✅ Token đã được gửi lên server thành công");
+    } else {
+      console.error("❌ Server trả về lỗi:", response.statusText);
+    }
+  } catch (error) {
+    console.error("❌ Lỗi khi gửi token lên server:", error);
+  }
+};
+
+export { app, messaging };
 

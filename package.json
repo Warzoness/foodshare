@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/copy-sw.js",
     "dev": "next dev --turbopack",
+    "prebuild": "node scripts/copy-sw.js",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"

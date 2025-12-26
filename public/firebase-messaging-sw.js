@@ -22,6 +22,17 @@ messaging.onBackgroundMessage((payload) => {
         "[firebase-messaging-sw.js] Received background message ",
         payload
     );
+
+    // Hard code link khi nhận notification
+    const link = "https://foodshare-ivory.vercel.app/items/38355";
+
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: "./logo.png",
+        data: { url: link },
+    };
+    // self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 self.addEventListener("notificationclick", function (event) {

@@ -103,8 +103,10 @@ export const FirebaseTokenService = {
     }
 
     // Nếu permission bị từ chối, không làm gì
+    // Lưu ý: Khi permission = "denied", trình duyệt sẽ KHÔNG cho phép gọi requestPermission() nữa
+    // Người dùng phải tự vào cài đặt trình duyệt để bật lại notification
     if (Notification.permission === "denied") {
-      console.warn("⚠️ Notification permission đã bị từ chối");
+      console.warn("⚠️ Notification permission đã bị từ chối - không thể yêu cầu lại bằng code");
       return null;
     }
 

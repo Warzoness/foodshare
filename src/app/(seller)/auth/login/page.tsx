@@ -7,6 +7,7 @@ import Link from "next/link";
 import LoadingSpinner from "@/components/share/LoadingSpinner";
 import { AuthService } from "@/services/site/auth.service";
 import { SocialLoginRequest } from "@/types/auth";
+import { handleFirebaseTokenAfterLogin } from "@/lib/firebase";
 
 // Declare global types for SDKs
 declare global {
@@ -256,6 +257,9 @@ function LoginPageContent() {
       const response = await AuthService.socialLogin(loginRequest);
       
       console.log('✅ Login successful! Backend response:', response);
+      
+      // Xử lý Firebase token sau khi đăng nhập thành công
+      handleFirebaseTokenAfterLogin();
       
       // Redirect to intended page or home
       const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';

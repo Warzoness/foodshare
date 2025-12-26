@@ -28,6 +28,9 @@ export default function FirebaseTokenManager() {
     // Nếu chưa có token, cần xử lý
     if (typeof window !== "undefined" && "Notification" in window) {
       // Nếu permission chưa được cấp (default), hiển thị popup để xin phép
+      // Lưu ý: Chỉ có thể yêu cầu permission khi status = "default"
+      // Khi status = "denied", trình duyệt sẽ KHÔNG cho phép gọi requestPermission() nữa
+      // Người dùng phải tự vào cài đặt trình duyệt để bật lại
       if (Notification.permission === "default") {
         // Kiểm tra xem đã hiển thị prompt chưa (để tránh hiển thị nhiều lần)
         const promptShown = localStorage.getItem("notification_prompt_shown");
@@ -39,15 +42,22 @@ export default function FirebaseTokenManager() {
         }
       }
       
-      // Nếu permission đã được cấp, lấy token ngay
+      // Nếu permission đã được cấp, kiểm tra và fetch token nếu chưa có
       if (Notification.permission === "granted") {
-        console.log("✅ Permission đã được cấp, lấy token ngay");
-        FirebaseTokenService.handleTokenAfterLogin();
+        console.log("✅ Permission đã được cấp, kiểm tra token");
+        // Nếu không có token trong localStorage, fetch token mới
+        if (!hasToken) {
+          console.log("🔄 Không có token trong localStorage, đang fetch token mới...");
+          FirebaseTokenService.handleTokenAfterLogin();
+        }
       }
       
       // Nếu permission bị từ chối, không làm gì
+      // Lưu ý: Khi permission = "denied", không thể yêu cầu lại bằng code
+      // Người dùng phải tự vào cài đặt trình duyệt để bật lại notification
       if (Notification.permission === "denied") {
-        console.log("⚠️ Permission đã bị từ chối");
+        console.log("⚠️ Permission đã bị từ chối - không thể yêu cầu lại bằng code");
+        console.log("💡 Người dùng cần vào cài đặt trình duyệt để bật lại notification");
       }
     }
 
@@ -56,6 +66,11 @@ export default function FirebaseTokenManager() {
 
   const handleAllow = async () => {
     try {
+      // Đánh dấu đã hiển thị prompt và đóng prompt
+      // Chỉ lưu khi người dùng đồng ý
+      localStorage.setItem("notification_prompt_shown", "true");
+      setShowPrompt(false);
+      
       // Yêu cầu permission và lấy token
       const token = await FirebaseTokenService.requestPermissionAndGetToken();
       if (token) {
@@ -64,10 +79,15 @@ export default function FirebaseTokenManager() {
       }
     } catch (error) {
       console.error("❌ Lỗi khi xử lý token sau khi cho phép:", error);
+      // Vẫn đóng prompt dù có lỗi
+      setShowPrompt(false);
     }
   };
 
   const handleDeny = () => {
+    // Chỉ đóng prompt, KHÔNG lưu notification_prompt_shown
+    // Để có thể hiển thị lại prompt ở lần sau nếu người dùng muốn
+    setShowPrompt(false);
     console.log("Người dùng từ chối notification permission");
   };
 

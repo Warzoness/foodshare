@@ -12,12 +12,10 @@ export default function NotificationPermissionPrompt({
   onDeny,
 }: NotificationPermissionPromptProps) {
   const handleAllow = () => {
-    localStorage.setItem("notification_prompt_shown", "true");
     onAllow();
   };
 
   const handleDeny = () => {
-    localStorage.setItem("notification_prompt_shown", "true");
     onDeny();
   };
 
@@ -46,6 +44,7 @@ export default function NotificationPermissionPrompt({
         </p>
         <div className={styles.buttonGroup}>
           <button
+
             className={styles.denyButton}
             onClick={handleDeny}
             type="button"
