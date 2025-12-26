@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/services/site/auth.service';
+import { FirebaseTokenService } from '@/services/site/firebase-token.service';
 
 // Remove global declaration to avoid conflicts
 
@@ -83,6 +84,12 @@ export default function GoogleLoginButton({ onSuccess, onError }: GoogleLoginBut
         provider: 'GOOGLE',
         token: response.credential
       });
+
+      // Sau khi login thành công, xử lý Firebase token
+      // Chỉ lấy token 1 lần trong phiên và lưu vào localStorage
+      setTimeout(() => {
+        FirebaseTokenService.handleTokenAfterLogin();
+      }, 1000);
 
       onSuccess?.();
       
