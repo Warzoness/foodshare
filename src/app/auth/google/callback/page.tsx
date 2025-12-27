@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthService } from '@/services/site/auth.service';
 import { SocialLoginRequest } from '@/types/auth';
+import { handleFirebaseTokenAfterLogin } from '@/lib/firebase';
 
 function GoogleCallbackContent() {
   const router = useRouter();
@@ -43,6 +44,8 @@ function GoogleCallbackContent() {
         const response = await AuthService.socialLogin(loginRequest);
         console.log('✅ Login successful:', response);
         
+        // Sau khi login thành công, xử lý Firebase token
+        handleFirebaseTokenAfterLogin();
         
         // Redirect to intended page or home
         const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';

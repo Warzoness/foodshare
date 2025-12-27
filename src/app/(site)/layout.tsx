@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import FeedbackButton from "@/components/share/FeedbackButton/FeedbackButton";
 import ToastContainer from "@/components/share/Toast/ToastContainer";
+import FirebaseTokenManager from "@/components/share/FirebaseTokenManager/FirebaseTokenManager";
+import UserLocationUpdater from "@/components/share/UserLocationUpdater";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
     useEffect(() => {
@@ -66,6 +68,8 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <ToastContainer>
             <main>{children}</main>
             <FeedbackButton />
+            <FirebaseTokenManager />
+            <UserLocationUpdater />
         </ToastContainer>
     );
 }
