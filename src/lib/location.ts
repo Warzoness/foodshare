@@ -102,3 +102,44 @@ export async function getCurrentAddress(locale: string = "vi") {
   const address = await reverseGeocodeOSM(coords, locale);
   return { coords, address };
 }
+
+// 🔄 Cập nhật địa chỉ khách hàng lên server
+export async function updateUserLocation(coords: Coordinates): Promise<void> {
+  if (typeof window === "undefined") return;
+  
+  // Kiểm tra xem đã gọi API trong phiên này chưa
+  const sessionKey = "location_updated_in_session";
+  if (sessionStorage.getItem(sessionKey)) {
+    console.log("📍 Location đã được cập nhật trong phiên này, bỏ qua");
+    return;
+  }
+
+  try {
+    // Lấy JWT token từ AuthService
+    const { AuthService } = await import("@/services/site/auth.service");
+    const jwtToken = AuthService.getStoredToken();
+    
+    if (!jwtToken) {
+      console.log("📍 Không tìm thấy JWT token, bỏ qua cập nhật location");
+      return;
+    }
+
+    const { apiClient } = await import("@/lib/apiClient");
+    await apiClient.put("/api/users/location", {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      body: {
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      },
+    });
+    
+    // Đánh dấu đã cập nhật trong phiên này
+    sessionStorage.setItem(sessionKey, "true");
+    console.log("✅ Đã cập nhật location lên server:", coords);
+  } catch (error) {
+    console.error("❌ Lỗi khi cập nhật location:", error);
+    // Không throw error để không ảnh hưởng đến flow chính
+  }
+}

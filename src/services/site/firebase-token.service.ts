@@ -4,6 +4,7 @@ import { AuthService } from "./auth.service";
 
 const FIREBASE_TOKEN_STORAGE_KEY = "firebase_fcm_token";
 const FIREBASE_TOKEN_REQUESTED_KEY = "firebase_token_requested_session"; // Dùng sessionStorage thay vì localStorage
+const SAVE_FIREBASE_TOKEN_ENDPOINT = "/api/users/firebase-token";
 
 export interface FirebaseTokenResponse {
   success: boolean;
@@ -143,7 +144,7 @@ export const FirebaseTokenService = {
       }
 
       const response = await apiClient.post<FirebaseTokenResponse>(
-        "/api/users/firebase-token",
+        SAVE_FIREBASE_TOKEN_ENDPOINT,
         {
           headers: {
             "Content-Type": "application/json",

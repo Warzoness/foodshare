@@ -56,6 +56,7 @@ export default function FirebaseTokenManager() {
       // Lưu ý: Khi permission = "denied", không thể yêu cầu lại bằng code
       // Người dùng phải tự vào cài đặt trình duyệt để bật lại notification
       if (Notification.permission === "denied") {
+        setShowPrompt(false);
         console.log("⚠️ Permission đã bị từ chối - không thể yêu cầu lại bằng code");
         console.log("💡 Người dùng cần vào cài đặt trình duyệt để bật lại notification");
       }
@@ -67,8 +68,6 @@ export default function FirebaseTokenManager() {
   const handleAllow = async () => {
     try {
       // Đánh dấu đã hiển thị prompt và đóng prompt
-      // Chỉ lưu khi người dùng đồng ý
-      localStorage.setItem("notification_prompt_shown", "true");
       setShowPrompt(false);
       
       // Yêu cầu permission và lấy token

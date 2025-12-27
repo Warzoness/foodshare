@@ -18,51 +18,49 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-    console.log(
-        "[firebase-messaging-sw.js] Received background message ",
-        payload
-    );
+    console.log("Received background message ", payload);
 
-    // Hard code link khi nhận notification
-    const link = "https://foodshare-ivory.vercel.app/items/38355";
+    // Lấy link từ data gửi về (không hardcode nữa)
+    const dynamicLink = payload.data?.link || "https://www.miniapp-foodshare.com/";
 
-    const notificationTitle = payload.notification.title;
+    const notificationTitle = '🔥🔥🔥 ' + payload.data?.title + ' 🔔🔔🔔';
     const notificationOptions = {
-        body: payload.notification.body,
-        icon: "./logo.png",
-        data: { url: link },
+        body: payload.data?.body,
+        icon: "./logo/logo_512x512.png",
+        image: payload.data?.image,
+        data: { url: dynamicLink }, // Lưu link vào đây để dùng khi click
+        actions: [
+            {
+                action: 'open_url',
+                title: 'GIỮ CHỖ NGAY',
+            }
+        ]
     };
-    // self.registration.showNotification(notificationTitle, notificationOptions);
+
+    // Chỉ có 1 dòng này hiển thị thông báo, không lo bị duplicate
+    return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 self.addEventListener("notificationclick", function (event) {
-    console.log("[firebase-messaging-sw.js] Notification click received.");
-
     event.notification.close();
 
-    // This checks if the client is already open and if it is, it focuses on the tab. If it is not open, it opens a new tab with the URL passed in the notification payload
+    // Lấy link động từ data đã lưu ở trên
+    const urlToOpen = event.notification.data?.url;
+
     event.waitUntil(
-        clients
-            // https://developer.mozilla.org/en-US/docs/Web/API/Clients/matchAll
-            .matchAll({ type: "window", includeUncontrolled: true })
+        clients.matchAll({ type: "window", includeUncontrolled: true })
             .then(function (clientList) {
-                // Hard code link khi click notification
-                const url = "https://foodshare-ivory.vercel.app/items/38355";
+                if (!urlToOpen) return;
 
-                if (!url) return;
-
-                // If relative URL is passed in firebase console or API route handler, it may open a new window as the client.url is the full URL i.e. https://example.com/ and the url is /about whereas if we passed in the full URL, it will focus on the existing tab i.e. https://example.com/about
                 for (const client of clientList) {
-                    if (client.url === url && "focus" in client) {
+                    if (client.url === urlToOpen && "focus" in client) {
                         return client.focus();
                     }
                 }
 
                 if (clients.openWindow) {
-                    console.log("OPENWINDOW ON CLIENT");
-                    return clients.openWindow(url);
+                    return clients.openWindow(urlToOpen);
                 }
             })
     );
 });
-
