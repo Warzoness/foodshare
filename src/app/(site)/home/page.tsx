@@ -197,6 +197,10 @@ export default function HomePage() {
             <span>CÔNG TY TNHH CÔNG NGHỆ SỐ HITDREAM</span>
           </div>
           <div className={styles.footerItem}>
+            <span className={styles.footerLabel}>Tên tiếng anh:</span>
+            <span>HITDREAM DIGITAL CO., LTD</span>
+          </div>
+          <div className={styles.footerItem}>
             <span className={styles.footerLabel}>MST:</span>
             <span>1001326662</span>
           </div>
@@ -206,7 +210,7 @@ export default function HomePage() {
           </div>
           <div className={styles.footerItem}>
             <span className={styles.footerLabel}>Email:</span>
-            <a href="mailto:contact@hitdream.vn" style={{color: 'inherit', textDecoration: 'none'}}>contact@hitdream.vn</a>
+            <a href="mailto:contact.hitdream@gmail.com" style={{color: 'inherit', textDecoration: 'none'}}>contact.hitdream@gmail.com</a>
           </div>
           <div className={styles.footerItem}>
             <span className={styles.footerLabel}>Địa chỉ:</span>

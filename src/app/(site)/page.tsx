@@ -20,6 +20,10 @@ export default function WelcomePage() {
             <span className={styles.infoLabel}>Tên chính thức</span>
             <span className={styles.infoValue}>CÔNG TY TNHH CÔNG NGHỆ SỐ HITDREAM</span>
           </div>
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>Tên tiếng Anh</span>
+            <span className={styles.infoValue}>HITDREAM DIGITAL CO., LTD</span>
+          </div>
 
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Mã số DN / MST</span>
@@ -28,7 +32,7 @@ export default function WelcomePage() {
 
           <div className={styles.infoItem}>
             <span className={styles.infoLabel}>Liên hệ hỗ trợ</span>
-            <span className={styles.infoValue}>0369 454 687 | contact@hitdream.vn</span>
+            <span className={styles.infoValue}>0369 454 687 | contact.hitdream@gmail.com</span>
           </div>
 
           <div className={styles.infoItem}>
@@ -42,7 +46,7 @@ export default function WelcomePage() {
         </Link>
 
         <div className={styles.footer}>
-          &copy; 2026 HITDREAM TECHNOLOGY CO., LTD. All rights reserved.
+          &copy; 2026 HITDREAM DIGITAL CO., LTD. All rights reserved.
         </div>
       </div>
     </div>
