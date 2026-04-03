@@ -4,7 +4,7 @@ export default function Header(){
     return(
         <nav className="navbar navbar-expand-lg navbar-dark" style={{ background: "var(--brand)" }}>
     <div className="container">
-        <Link className="navbar-brand text-white fw-bold" href="/">
+        <Link className="navbar-brand text-white fw-bold" href="/home">
             FoodShare
         </Link>
 

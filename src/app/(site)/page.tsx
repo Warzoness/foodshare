@@ -1,196 +1,50 @@
-"use client";
+import React from 'react';
+import Link from 'next/link';
+import styles from './Welcome.module.css';
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "./Home.module.css";
-import Link from "next/link";
-import dynamic from "next/dynamic";
-const FloatMenu = dynamic(() => import("@/components/site/layouts/FloatMenu/FloatMenu"), { ssr: false });
-import { ProductService, Product } from "@/services/site/product.service";
-import FlashDealTag from "@/components/share/FlashDealTag/FlashDealTag";
-import { getCurrentCoordinates } from "@/lib/location";
-const SearchBar = dynamic(() => import("@/components/site/layouts/SearchBar/SearchBar"), { ssr: false });
-
-const USE_API = true; // Always use real API data
-
-type CardItem = { id: number; name: string; price: string; originalPrice?: string; img: string; discountPct?: number; totalOrders?: number; distanceKm?: number };
-
-
-
-function priceToLabel(v?: number) {
-  if (typeof v !== "number") return "—";
-  if (v >= 1000 && v % 1000 === 0) return `${Math.round(v / 1000)}.000 đ`;
-  return v.toLocaleString("vi-VN") + " đ";
-}
-const toCard = (p: Product): CardItem => ({
-  id: p.id,
-  name: p.name,
-  price: priceToLabel(p.price),
-  originalPrice: (p.originalPrice && p.originalPrice > p.price) ? priceToLabel(p.originalPrice) : undefined,
-  img: p.imageUrl || "/images/chicken-fried.jpg",
-  discountPct: p.discountPercent ?? undefined,
-  totalOrders: p.totalOrders,
-  distanceKm: p.distanceKm,
-});
-function Section({
-  title, items, seeMoreHref = "/items", loading = false,
-}: {
-  title: string;
-  items: CardItem[];
-  seeMoreHref?: string;
-  loading?: boolean;
-}) {
+export default function WelcomePage() {
   return (
-    <section className="mt-3">
-      <div className="d-flex justify-content-between align-items-center px-2">
-        <h6 className="mb-2 fw-bold">{title}</h6>
-        <Link href={seeMoreHref} className={styles.seeMore}>Xem thêm &gt;</Link>
+    <div className={styles.welcomeContainer}>
+      <div className={styles.content}>
+        <div className={styles.logo}>🍱</div>
+        <h1 className={styles.title}>FoodShare</h1>
+        <p className={styles.description}>
+          Phát triển bởi đội ngũ tâm huyết, FoodShare giúp kết nối bạn với những ưu đãi ẩm thực tuyệt vời xung quanh, 
+          mang đến trải nghiệm ăn uống tiết kiệm và ý nghĩa hơn cho mọi người.
+        </p>
+
+        <div className={styles.infoCard}>
+          <div className={styles.infoTitle}>Thông tin công ty</div>
+          
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>Tên chính thức</span>
+            <span className={styles.infoValue}>CÔNG TY TNHH CÔNG NGHỆ SỐ HITDREAM</span>
+          </div>
+
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>Mã số DN / MST</span>
+            <span className={styles.infoValue}>1001326662</span>
+          </div>
+
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>Liên hệ hỗ trợ</span>
+            <span className={styles.infoValue}>0369 454 687 | contact@hitdream.vn</span>
+          </div>
+
+          <div className={styles.infoItem}>
+            <span className={styles.infoLabel}>Trụ sở chính</span>
+            <span className={styles.infoValue}>Thôn Nhân Hòa, Xã Thư Vũ, Tỉnh Hưng Yên, Việt Nam</span>
+          </div>
+        </div>
+
+        <Link href="/home" className={styles.ctaButton}>
+          Vào trang chủ
+        </Link>
+
+        <div className={styles.footer}>
+          &copy; 2026 HITDREAM TECHNOLOGY CO., LTD. All rights reserved.
+        </div>
       </div>
-
-      {loading ? (
-        <div className={styles.rowScroll}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className={styles.cardItem}>
-              <div className={`${styles.thumbWrap} placeholder-glow`}>
-                <div className={`${styles.thumb} placeholder`} />
-              </div>
-              <div className="p-2">
-                <div className="placeholder col-8 mb-2" />
-                <div className="placeholder col-4" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className={styles.rowScroll}>
-          {items.map((it) => (
-            <Link key={it.id} href={`/items/${it.id}`}>
-              <article className={styles.cardItem}>
-                <div className={styles.thumbWrap}>
-                  <div className={styles.thumb} style={{ backgroundImage: `url(${it.img})` }} aria-label={it.name} />
-                  {typeof it.discountPct === "number" && (
-                    <FlashDealTag discountPercentage={it.discountPct ?? 0} size="md" />
-                  )}
-                </div>
-                <div className={styles.cardMeta}>
-                  <div className={styles.itemName} title={it.name}>{it.name}</div>
-                  <div className={styles.priceContainer}>
-                    <div className={styles.price}>{it.price}</div>
-                    {it.originalPrice && (
-                      <div className={styles.originalPrice}>{it.originalPrice}</div>
-                    )}
-                  </div>
-                  {((it.totalOrders && it.totalOrders > 0) || it.distanceKm) && (
-                    <div className={styles.metaInfo}>
-                      {/*{it.totalOrders && it.totalOrders > 0 && <span className={styles.orders}>Đã bán {it.totalOrders}</span>}*/}
-                      {/*{it.totalOrders && it.totalOrders > 0 && it.distanceKm && <span className={styles.separator}>.</span>}*/}
-                      {it.distanceKm && <span className={styles.distance}>Đã bán {it.totalOrders} | {it.distanceKm} km</span>}
-                    </div>
-                  )}
-                </div>
-              </article>
-            </Link>
-          ))}
-        </div>
-      )}
-    </section>
-  );
-}
-
-export default function HomePage() {
-  const [err, setErr] = useState<string | null>(null);
-  const [loadingHot, setLoadingHot] = useState(USE_API);
-  const [loadingShock, setLoadingShock] = useState(USE_API);
-  const [loadingNear, setLoadingNear] = useState(USE_API);
-
-  const [hotRaw, setHotRaw] = useState<Product[]>([]);
-  const [shockRaw, setShockRaw] = useState<Product[]>([]);
-  const [nearRaw, setNearRaw] = useState<Product[]>([]);
-
-  // Nếu dùng API thật
-  const fetchHot = useCallback(async () => {
-    setLoadingHot(true);
-    try {
-      const { latitude, longitude } = await getCurrentCoordinates();
-      // Sử dụng tọa độ mặc định nếu không có vị trí thực tế
-      const finalLat = latitude ?? 0.99;
-      const finalLon = longitude ?? 0.99;
-      const arr = await ProductService.popular({ page: 0, size: 12, lat: finalLat, lon: finalLon });
-      setHotRaw(arr || []);
-    } catch (e: any) {
-      setErr(e.message || "Failed to fetch");
-      setHotRaw([]);
-    } finally {
-      setLoadingHot(false);
-    }
-  }, []);
-
-  const fetchShock = useCallback(async () => {
-    setLoadingShock(true);
-    try {
-      const { latitude, longitude } = await getCurrentCoordinates();
-      // Sử dụng tọa độ mặc định nếu không có vị trí thực tế
-      const finalLat = latitude ?? 0.99;
-      const finalLon = longitude ?? 0.99;
-      const arr = await ProductService.topDiscounts({ page: 0, size: 12, lat: finalLat, lon: finalLon });
-      setShockRaw(arr || []);
-    } catch (e: any) {
-      setErr(e.message || "Failed to fetch");
-      setShockRaw([]);
-    } finally {
-      setLoadingShock(false);
-    }
-  }, []);
-
-  const fetchNear = useCallback(async () => {
-    setLoadingNear(true);
-    try {
-      const { latitude, longitude } = await getCurrentCoordinates();
-      console.log('📍 Fetching nearby products for:', { latitude, longitude });
-      const arr = await ProductService.nearby({ page: 0, size: 12, lat: latitude, lon: longitude });
-      setNearRaw(arr || []);
-    } catch (e: any) {
-      setErr(e.message || "Failed to fetch");
-      setNearRaw([]);
-    } finally {
-      setLoadingNear(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (USE_API) {
-      fetchHot();
-      fetchShock();
-      // Fix cứng lat lon là 0.99
-      fetchNear();
-    } else {
-      // Show empty state
-      setHotRaw([]);
-      setShockRaw([]);
-      setNearRaw([]);
-      setLoadingHot(false);
-      setLoadingShock(false);
-      setLoadingNear(false);
-    }
-  }, [fetchHot, fetchShock, fetchNear]);
-
-  const hot = useMemo(() => hotRaw.map(toCard), [hotRaw]);
-  const shock = useMemo(() => shockRaw.map(toCard), [shockRaw]);
-  const near = useMemo(() => nearRaw.map(toCard), [nearRaw]);
-
-  return (
-    <div className={styles.wrap}>
-      <div className="page-container pt-3 pb-2">
-        {/* Thanh search */}
-        <div style={{marginBottom: 12}}>
-          <SearchBar />
-        </div>
-        {err && <div className="alert alert-danger">{err}</div>}
-
-        <Section title="Mua nhiều" items={hot} loading={loadingHot} seeMoreHref="/search?sort=ordersDesc" />
-        <Section title="Giảm sốc" items={shock} loading={loadingShock} seeMoreHref="/search?flashDeal=30" />
-        <Section title="Gần bạn" items={near} loading={loadingNear} seeMoreHref="/search?distance=10" />
-      </div>
-      <FloatMenu />
     </div>
   );
 }

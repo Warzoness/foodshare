@@ -422,7 +422,7 @@ export default function HoldPage() {
 
           <div className="d-flex gap-2">
             <Link href="/orders" className="btn" style={{ background: "#54A65C", color: "#fff" }}>Đơn hàng</Link>
-            <Link href="/" className="btn btn-outline-success">Trang chủ</Link>
+            <Link href="/home" className="btn btn-outline-success">Trang chủ</Link>
           </div>
         </div>
       </main>

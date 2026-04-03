@@ -41,7 +41,7 @@ function LoginPageContent() {
         if (isLoggedIn) {
           console.log('🔐 User already logged in, redirecting to home');
           // Get returnUrl if available, otherwise go to home
-          const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
+          const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/home';
           router.replace(returnUrl);
           return;
         }
@@ -258,7 +258,7 @@ function LoginPageContent() {
       console.log('✅ Login successful! Backend response:', response);
       
       // Redirect to intended page or home
-      const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/';
+      const returnUrl = searchParams.get('returnUrl') || searchParams.get('next') || '/home';
       console.log('🔄 Redirecting to:', returnUrl);
       router.replace(returnUrl);
       
@@ -386,7 +386,7 @@ function LoginPageContent() {
 
               {/* Skip Button */}
               <div className={styles.skipSection}>
-                <Link href="/" className={`${styles.skipBtn} btn btn-outline-light`}>
+                <Link href="/home" className={`${styles.skipBtn} btn btn-outline-light`}>
                   Bỏ qua đăng nhập
                 </Link>
               </div>

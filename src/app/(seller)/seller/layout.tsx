@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h5 className="m-0">Bảng điều khiển</h5>
           <div className="d-flex gap-2">
-            <Link href="/" className="btn btn-outline-secondary btn-sm">Về trang chủ</Link>
+            <Link href="/home" className="btn btn-outline-secondary btn-sm">Về trang chủ</Link>
             <Link href="/auth/logout" className="btn btn-danger btn-sm">Đăng xuất</Link>
           </div>
         </div>

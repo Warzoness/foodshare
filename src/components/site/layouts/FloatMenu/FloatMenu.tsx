@@ -17,10 +17,10 @@ export default function FloatMenu() {
   return (
     <nav className={styles.bottomNav}>
       {/* Home */}
-      <Link href="/" className={`${styles.navItem} ${pathname === "/" ? styles.active : ""}`}>
+      <Link href="/home" className={`${styles.navItem} ${pathname === "/home" ? styles.active : ""}`}>
         <i
           className={
-            pathname === "/"
+            pathname === "/home"
               ? "fi fi-sr-house-chimney"
               : "fi fi-tr-house-chimney"
           }
